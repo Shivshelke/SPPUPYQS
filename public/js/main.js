@@ -51,52 +51,54 @@ let currentUsername = null;
 
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
-  try {
-    const [configRes, statsRes, authRes] = await Promise.all([
-      fetch('/api/config'),
-      fetch('/api/stats'),
-      fetch('/student/status')
-    ]);
-    CONFIG = await configRes.json();
-    const stats = await statsRes.json();
-    const authData = await authRes.json();
-    currentUsername = authData.username || null;
+  // Load Stats independently
+  fetch('/api/stats')
+    .then(r => r.json())
+    .then(stats => {
+      document.getElementById('statTotal').textContent = stats.total || 0;
+      if (document.getElementById('count-first')) document.getElementById('count-first').textContent = `${stats.byYear.first || 0} papers`;
+      if (document.getElementById('count-second')) document.getElementById('count-second').textContent = `${stats.byYear.second || 0} papers`;
+      if (document.getElementById('count-third')) document.getElementById('count-third').textContent = `${stats.byYear.third || 0} papers`;
+      if (document.getElementById('count-fourth')) document.getElementById('count-fourth').textContent = `${stats.byYear.fourth || 0} papers`;
+    })
+    .catch(e => console.error('Stats load error', e));
 
-    // Update hero stats
-    document.getElementById('statTotal').textContent = stats.total;
-    document.getElementById('count-first').textContent  = `${stats.byYear.first  || 0} papers`;
-    document.getElementById('count-second').textContent = `${stats.byYear.second || 0} papers`;
-    document.getElementById('count-third').textContent  = `${stats.byYear.third  || 0} papers`;
-    document.getElementById('count-fourth').textContent = `${stats.byYear.fourth || 0} papers`;
+  // Load Auth independently
+  fetch('/student/status')
+    .then(r => r.json())
+    .then(authData => {
+      currentUsername = authData.username || null;
+      if (authData.loggedIn) {
+        const nav = document.getElementById('studentAuthNav');
+        if (nav) {
+          nav.innerHTML = `
+            <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${escHtml(authData.username)}</span>
+            <button class="btn-ghost" onclick="doStudentLogout()" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
+          `;
+        }
+        const welcome = document.getElementById('premiumWelcomeText');
+        if (welcome) welcome.textContent = `Welcome to Premium, ${escHtml(authData.username)}!`;
+        isLoggedIn = true;
+        isPremiumUser = authData.isPremium || false;
+        window.userPremiumStatus = authData.premiumStatus || 'none';
+        togglePremiumState();
 
-    // Handle Auth Data
-    if (authData.loggedIn) {
-      const nav = document.getElementById('studentAuthNav');
-      if (nav) {
-        nav.innerHTML = `
-          <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${escHtml(authData.username)}</span>
-          <button class="btn-ghost" onclick="doStudentLogout()" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
-        `;
+        const fbNameInput = document.getElementById('fbName');
+        if (fbNameInput) fbNameInput.value = authData.username;
+      } else {
+        isLoggedIn = false;
+        isPremiumUser = false;
+        togglePremiumState();
       }
-      const welcome = document.getElementById('premiumWelcomeText');
-      if (welcome) welcome.textContent = `Welcome to Premium, ${escHtml(authData.username)}!`;
-      isLoggedIn = true;
-      isPremiumUser = authData.isPremium || false;
-      window.userPremiumStatus = authData.premiumStatus || 'none';
-      togglePremiumState();
+    })
+    .catch(e => console.error('Auth load error', e));
 
-      // Auto-fill feedback name
-      const fbNameInput = document.getElementById('fbName');
-      if (fbNameInput) fbNameInput.value = authData.username;
-    } else {
-      isLoggedIn = false;
-      isPremiumUser = false;
-      togglePremiumState();
-    }
-
-    // Populate search keywords
+  // Load Config
+  try {
+    const configRes = await fetch('/api/config');
+    CONFIG = await configRes.json();
     populateKeywords();
-  } catch(e) { console.error('Init error', e); }
+  } catch(e) { console.error('Config load error', e); }
 }
 
 function populateKeywords() {

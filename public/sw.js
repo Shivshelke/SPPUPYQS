@@ -22,11 +22,23 @@ self.addEventListener('activate', event => {
   console.log('Service Worker activated');
 });
 
-// Fetch Event
+// Fetch Event (Network First Strategy)
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(response => {
+        // If network is fine, clone it and put in cache
+        if (response.status === 200) {
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, resClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try to get from cache
+        return caches.match(event.request);
+      })
   );
 });
