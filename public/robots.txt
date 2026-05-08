@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://sppupyq-synapse.vercel.app/sitemap.xml
