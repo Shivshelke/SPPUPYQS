@@ -45,9 +45,11 @@ function closeMobileMenu() {
 let CONFIG = {};
 let currentYear = null;
 let currentBranch = null;
+let currentSemester = null;
 let allFiles = [];
 let allKeywords = [];
 let currentUsername = null;
+let currentPrmType = null;
 
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
@@ -125,21 +127,22 @@ function selectYear(year) {
   document.getElementById('panelTitle').textContent = yearData.label;
 
   // Reset steps
-  document.getElementById('branchStep').style.display  = 'block';
-  document.getElementById('subjectStep').style.display = 'none';
-  document.getElementById('fileStep').style.display    = 'none';
+  document.getElementById('branchStep').style.display   = 'none';
+  document.getElementById('semesterStep').style.display = 'none';
+  document.getElementById('subjectStep').style.display  = 'none';
+  document.getElementById('fileStep').style.display     = 'none';
 
   // Build branch list
   const grid = document.getElementById('branchGrid');
   grid.innerHTML = '';
 
   if (year === 'first') {
-    // 1st year: skip branch, go straight to subjects
+    // 1st year: skip branch, go to semester
     document.getElementById('branchStep').style.display = 'none';
-    document.getElementById('subjectStep').style.display = 'block';
     currentBranch = 'FE';
-    buildSubjectTags(yearData.subjects);
+    showSemesterStep();
   } else {
+    document.getElementById('branchStep').style.display = 'block';
     yearData.branches.forEach(branch => {
       const tag = document.createElement('div');
       tag.className = 'tag';
@@ -150,28 +153,66 @@ function selectYear(year) {
   }
 }
 
-// ── Branch selection ──────────────────────────────────────────────────────────
-async function selectBranch(branch, yearData) {
-  currentBranch = branch;
+function showSemesterStep() {
+  document.getElementById('semesterStep').style.display = 'block';
+  document.getElementById('subjectStep').style.display = 'none';
+  document.getElementById('fileStep').style.display = 'none';
 
-  // Highlight selected
+  // Highlight available semesters for this year/branch
+  // For now, show all 8 but maybe FE only 1,2 etc.
+  const semGrid = document.getElementById('semesterGrid');
+  const tags = semGrid.querySelectorAll('.tag');
+  tags.forEach(t => {
+    t.classList.remove('active');
+    const s = parseInt(t.textContent.replace('Semester ', ''));
+    
+    // Simple logic: FE is Sem 1,2. SE is 3,4. TE is 5,6. BE is 7,8.
+    let allowed = [];
+    if (currentYear === 'first') allowed = [1, 2];
+    else if (currentYear === 'second') allowed = [3, 4];
+    else if (currentYear === 'third') allowed = [5, 6];
+    else if (currentYear === 'fourth') allowed = [7, 8];
+
+    if (allowed.includes(s)) {
+      t.style.display = 'block';
+    } else {
+      t.style.display = 'none';
+    }
+  });
+}
+
+// ── Branch selection ──────────────────────────────────────────────────────────
   document.querySelectorAll('#branchGrid .tag').forEach(t =>
     t.classList.toggle('active', t.textContent === branch)
   );
 
+  showSemesterStep();
+}
+
+async function selectSemester(sem) {
+  currentSemester = sem;
+  document.querySelectorAll('#semesterGrid .tag').forEach(t => {
+    const s = parseInt(t.textContent.replace('Semester ', ''));
+    t.classList.toggle('active', s === sem);
+  });
+
   document.getElementById('subjectStep').style.display = 'block';
 
-  // For 2nd+ year: fetch subjects that actually have files for this branch/year
-  const res = await fetch(`/api/files?year=${currentYear}&branch=${encodeURIComponent(branch)}`);
+  // Fetch subjects that have files for this year/branch/semester
+  const res = await fetch(`/api/files?year=${currentYear}&branch=${encodeURIComponent(currentBranch)}&semester=${sem}`);
   const files = await res.json();
 
-  // Collect unique subjects with files
   const subjectsWithFiles = [...new Set(files.map(f => f.subject))];
-  // Also include configured subjects
-  const configSubjects = yearData.subjects || [];
-  const allSubjects = [...new Set([...configSubjects, ...subjectsWithFiles])];
+  
+  // Also fallback to config if empty
+  let allSubjects = subjectsWithFiles;
+  if (allSubjects.length === 0 && CONFIG[currentYear] && CONFIG[currentYear].subjects) {
+    // Filter config subjects by semester if we had that mapping, 
+    // but we don't in CONFIG. So just show what we found.
+    allSubjects = CONFIG[currentYear].subjects;
+  }
 
-  buildSubjectTags(allSubjects.length ? allSubjects : subjectsWithFiles);
+  buildSubjectTags(allSubjects);
 }
 
 function buildSubjectTags(subjects) {
@@ -203,6 +244,7 @@ async function selectSubject(subject) {
 
   const params = new URLSearchParams({ year: currentYear, subject });
   if (currentBranch && currentBranch !== 'FE') params.append('branch', currentBranch);
+  if (currentSemester) params.append('semester', currentSemester);
 
   try {
     const res = await fetch(`/api/files?${params}`);
@@ -315,13 +357,23 @@ function goBack() {
     document.querySelectorAll('#subjectGrid .tag').forEach(t => t.classList.remove('active'));
     return;
   }
-  if (document.getElementById('subjectStep').style.display !== 'none' && currentYear !== 'first') {
+  if (document.getElementById('subjectStep').style.display !== 'none') {
     document.getElementById('subjectStep').style.display = 'none';
-    document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#semesterGrid .tag').forEach(t => t.classList.remove('active'));
+    return;
+  }
+  if (document.getElementById('semesterStep').style.display !== 'none') {
+    document.getElementById('semesterStep').style.display = 'none';
+    if (currentYear === 'first') {
+      document.getElementById('browserPanel').style.display = 'none';
+      currentYear = null; currentBranch = null; currentSemester = null;
+    } else {
+       document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
+    }
     return;
   }
   document.getElementById('browserPanel').style.display = 'none';
-  currentYear = null; currentBranch = null;
+  currentYear = null; currentBranch = null; currentSemester = null;
   document.getElementById('years').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -490,6 +542,20 @@ async function openPremiumModal(type) {
   const icon = document.getElementById('prmModalIcon');
   const list = document.getElementById('prmModalList');
 
+  currentPrmType = type;
+
+  // Reset filters
+  const yrFilter = document.getElementById('prmFilterYear');
+  const brFilter = document.getElementById('prmFilterBranch');
+  const semFilter = document.getElementById('prmFilterSemester');
+  
+  if (yrFilter) yrFilter.value = '';
+  if (brFilter) {
+    brFilter.value = '';
+    brFilter.innerHTML = '<option value="">All Branches</option>';
+  }
+  if (semFilter) semFilter.value = '';
+
   // Set meta
   if (type === 'solved-pyq') {
     title.textContent = 'Solved PYQs';
@@ -505,26 +571,44 @@ async function openPremiumModal(type) {
     icon.textContent = '🎯';
   }
 
-  list.innerHTML = '<li><span>Loading...</span></li>';
+  fetchPremiumFiles();
   if (modal) modal.classList.add('show');
+}
+
+async function fetchPremiumFiles() {
+  const list = document.getElementById('prmModalList');
+  const yr = document.getElementById('prmFilterYear').value;
+  const br = document.getElementById('prmFilterBranch').value;
+  const sem = document.getElementById('prmFilterSemester').value;
+
+  list.innerHTML = '<li><span>Loading...</span></li>';
+
+  const params = new URLSearchParams({ type: currentPrmType });
+  if (yr) params.append('year', yr);
+  if (br) params.append('branch', br);
+  if (sem) params.append('semester', sem);
 
   try {
-    const res = await fetch(`/api/premium-files?type=${type}`);
+    const res = await fetch(`/api/premium-files?${params}`);
     const files = await res.json();
     
     if (files.length === 0) {
-      list.innerHTML = '<li><span style="color:var(--muted)">No files available yet.</span></li>';
+      list.innerHTML = '<li><span style="color:var(--muted)">No files available yet for these filters.</span></li>';
     } else {
       list.innerHTML = files.map(f => {
         const actionBtn = isPremiumUser 
           ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
           : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
 
+        let metaStr = `${escHtml(f.originalName)} · ${formatSize(f.size)}`;
+        if (f.branch) metaStr = `${f.branch} · ` + metaStr;
+        if (f.semester) metaStr = `Sem ${f.semester} · ` + metaStr;
+
         return `
           <li>
             <div>
               <span style="display:block">${escHtml(f.subject)}</span>
-              <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
+              <small style="color:var(--muted)">${metaStr}</small>
             </div>
             <div style="display:flex; gap:8px;">
               ${actionBtn}
@@ -537,6 +621,26 @@ async function openPremiumModal(type) {
     list.innerHTML = '<li><span style="color:var(--danger)">Failed to load.</span></li>';
   }
 }
+
+window.updatePremiumFilter = function() {
+  const yr = document.getElementById('prmFilterYear').value;
+  const brSelect = document.getElementById('prmFilterBranch');
+  
+  // If year changed, update branch list
+  if (event.target.id === 'prmFilterYear') {
+    brSelect.innerHTML = '<option value="">All Branches</option>';
+    if (yr && yr !== 'first' && CONFIG[yr] && CONFIG[yr].branches) {
+      CONFIG[yr].branches.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b;
+        opt.textContent = b;
+        brSelect.appendChild(opt);
+      });
+    }
+  }
+
+  fetchPremiumFiles();
+};
 
 async function showPreview(fileId) {
   const modal = document.getElementById('previewOverlay');

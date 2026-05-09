@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   year:         String,
   branch:       String,
   subject:      String,
+  semester:     String,
   size:         Number,
   uploadDate:   { type: Date, default: Date.now },
   uploadedBy:   String,

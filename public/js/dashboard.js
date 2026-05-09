@@ -214,6 +214,7 @@ function setupDragDrop() {
 async function doUpload() {
   const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch').value;
+  const semester = document.getElementById('upSemester').value;
   const subject = document.getElementById('upSubject').value;
   const customSubject = document.getElementById('upCustomSubject').value.trim();
   const customFileName = document.getElementById('upCustomFileName').value.trim();
@@ -221,6 +222,7 @@ async function doUpload() {
 
   if (!year) { showUploadAlert('Please select a year.', 'error'); return; }
   if (!branch) { showUploadAlert('Please select a branch.', 'error'); return; }
+  if (!semester) { showUploadAlert('Please select a semester.', 'error'); return; }
   if (!subject) { showUploadAlert('Please select a subject.', 'error'); return; }
   if (subject === '__custom__' && !customSubject) {
     showUploadAlert('Please enter a custom subject name.', 'error'); return;
@@ -247,6 +249,7 @@ async function doUpload() {
   const fd = new FormData();
   fd.append('year', year);
   fd.append('branch', branch);
+  fd.append('semester', semester);
   fd.append('subject', subject === '__custom__' ? customSubject : subject);
   if (subject === '__custom__') fd.append('customSubject', customSubject);
   if (customFileName) fd.append('customFileName', customFileName);
@@ -264,6 +267,7 @@ async function doUpload() {
       clearFile();
       document.getElementById('upYear').value = '';
       document.getElementById('upBranch').value = '';
+      document.getElementById('upSemester').value = '';
       document.getElementById('upSubject').value = '';
       document.getElementById('upCustomFileName').value = '';
       document.getElementById('upBranch').disabled = true;
@@ -341,8 +345,8 @@ async function loadAdminFiles() {
         <thead>
           <tr>
             <th>File Name</th>
-            <th>Year</th>
-            <th>Branch</th>
+            <th>Year/Branch</th>
+            <th>Sem</th>
             <th>Subject</th>
             <th>Size</th>
             <th>Uploaded</th>
@@ -353,8 +357,8 @@ async function loadAdminFiles() {
           ${files.map(f => `
             <tr>
               <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
-              <td><span class="badge badge-year">${escHtml(f.year)}</span></td>
-              <td><span class="badge badge-branch">${escHtml(f.branch)}</span></td>
+              <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
+              <td><span class="badge" style="background:var(--card-bg); color:var(--text); border:1px solid var(--border); font-size:0.7rem">${escHtml(f.semester || '—')}</span></td>
               <td>${escHtml(f.subject)}</td>
               <td>${formatSize(f.size)}</td>
               <td>${formatDate(f.uploadDate)}</td>
@@ -607,14 +611,36 @@ window.clearPremiumFile = function () {
   document.getElementById('prmCustomName').value = '';
 }
 
+window.onPrmYearChange = function() {
+  const year = document.getElementById('prmYear').value;
+  const branch = document.getElementById('prmBranch');
+  branch.innerHTML = '<option value="">— Select Branch —</option>';
+  branch.disabled = true;
+
+  if (!year || !CONFIG[year]) return;
+
+  const branches = CONFIG[year].branches;
+  branches.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b; opt.textContent = b;
+    branch.appendChild(opt);
+  });
+  branch.disabled = false;
+}
+
 window.doPremiumUpload = async function () {
   const type = document.getElementById('prmType').value;
   const year = document.getElementById('prmYear').value;
+  const branch = document.getElementById('prmBranch').value;
+  const semester = document.getElementById('prmSemester').value;
   const subject = document.getElementById('prmSubject').value.trim();
   const custom = document.getElementById('prmCustomName').value.trim();
   const file = document.getElementById('prmPdfInput').files[0];
 
   if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
+  if (!year) { showPrmAlert('Please select a year.', 'error'); return; }
+  if (!branch) { showPrmAlert('Please select a branch.', 'error'); return; }
+  if (!semester) { showPrmAlert('Please select a semester.', 'error'); return; }
   if (!subject) { showPrmAlert('Please enter a subject name.', 'error'); return; }
   if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
 
@@ -636,7 +662,9 @@ window.doPremiumUpload = async function () {
 
   const fd = new FormData();
   fd.append('contentType', type);
-  if (year) fd.append('year', year);
+  fd.append('year', year);
+  fd.append('branch', branch);
+  fd.append('semester', semester);
   fd.append('subject', subject);
   if (custom) fd.append('customFileName', custom);
   fd.append('pdf', file);
@@ -653,7 +681,10 @@ window.doPremiumUpload = async function () {
       window.clearPremiumFile();
       document.getElementById('prmType').value = '';
       document.getElementById('prmYear').value = '';
+      document.getElementById('prmBranch').value = '';
+      document.getElementById('prmSemester').value = '';
       document.getElementById('prmSubject').value = '';
+      document.getElementById('prmBranch').disabled = true;
 
       await window.loadPremiumAdminFiles();
     } else {
@@ -702,6 +733,8 @@ window.loadPremiumAdminFiles = async function () {
           <tr>
             <th>Type</th>
             <th>File Name</th>
+            <th>Year/Branch</th>
+            <th>Sem</th>
             <th>Subject</th>
             <th>Size</th>
             <th>Action</th>
@@ -718,6 +751,8 @@ window.loadPremiumAdminFiles = async function () {
             <tr>
               <td>${badge}</td>
               <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
+              <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
+              <td><span class="badge" style="background:var(--card-bg); color:var(--text); border:1px solid var(--border); font-size:0.7rem">${escHtml(f.semester || '—')}</span></td>
               <td>${escHtml(f.subject)}</td>
               <td>${formatSize(f.size)}</td>
               <td>

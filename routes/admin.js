@@ -24,10 +24,17 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const { year, branch, subject, contentType } = req.body;
-    const folder = contentType && contentType !== 'regular'
-      ? `synapse/premium/${contentType}`
-      : `synapse/${year}/${branch}`;
+    const { year, branch, subject, contentType, semester } = req.body;
+    let folder = 'synapse/misc';
+    
+    if (contentType && contentType !== 'regular') {
+      folder = `synapse/premium/${contentType}/${year}/${branch}`;
+      if (semester) folder += `/${semester}`;
+    } else {
+      folder = `synapse/${year}/${branch}`;
+      if (semester) folder += `/${semester}`;
+    }
+
     return {
       folder,
       resource_type: 'image',
@@ -57,7 +64,7 @@ router.get('/dashboard', (req, res) => {
 router.post('/upload', (req, res) => {
   upload.single('pdf')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
-    const { year, branch, subject, customSubject, contentType } = req.body;
+    const { year, branch, subject, customSubject, contentType, semester } = req.body;
     if (!req.file) return res.status(400).json({ error: 'File required.' });
 
     const finalSubject = customSubject && customSubject.trim() ? customSubject.trim() : subject;
@@ -67,6 +74,7 @@ router.post('/upload', (req, res) => {
       year:         year || 'any',
       branch:       branch || 'any',
       subject:      finalSubject,
+      semester:     semester || 'any',
       size:         req.file.size || 0,
       uploadedBy:   req.session.adminUser,
       url:          req.file.path,

@@ -122,11 +122,13 @@ router.get('/config', (req, res) => res.json(CONFIG));
 
 // GET /api/files
 router.get('/files', async (req, res) => {
-  const { year, branch, subject, search } = req.query;
+  const { year, branch, subject, semester, search } = req.query;
   const query = { contentType: 'regular' };
-  if (year)    query.year    = year;
-  if (branch)  query.branch  = branch;
-  if (subject) query.subject = subject;
+  if (year)     query.year     = year;
+  if (branch)   query.branch   = branch;
+  if (subject)  query.subject  = subject;
+  if (semester) query.semester = semester;
+  
   if (search) {
     const r = new RegExp(search, 'i');
     query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
@@ -165,8 +167,13 @@ router.get('/preview/:id', async (req, res) => {
 
 // GET /api/premium-files
 router.get('/premium-files', async (req, res) => {
-  const { type } = req.query;
+  const { type, year, branch, semester } = req.query;
   const query = type ? { contentType: type } : { contentType: { $ne: 'regular' } };
+  
+  if (year)     query.year     = year;
+  if (branch)   query.branch   = branch;
+  if (semester) query.semester = semester;
+
   const files = await File.find(query).sort({ uploadDate: -1 });
 
   // If user is premium or admin, return everything.

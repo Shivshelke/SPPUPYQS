@@ -195,6 +195,21 @@
       <div class="tag-grid" id="branchGrid"></div>
     </div>
 
+    <!-- Semester selection -->
+    <div id="semesterStep" style="display:none">
+      <p class="step-hint">Choose a semester</p>
+      <div class="tag-grid" id="semesterGrid">
+        <div class="tag" onclick="selectSemester(1)">Semester 1</div>
+        <div class="tag" onclick="selectSemester(2)">Semester 2</div>
+        <div class="tag" onclick="selectSemester(3)">Semester 3</div>
+        <div class="tag" onclick="selectSemester(4)">Semester 4</div>
+        <div class="tag" onclick="selectSemester(5)">Semester 5</div>
+        <div class="tag" onclick="selectSemester(6)">Semester 6</div>
+        <div class="tag" onclick="selectSemester(7)">Semester 7</div>
+        <div class="tag" onclick="selectSemester(8)">Semester 8</div>
+      </div>
+    </div>
+
     <!-- Subject selection -->
     <div id="subjectStep" style="display:none">
       <p class="step-hint">Choose a subject</p>
@@ -336,6 +351,41 @@
     </div>
     <div class="modal-body">
       <p id="prmModalDesc">Select a subject to view step-by-step solutions curated by our top educators and previous year toppers.</p>
+      
+      <!-- Premium Filters -->
+      <div class="premium-filters" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin:1.5rem 0; padding:1rem; background:var(--glass-bg); border-radius:12px; border:1px solid var(--glass-border);">
+        <div class="filter-group">
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase;">Year</label>
+          <select id="prmFilterYear" onchange="updatePremiumFilter()" style="width:100%; padding:8px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:var(--text-main); border-radius:8px; outline:none;">
+            <option value="">All Years</option>
+            <option value="first">1st Year</option>
+            <option value="second">2nd Year</option>
+            <option value="third">3rd Year</option>
+            <option value="fourth">4th Year</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase;">Branch</label>
+          <select id="prmFilterBranch" onchange="updatePremiumFilter()" style="width:100%; padding:8px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:var(--text-main); border-radius:8px; outline:none;">
+            <option value="">All Branches</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase;">Semester</label>
+          <select id="prmFilterSemester" onchange="updatePremiumFilter()" style="width:100%; padding:8px; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:var(--text-main); border-radius:8px; outline:none;">
+            <option value="">All Semesters</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+            <option value="7">Semester 7</option>
+            <option value="8">Semester 8</option>
+          </select>
+        </div>
+      </div>
+
       <ul class="modal-list" id="prmModalList">
         <!-- populated dynamically -->
       </ul>
