@@ -5,7 +5,6 @@
 
 // ── PWA Service Worker Registration ──────────────────────────────────────────
 let deferredPrompt;
-let premiumFilesData = []; // Store fetched files for local filtering
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -490,14 +489,11 @@ async function openPremiumModal(type) {
   const desc = document.getElementById('prmModalDesc');
   const icon = document.getElementById('prmModalIcon');
   const list = document.getElementById('prmModalList');
-  const searchInput = document.getElementById('prmSearchInput');
-
-  if (searchInput) searchInput.value = ''; // Reset search
 
   // Set meta
   if (type === 'solved-pyq') {
     title.textContent = 'Solved PYQs';
-    desc.textContent = 'Select a subject to view step-by-step solutions curated by our top educators and toppers.';
+    desc.textContent = 'Select a subject to view step-by-step solutions curated by our top educators and previous year toppers.';
     icon.textContent = '📄';
   } else if (type === 'notes') {
     title.textContent = 'Handwritten Notes';
@@ -514,58 +510,32 @@ async function openPremiumModal(type) {
 
   try {
     const res = await fetch(`/api/premium-files?type=${type}`);
-    premiumFilesData = await res.json();
-    renderPremiumFiles(premiumFilesData);
+    const files = await res.json();
+
+    if (files.length === 0) {
+      list.innerHTML = '<li><span style="color:var(--muted)">No files available yet.</span></li>';
+    } else {
+      list.innerHTML = files.map(f => {
+        const actionBtn = isPremiumUser
+          ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
+          : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
+
+        return `
+          <li>
+            <div>
+              <span style="display:block">${escHtml(f.subject)}</span>
+              <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
+            </div>
+            <div style="display:flex; gap:8px;">
+              ${actionBtn}
+            </div>
+          </li>
+        `;
+      }).join('');
+    }
   } catch (e) {
     list.innerHTML = '<li><span style="color:var(--danger)">Failed to load.</span></li>';
   }
-}
-
-function renderPremiumFiles(files) {
-  const list = document.getElementById('prmModalList');
-  if (!list) return;
-
-  if (files.length === 0) {
-    list.innerHTML = '<li><span style="color:var(--muted)">No files found.</span></li>';
-    return;
-  }
-
-  list.innerHTML = files.map(f => {
-    const isPremiumUser = window.currentUser && window.currentUser.isPremium;
-    const actionBtn = isPremiumUser
-      ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
-      : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
-
-    const yearMap = { first: 'FE', second: 'SE', third: 'TE', fourth: 'BE' };
-    const yearShort = yearMap[f.year] || f.year;
-
-    return `
-      <li>
-        <div style="flex:1">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
-            <span style="font-weight:600; font-size:0.95rem;">${escHtml(f.subject)}</span>
-            <span class="badge-mini-accent">${escHtml(yearShort)}</span>
-            <span class="badge-mini-muted">${escHtml(f.branch)}</span>
-          </div>
-          <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
-        </div>
-        <div style="display:flex; gap:8px;">
-          ${actionBtn}
-        </div>
-      </li>
-    `;
-  }).join('');
-}
-
-function filterPremiumFiles() {
-  const term = document.getElementById('prmSearchInput').value.toLowerCase();
-  const filtered = premiumFilesData.filter(f => 
-    f.subject.toLowerCase().includes(term) || 
-    f.year.toLowerCase().includes(term) || 
-    f.branch.toLowerCase().includes(term) ||
-    (f.originalName && f.originalName.toLowerCase().includes(term))
-  );
-  renderPremiumFiles(filtered);
 }
 
 async function showPreview(fileId) {

@@ -2,21 +2,21 @@
  * routes/admin.js — MongoDB + Cloudinary version
  */
 require('dotenv').config();
-const express    = require('express');
+const express = require('express');
 const nodemailer = require('nodemailer');
-const multer     = require('multer');
+const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { requireAdmin } = require('../middleware/auth');
-const router     = express.Router();
-const File       = require('../models/File');
-const Feedback   = require('../models/Feedback');
-const Student    = require('../models/Student');
+const router = express.Router();
+const File = require('../models/File');
+const Feedback = require('../models/Feedback');
+const Student = require('../models/Student');
 
 // ── Cloudinary config ─────────────────────────────────────────────────────────
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
@@ -24,10 +24,15 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
+    const { year, branch, subject, contentType, semester } = req.body;
+    let folder = 'synapse/misc';
+
     if (contentType && contentType !== 'regular') {
       folder = `synapse/premium/${contentType}/${year}/${branch}`;
+      if (semester) folder += `/${semester}`;
     } else {
       folder = `synapse/${year}/${branch}`;
+      if (semester) folder += `/${semester}`;
     }
 
     return {
@@ -59,21 +64,22 @@ router.get('/dashboard', (req, res) => {
 router.post('/upload', (req, res) => {
   upload.single('pdf')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
-    const { year, branch, subject, customSubject, contentType } = req.body;
+    const { year, branch, subject, customSubject, contentType, semester } = req.body;
     if (!req.file) return res.status(400).json({ error: 'File required.' });
 
     const finalSubject = customSubject && customSubject.trim() ? customSubject.trim() : subject;
     const record = {
       originalName: req.file.originalname,
-      storedName:   req.file.filename || req.file.public_id,
-      year:         year || 'any',
-      branch:       branch || 'any',
-      subject:      finalSubject,
-      size:         req.file.size || 0,
-      uploadedBy:   req.session.adminUser,
-      url:          req.file.path,
-      publicId:     req.file.filename || req.file.public_id,
-      contentType:  contentType || 'regular'
+      storedName: req.file.filename || req.file.public_id,
+      year: year || 'any',
+      branch: branch || 'any',
+      subject: finalSubject,
+      semester: semester || 'any',
+      size: req.file.size || 0,
+      uploadedBy: req.session.adminUser,
+      url: req.file.path,
+      publicId: req.file.filename || req.file.public_id,
+      contentType: contentType || 'regular'
     };
     const saved = await File.create(record);
     res.json({ success: true, file: saved });
@@ -85,7 +91,7 @@ router.delete('/files/:id', async (req, res) => {
   const file = await File.findById(req.params.id);
   if (!file) return res.status(404).json({ error: 'File not found.' });
 
-  try { await cloudinary.uploader.destroy(file.publicId, { resource_type: 'raw' }); } catch(e) {}
+  try { await cloudinary.uploader.destroy(file.publicId, { resource_type: 'raw' }); } catch (e) { }
   await File.deleteOne({ _id: req.params.id });
   res.json({ success: true });
 });

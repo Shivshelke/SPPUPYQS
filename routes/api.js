@@ -1,20 +1,20 @@
 /**
  * routes/api.js — MongoDB + Cloudinary version
  */
-const express    = require('express');
+const express = require('express');
 const nodemailer = require('nodemailer');
-const https      = require('https');
-const http       = require('http');
-const OpenAI     = require('openai');
+const https = require('https');
+const http = require('http');
+const OpenAI = require('openai');
 const nvidiaClient = process.env.NVIDIA_API_KEY ? new OpenAI({
   apiKey: process.env.NVIDIA_API_KEY,
   baseURL: 'https://integrate.api.nvidia.com/v1'
 }) : null;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const genAI      = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
-const router     = express.Router();
-const File       = require('../models/File');
-const Feedback   = require('../models/Feedback');
+const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
+const router = express.Router();
+const File = require('../models/File');
+const Feedback = require('../models/Feedback');
 
 // Helper to proxy Cloudinary files with redirect support and header forwarding
 function proxySecure(url, res, filename, disposition = 'attachment') {
@@ -48,7 +48,7 @@ function proxySecure(url, res, filename, disposition = 'attachment') {
     }
 
     res.set('Content-Type', proxyRes.headers['content-type'] || 'application/pdf');
-    
+
     // Forward Content-Length for better browser experience
     if (proxyRes.headers['content-length']) {
       res.set('Content-Length', proxyRes.headers['content-length']);
@@ -87,7 +87,7 @@ router.get('/download/:id', async (req, res) => {
     }
     const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
     proxySecure(file.url, res, filename, 'attachment');
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ error: 'Server error.' });
   }
 });
@@ -104,17 +104,17 @@ router.get('/view/:id', async (req, res) => {
     }
     const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
     proxySecure(file.url, res, filename, 'inline');
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ error: 'Server error.' });
   }
 });
 
 // Hardcoded config (year/branch/subject taxonomy stored in memory)
 const CONFIG = {
-  first:  { label: '1st Year', branches: ['FE'], subjects: ['Engineering Mathematics – I','Engineering Mathematics – II','Engineering Physics','Engineering Chemistry','Basic Electrical Engineering','Basic Electronics Engineering','Engineering Graphics','Engineering Mechanics','Fundamentals of Programming Languages','Programming and Problem Solving'] },
-  second: { label: '2nd Year', branches: ['Computer Engineering','Information Technology','AIML','Electronics & Telecommunication','Mechanical Engineering','Civil Engineering','Electrical Engineering','Chemical Engineering','Instrumentation Engineering','Production Engineering'], subjects: [] },
-  third:  { label: '3rd Year', branches: ['Computer Engineering','Information Technology','AIML','Electronics & Telecommunication','Mechanical Engineering','Civil Engineering','Electrical Engineering','Chemical Engineering','Instrumentation Engineering','Production Engineering'], subjects: [] },
-  fourth: { label: '4th Year', branches: ['Computer Engineering','Information Technology','AIML','Electronics & Telecommunication','Mechanical Engineering','Civil Engineering','Electrical Engineering','Chemical Engineering','Instrumentation Engineering','Production Engineering'], subjects: [] }
+  first: { label: '1st Year', branches: ['FE'], subjects: ['Engineering Mathematics – I', 'Engineering Mathematics – II', 'Engineering Physics', 'Engineering Chemistry', 'Basic Electrical Engineering', 'Basic Electronics Engineering', 'Engineering Graphics', 'Engineering Mechanics', 'Fundamentals of Programming Languages', 'Programming and Problem Solving'] },
+  second: { label: '2nd Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] },
+  third: { label: '3rd Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] },
+  fourth: { label: '4th Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] }
 };
 
 // GET /api/config
@@ -122,10 +122,13 @@ router.get('/config', (req, res) => res.json(CONFIG));
 
 // GET /api/files
 router.get('/files', async (req, res) => {
-  if (year)     query.year     = year;
-  if (branch)   query.branch   = branch;
-  if (subject)  query.subject  = subject;
-  
+  const { year, branch, subject, semester, search } = req.query;
+  const query = { contentType: 'regular' };
+  if (year) query.year = year;
+  if (branch) query.branch = branch;
+  if (subject) query.subject = subject;
+  if (semester) query.semester = semester;
+
   if (search) {
     const r = new RegExp(search, 'i');
     query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
@@ -149,7 +152,7 @@ router.get('/preview/:id', async (req, res) => {
       // If it's a PDF, we can select page 1 and blur it
       // Format: .../upload/pg_1,e_blur:1000,w_800,f_jpg/v123/public_id.pdf
       previewUrl = baseUrl.replace('/upload/', '/upload/pg_1,e_blur:1000,w_800,f_jpg/');
-      
+
       // Also ensure the extension is .jpg for the preview
       if (previewUrl.toLowerCase().endsWith('.pdf')) {
         previewUrl = previewUrl.slice(0, -4) + '.jpg';
@@ -157,18 +160,19 @@ router.get('/preview/:id', async (req, res) => {
     }
 
     res.json({ previewUrl });
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ error: 'Server error.' });
   }
 });
 
 // GET /api/premium-files
 router.get('/premium-files', async (req, res) => {
-  const { type, year, branch } = req.query;
+  const { type, year, branch, semester } = req.query;
   const query = type ? { contentType: type } : { contentType: { $ne: 'regular' } };
-  
-  if (year)     query.year     = year;
-  if (branch)   query.branch   = branch;
+
+  if (year) query.year = year;
+  if (branch) query.branch = branch;
+  if (semester) query.semester = semester;
 
   const files = await File.find(query).sort({ uploadDate: -1 });
 
@@ -220,7 +224,7 @@ router.post('/feedback', async (req, res) => {
     try {
       const t = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
       await t.sendMail({ from: `"Synapse" <${process.env.EMAIL_USER}>`, to: process.env.EMAIL_USER, subject: `Feedback from ${safeName}`, text: message.trim() });
-    } catch(e) { console.error('Email error:', e); }
+    } catch (e) { console.error('Email error:', e); }
   }
   // Formspree Integration
   try {
@@ -238,7 +242,7 @@ router.post('/feedback', async (req, res) => {
     formReq.on('error', (e) => console.error('Formspree error:', e));
     formReq.write(data);
     formReq.end();
-  } catch(e) { console.error('Formspree integration error:', e); }
+  } catch (e) { console.error('Formspree integration error:', e); }
 
   res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
 });
@@ -280,7 +284,7 @@ router.post('/chat', async (req, res) => {
     if (process.env.GEMINI_API_KEY) {
       const fetch = require('node-fetch');
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -294,7 +298,7 @@ router.post('/chat', async (req, res) => {
         return res.json({ reply: data.candidates[0].content.parts[0].text });
       }
     }
-    
+
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
     res.json({ reply: getFallbackReply(message) });
