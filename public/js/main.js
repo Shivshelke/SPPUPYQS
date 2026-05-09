@@ -5,6 +5,7 @@
 
 // ── PWA Service Worker Registration ──────────────────────────────────────────
 let deferredPrompt;
+let premiumFilesData = []; // Store fetched files for local filtering
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -45,11 +46,9 @@ function closeMobileMenu() {
 let CONFIG = {};
 let currentYear = null;
 let currentBranch = null;
-let currentSemester = null;
 let allFiles = [];
 let allKeywords = [];
 let currentUsername = null;
-let currentPrmType = null;
 
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
@@ -100,7 +99,7 @@ async function init() {
     const configRes = await fetch('/api/config');
     CONFIG = await configRes.json();
     populateKeywords();
-  } catch(e) { console.error('Config load error', e); }
+  } catch (e) { console.error('Config load error', e); }
 }
 
 function populateKeywords() {
@@ -127,22 +126,21 @@ function selectYear(year) {
   document.getElementById('panelTitle').textContent = yearData.label;
 
   // Reset steps
-  document.getElementById('branchStep').style.display   = 'none';
-  document.getElementById('semesterStep').style.display = 'none';
-  document.getElementById('subjectStep').style.display  = 'none';
-  document.getElementById('fileStep').style.display     = 'none';
+  document.getElementById('branchStep').style.display = 'block';
+  document.getElementById('subjectStep').style.display = 'none';
+  document.getElementById('fileStep').style.display = 'none';
 
   // Build branch list
   const grid = document.getElementById('branchGrid');
   grid.innerHTML = '';
 
   if (year === 'first') {
-    // 1st year: skip branch, go to semester
+    // 1st year: skip branch, go straight to subjects
     document.getElementById('branchStep').style.display = 'none';
+    document.getElementById('subjectStep').style.display = 'block';
     currentBranch = 'FE';
-    showSemesterStep();
+    buildSubjectTags(yearData.subjects);
   } else {
-    document.getElementById('branchStep').style.display = 'block';
     yearData.branches.forEach(branch => {
       const tag = document.createElement('div');
       tag.className = 'tag';
@@ -153,66 +151,28 @@ function selectYear(year) {
   }
 }
 
-function showSemesterStep() {
-  document.getElementById('semesterStep').style.display = 'block';
-  document.getElementById('subjectStep').style.display = 'none';
-  document.getElementById('fileStep').style.display = 'none';
-
-  // Highlight available semesters for this year/branch
-  // For now, show all 8 but maybe FE only 1,2 etc.
-  const semGrid = document.getElementById('semesterGrid');
-  const tags = semGrid.querySelectorAll('.tag');
-  tags.forEach(t => {
-    t.classList.remove('active');
-    const s = parseInt(t.textContent.replace('Semester ', ''));
-    
-    // Simple logic: FE is Sem 1,2. SE is 3,4. TE is 5,6. BE is 7,8.
-    let allowed = [];
-    if (currentYear === 'first') allowed = [1, 2];
-    else if (currentYear === 'second') allowed = [3, 4];
-    else if (currentYear === 'third') allowed = [5, 6];
-    else if (currentYear === 'fourth') allowed = [7, 8];
-
-    if (allowed.includes(s)) {
-      t.style.display = 'block';
-    } else {
-      t.style.display = 'none';
-    }
-  });
-}
-
 // ── Branch selection ──────────────────────────────────────────────────────────
+async function selectBranch(branch, yearData) {
+  currentBranch = branch;
+
+  // Highlight selected
   document.querySelectorAll('#branchGrid .tag').forEach(t =>
     t.classList.toggle('active', t.textContent === branch)
   );
 
-  showSemesterStep();
-}
-
-async function selectSemester(sem) {
-  currentSemester = sem;
-  document.querySelectorAll('#semesterGrid .tag').forEach(t => {
-    const s = parseInt(t.textContent.replace('Semester ', ''));
-    t.classList.toggle('active', s === sem);
-  });
-
   document.getElementById('subjectStep').style.display = 'block';
 
-  // Fetch subjects that have files for this year/branch/semester
-  const res = await fetch(`/api/files?year=${currentYear}&branch=${encodeURIComponent(currentBranch)}&semester=${sem}`);
+  // For 2nd+ year: fetch subjects that actually have files for this branch/year
+  const res = await fetch(`/api/files?year=${currentYear}&branch=${encodeURIComponent(branch)}`);
   const files = await res.json();
 
+  // Collect unique subjects with files
   const subjectsWithFiles = [...new Set(files.map(f => f.subject))];
-  
-  // Also fallback to config if empty
-  let allSubjects = subjectsWithFiles;
-  if (allSubjects.length === 0 && CONFIG[currentYear] && CONFIG[currentYear].subjects) {
-    // Filter config subjects by semester if we had that mapping, 
-    // but we don't in CONFIG. So just show what we found.
-    allSubjects = CONFIG[currentYear].subjects;
-  }
+  // Also include configured subjects
+  const configSubjects = yearData.subjects || [];
+  const allSubjects = [...new Set([...configSubjects, ...subjectsWithFiles])];
 
-  buildSubjectTags(allSubjects);
+  buildSubjectTags(allSubjects.length ? allSubjects : subjectsWithFiles);
 }
 
 function buildSubjectTags(subjects) {
@@ -244,14 +204,13 @@ async function selectSubject(subject) {
 
   const params = new URLSearchParams({ year: currentYear, subject });
   if (currentBranch && currentBranch !== 'FE') params.append('branch', currentBranch);
-  if (currentSemester) params.append('semester', currentSemester);
 
   try {
     const res = await fetch(`/api/files?${params}`);
     const files = await res.json();
     allFiles = files;
     renderFileGrid(files, 'fileGrid');
-  } catch(e) {
+  } catch (e) {
     document.getElementById('fileGrid').innerHTML = '<div class="empty-state">Failed to load files.</div>';
   }
 }
@@ -294,16 +253,16 @@ function filterLocal(q) {
 }
 
 // ── Global search / Autocomplete ───────────────────────────────────────────────
-window.showSuggestions = function(q) {
+window.showSuggestions = function (q) {
   const dropdown = document.getElementById('searchSuggestions');
   if (!dropdown) return;
   if (!q.trim()) { dropdown.style.display = 'none'; return; }
-  
+
   const qLower = q.toLowerCase();
   let matches = allKeywords.filter(k => k.toLowerCase().includes(qLower));
-  
+
   if (matches.length === 0) { dropdown.style.display = 'none'; return; }
-  
+
   dropdown.innerHTML = matches.slice(0, 8).map(m => {
     const safeJs = escHtml(m).replace(/'/g, "\\'");
     return `<div class="suggestion-item" onclick="selectSuggestion('${safeJs}')">${escHtml(m)}</div>`;
@@ -311,12 +270,12 @@ window.showSuggestions = function(q) {
   dropdown.style.display = 'block';
 };
 
-window.hideSuggestions = function() {
+window.hideSuggestions = function () {
   const dropdown = document.getElementById('searchSuggestions');
   if (dropdown) dropdown.style.display = 'none';
 };
 
-window.selectSuggestion = function(val) {
+window.selectSuggestion = function (val) {
   document.getElementById('globalSearch').value = val;
   hideSuggestions();
   doGlobalSearch();
@@ -339,7 +298,7 @@ async function doGlobalSearch() {
     const res = await fetch(`/api/files?search=${encodeURIComponent(q)}`);
     const files = await res.json();
     renderFileGrid(files, 'searchGrid');
-  } catch(e) {
+  } catch (e) {
     grid.innerHTML = '<div class="empty-state">Search failed. Try again.</div>';
   }
 }
@@ -357,23 +316,13 @@ function goBack() {
     document.querySelectorAll('#subjectGrid .tag').forEach(t => t.classList.remove('active'));
     return;
   }
-  if (document.getElementById('subjectStep').style.display !== 'none') {
+  if (document.getElementById('subjectStep').style.display !== 'none' && currentYear !== 'first') {
     document.getElementById('subjectStep').style.display = 'none';
-    document.querySelectorAll('#semesterGrid .tag').forEach(t => t.classList.remove('active'));
-    return;
-  }
-  if (document.getElementById('semesterStep').style.display !== 'none') {
-    document.getElementById('semesterStep').style.display = 'none';
-    if (currentYear === 'first') {
-      document.getElementById('browserPanel').style.display = 'none';
-      currentYear = null; currentBranch = null; currentSemester = null;
-    } else {
-       document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
-    }
+    document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
     return;
   }
   document.getElementById('browserPanel').style.display = 'none';
-  currentYear = null; currentBranch = null; currentSemester = null;
+  currentYear = null; currentBranch = null;
   document.getElementById('years').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -387,11 +336,11 @@ function formatSize(bytes) {
 
 function formatDate(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── Feedback ──────────────────────────────────────────────────────────────────
@@ -415,7 +364,7 @@ async function submitFeedback() {
       body: JSON.stringify({ name, message })
     });
     const data = await res.json();
-    
+
     if (data.success) {
       showFbAlert('Message sent! Thank you for your feedback.', 'success');
       // Only clear name if not logged in
@@ -453,39 +402,39 @@ document.getElementById('globalSearch').addEventListener('keydown', e => {
 let isPremiumUser = false;
 let isLoggedIn = false;
 
-window.checkPremiumLogin = function() {
+window.checkPremiumLogin = function () {
   if (!isLoggedIn) {
     window.location.href = '/student-login.html';
   }
 };
 
-window.buyPremium = async function() {
+window.buyPremium = async function () {
   const btn = document.getElementById('buyPremiumBtn');
-  if(btn) {
+  if (btn) {
     btn.textContent = 'Processing...';
     btn.disabled = true;
   }
-  
+
   try {
     const res = await fetch('/student/buy-premium', { method: 'POST' });
     const data = await res.json();
-    if(data.success) {
+    if (data.success) {
       alert(data.message);
       init();
     } else {
       alert(data.error || 'Failed to buy premium.');
     }
-  } catch(e) {
+  } catch (e) {
     alert('Network error during purchase.');
   } finally {
-    if(btn) {
+    if (btn) {
       btn.textContent = 'Buy Premium Now ✨';
       btn.disabled = false;
     }
   }
 };
 
-window.doStudentLogout = async function() {
+window.doStudentLogout = async function () {
   await fetch('/student/logout', { method: 'POST' });
   window.location.reload();
 };
@@ -495,13 +444,13 @@ function togglePremiumState() {
   const free = document.getElementById('freeState');
   const unlocked = document.getElementById('unlockedState');
   const buyBtn = document.getElementById('buyPremiumBtn');
-  
+
   if (!loggedOut || !free || !unlocked) return;
-  
+
   loggedOut.classList.remove('show', 'active');
   free.classList.remove('show', 'active');
   unlocked.classList.remove('show', 'active');
-  
+
   setTimeout(() => {
     let target;
     if (!isLoggedIn) {
@@ -527,7 +476,7 @@ function togglePremiumState() {
     } else {
       target = unlocked;
     }
-    
+
     target.classList.add('active');
     void target.offsetWidth;
     target.classList.add('show');
@@ -541,25 +490,14 @@ async function openPremiumModal(type) {
   const desc = document.getElementById('prmModalDesc');
   const icon = document.getElementById('prmModalIcon');
   const list = document.getElementById('prmModalList');
+  const searchInput = document.getElementById('prmSearchInput');
 
-  currentPrmType = type;
-
-  // Reset filters
-  const yrFilter = document.getElementById('prmFilterYear');
-  const brFilter = document.getElementById('prmFilterBranch');
-  const semFilter = document.getElementById('prmFilterSemester');
-  
-  if (yrFilter) yrFilter.value = '';
-  if (brFilter) {
-    brFilter.value = '';
-    brFilter.innerHTML = '<option value="">All Branches</option>';
-  }
-  if (semFilter) semFilter.value = '';
+  if (searchInput) searchInput.value = ''; // Reset search
 
   // Set meta
   if (type === 'solved-pyq') {
     title.textContent = 'Solved PYQs';
-    desc.textContent = 'Select a subject to view step-by-step solutions curated by our top educators and previous year toppers.';
+    desc.textContent = 'Select a subject to view step-by-step solutions curated by our top educators and toppers.';
     icon.textContent = '📄';
   } else if (type === 'notes') {
     title.textContent = 'Handwritten Notes';
@@ -571,82 +509,70 @@ async function openPremiumModal(type) {
     icon.textContent = '🎯';
   }
 
-  fetchPremiumFiles();
-  if (modal) modal.classList.add('show');
-}
-
-async function fetchPremiumFiles() {
-  const list = document.getElementById('prmModalList');
-  const yr = document.getElementById('prmFilterYear').value;
-  const br = document.getElementById('prmFilterBranch').value;
-  const sem = document.getElementById('prmFilterSemester').value;
-
   list.innerHTML = '<li><span>Loading...</span></li>';
-
-  const params = new URLSearchParams({ type: currentPrmType });
-  if (yr) params.append('year', yr);
-  if (br) params.append('branch', br);
-  if (sem) params.append('semester', sem);
+  if (modal) modal.classList.add('show');
 
   try {
-    const res = await fetch(`/api/premium-files?${params}`);
-    const files = await res.json();
-    
-    if (files.length === 0) {
-      list.innerHTML = '<li><span style="color:var(--muted)">No files available yet for these filters.</span></li>';
-    } else {
-      list.innerHTML = files.map(f => {
-        const actionBtn = isPremiumUser 
-          ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
-          : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
-
-        let metaStr = `${escHtml(f.originalName)} · ${formatSize(f.size)}`;
-        if (f.branch) metaStr = `${f.branch} · ` + metaStr;
-        if (f.semester) metaStr = `Sem ${f.semester} · ` + metaStr;
-
-        return `
-          <li>
-            <div>
-              <span style="display:block">${escHtml(f.subject)}</span>
-              <small style="color:var(--muted)">${metaStr}</small>
-            </div>
-            <div style="display:flex; gap:8px;">
-              ${actionBtn}
-            </div>
-          </li>
-        `;
-      }).join('');
-    }
-  } catch(e) {
+    const res = await fetch(`/api/premium-files?type=${type}`);
+    premiumFilesData = await res.json();
+    renderPremiumFiles(premiumFilesData);
+  } catch (e) {
     list.innerHTML = '<li><span style="color:var(--danger)">Failed to load.</span></li>';
   }
 }
 
-window.updatePremiumFilter = function() {
-  const yr = document.getElementById('prmFilterYear').value;
-  const brSelect = document.getElementById('prmFilterBranch');
-  
-  // If year changed, update branch list
-  if (event.target.id === 'prmFilterYear') {
-    brSelect.innerHTML = '<option value="">All Branches</option>';
-    if (yr && yr !== 'first' && CONFIG[yr] && CONFIG[yr].branches) {
-      CONFIG[yr].branches.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b;
-        opt.textContent = b;
-        brSelect.appendChild(opt);
-      });
-    }
+function renderPremiumFiles(files) {
+  const list = document.getElementById('prmModalList');
+  if (!list) return;
+
+  if (files.length === 0) {
+    list.innerHTML = '<li><span style="color:var(--muted)">No files found.</span></li>';
+    return;
   }
 
-  fetchPremiumFiles();
-};
+  list.innerHTML = files.map(f => {
+    const isPremiumUser = window.currentUser && window.currentUser.isPremium;
+    const actionBtn = isPremiumUser
+      ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
+      : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
+
+    const yearMap = { first: 'FE', second: 'SE', third: 'TE', fourth: 'BE' };
+    const yearShort = yearMap[f.year] || f.year;
+
+    return `
+      <li>
+        <div style="flex:1">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+            <span style="font-weight:600; font-size:0.95rem;">${escHtml(f.subject)}</span>
+            <span class="badge-mini-accent">${escHtml(yearShort)}</span>
+            <span class="badge-mini-muted">${escHtml(f.branch)}</span>
+          </div>
+          <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
+        </div>
+        <div style="display:flex; gap:8px;">
+          ${actionBtn}
+        </div>
+      </li>
+    `;
+  }).join('');
+}
+
+function filterPremiumFiles() {
+  const term = document.getElementById('prmSearchInput').value.toLowerCase();
+  const filtered = premiumFilesData.filter(f => 
+    f.subject.toLowerCase().includes(term) || 
+    f.year.toLowerCase().includes(term) || 
+    f.branch.toLowerCase().includes(term) ||
+    (f.originalName && f.originalName.toLowerCase().includes(term))
+  );
+  renderPremiumFiles(filtered);
+}
 
 async function showPreview(fileId) {
   const modal = document.getElementById('previewOverlay');
   const img = document.getElementById('previewImage');
   const loader = document.getElementById('previewLoader');
-  
+
   if (!modal || !img || !loader) return;
 
   modal.classList.add('show');
@@ -666,7 +592,7 @@ async function showPreview(fileId) {
       alert('Could not load preview.');
       closePreview();
     }
-  } catch(e) {
+  } catch (e) {
     alert('Error loading preview.');
     closePreview();
   }
@@ -718,7 +644,7 @@ function addMessageToChat(text, type) {
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `chat-message ${type}-message`;
-  
+
   const now = new Date();
   const timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
 
@@ -726,7 +652,7 @@ function addMessageToChat(text, type) {
     <div class="message-content">${text}</div>
     <div class="message-time">${timeStr}</div>
   `;
-  
+
   messagesContainer.appendChild(msgDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
@@ -750,15 +676,15 @@ async function sendChatMessage() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
-  
+
   // 1. Add User Message
   addMessageToChat(text, 'user');
   input.value = '';
   input.disabled = true;
-  
+
   // 2. Show Loading
   showChatLoading();
-  
+
   // 3. Send to Backend
   try {
     const res = await fetch('/api/chat', {
@@ -766,17 +692,17 @@ async function sendChatMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })
     });
-    
+
     const data = await res.json();
     hideChatLoading();
-    
+
     // 4. Add Bot Message
     if (data.reply) {
       addMessageToChat(data.reply, 'bot');
     } else {
       addMessageToChat('Sorry, I am having trouble connecting right now.', 'bot');
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Chat error:', e);
     hideChatLoading();
     addMessageToChat('Network error. Please try again.', 'bot');

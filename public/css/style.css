@@ -610,6 +610,31 @@ a { color: var(--accent); text-decoration: none; }
 .modal-list-btn.secondary { background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary); }
 .modal-list-btn.secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.1); }
 
+/* Premium Search & Badges */
+.modal-search-wrap input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.badge-mini-accent {
+  font-size: 0.65rem;
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.badge-mini-muted {
+  font-size: 0.65rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 /* ── PREMIUM CHAT WIDGET ── */
 .chat-widget {
   position: fixed;
