@@ -11,9 +11,30 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Connect MongoDB ───────────────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => { console.error('❌ MongoDB error:', err); process.exit(1); });
+let isConnected = false;
+const connectDB = async () => {
+  if (isConnected) return;
+  try {
+    const db = await mongoose.connect(process.env.MONGODB_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = db.connections[0].readyState;
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB error:', err);
+    // Don't process.exit(1) on Vercel as it crashes the whole function
+  }
+};
+
+// Initial connect for local dev or first Vercel invocation
+connectDB();
+
+// Middleware to ensure DB is connected for every request
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -27,7 +48,9 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions'
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 1 day
+    autoRemove: 'native'
   }),
   cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
