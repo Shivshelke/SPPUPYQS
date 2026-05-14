@@ -15,6 +15,7 @@ const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GE
 const router = express.Router();
 const File = require('../models/File');
 const Feedback = require('../models/Feedback');
+const Student = require('../models/Student');
 
 // Helper to proxy Cloudinary files with redirect support and header forwarding
 function proxySecure(url, res, filename, disposition = 'attachment') {
@@ -196,17 +197,29 @@ router.get('/premium-files', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const [total, totalStudents, pendingPremium, totalFeedback, byYearRaw] = await Promise.all([
-      File.countDocuments(),
-      require('../models/Student').countDocuments(),
-      require('../models/Student').countDocuments({ premiumStatus: 'pending', requestSeen: false }),
-      Feedback.countDocuments({ isRead: false }),
-      File.aggregate([{ $group: { _id: '$year', count: { $sum: 1 } } }])
+      File.countDocuments().catch(() => 0),
+      Student.countDocuments().catch(() => 0),
+      Student.countDocuments({ premiumStatus: 'pending', requestSeen: false }).catch(() => 0),
+      Feedback.countDocuments({ isRead: false }).catch(() => 0),
+      File.aggregate([{ $group: { _id: '$year', count: { $sum: 1 } } }]).catch(() => [])
     ]);
+
     const byYear = {};
-    byYearRaw.forEach(r => { byYear[r._id] = r.count; });
-    res.json({ total, totalStudents, pendingPremium, totalFeedback, byYear });
+    if (Array.isArray(byYearRaw)) {
+      byYearRaw.forEach(r => { if (r._id) byYear[r._id] = r.count; });
+    }
+
+    res.json({
+      total: total || 0,
+      totalStudents: totalStudents || 0,
+      pendingPremium: pendingPremium || 0,
+      totalFeedback: totalFeedback || 0,
+      byYear
+    });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch stats.' });
+    console.error('[Stats API Error]:', e);
+    // Return empty stats instead of 500 to keep UI functional
+    res.json({ total: 0, totalStudents: 0, pendingPremium: 0, totalFeedback: 0, byYear: {} });
   }
 });
 

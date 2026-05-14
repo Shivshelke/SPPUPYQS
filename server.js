@@ -11,19 +11,27 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Connect MongoDB ───────────────────────────────────────────────────────────
-let isConnected = false;
+// ── Connect MongoDB ───────────────────────────────────────────────────────────
+let cachedConnection = null;
+
 const connectDB = async () => {
-  if (isConnected) return;
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+
   try {
+    console.log('⏳ Connecting to MongoDB...');
     const db = await mongoose.connect(process.env.MONGODB_URI, {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased for stability
+      socketTimeoutMS: 45000,
     });
-    isConnected = db.connections[0].readyState;
+    cachedConnection = db;
     console.log('✅ MongoDB connected');
+    return db;
   } catch (err) {
     console.error('❌ MongoDB error:', err);
-    // Don't process.exit(1) on Vercel as it crashes the whole function
+    throw err;
   }
 };
 
