@@ -205,6 +205,19 @@ async function selectSubject(subject) {
   if (currentBranch && currentBranch !== 'FE') params.append('branch', currentBranch);
 
   try {
+    // Show skeletons
+    const grid = document.getElementById('fileGrid');
+    grid.innerHTML = Array(4).fill(0).map(() => `
+      <div class="file-card skeleton-card" style="border-color:transparent">
+        <div class="skeleton-icon skeleton"></div>
+        <div class="file-info">
+          <div class="skeleton-text skeleton"></div>
+          <div class="skeleton-text short skeleton"></div>
+        </div>
+        <div class="skeleton-btn skeleton"></div>
+      </div>
+    `).join('');
+
     const res = await fetch(`/api/files?${params}`);
     const files = await res.json();
     allFiles = files;
@@ -226,8 +239,8 @@ function renderFileGrid(files, gridId) {
     return;
   }
 
-  grid.innerHTML = files.map(f => `
-    <div class="file-card">
+  grid.innerHTML = files.map((f, i) => `
+    <div class="file-card fade-in-card" style="animation-delay: ${i * 0.05}s">
       <div class="file-icon">📄</div>
       <div class="file-info">
         <div class="file-name" title="${escHtml(f.originalName)}">${escHtml(f.originalName)}</div>
@@ -291,7 +304,16 @@ async function doGlobalSearch() {
   document.getElementById('searchResults').scrollIntoView({ behavior: 'smooth' });
 
   const grid = document.getElementById('searchGrid');
-  grid.innerHTML = '<div class="empty-state"><span class="empty-icon">⏳</span>Searching…</div>';
+  grid.innerHTML = Array(4).fill(0).map(() => `
+      <div class="file-card skeleton-card" style="border-color:transparent">
+        <div class="skeleton-icon skeleton"></div>
+        <div class="file-info">
+          <div class="skeleton-text skeleton"></div>
+          <div class="skeleton-text short skeleton"></div>
+        </div>
+        <div class="skeleton-btn skeleton"></div>
+      </div>
+    `).join('');
 
   try {
     const res = await fetch(`/api/files?search=${encodeURIComponent(q)}`);

@@ -236,14 +236,51 @@ a {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(15px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
+.fade-in-card {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-icon { width: 44px; height: 44px; border-radius: 10px; }
+.skeleton-text { height: 14px; margin-bottom: 8px; border-radius: 4px; width: 80%; }
+.skeleton-text.short { width: 50%; }
+.skeleton-btn { height: 32px; width: 80px; border-radius: 7px; margin-left: auto; }
 
 /* Search */
 .search-wrap {
