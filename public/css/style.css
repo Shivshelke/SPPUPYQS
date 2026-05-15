@@ -70,10 +70,10 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .9rem 2rem;
-  background: var(--nav-bg);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 2rem;
+  background: rgba(10, 10, 15, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .nav-brand {
@@ -134,16 +134,6 @@ a {
   padding: 8rem 1.5rem 4rem;
 }
 
-.hero-bg-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(99, 102, 241, .06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, .06) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
 .hero-bg-grid::after {
   content: '';
   position: absolute;
@@ -154,28 +144,37 @@ a {
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: 760px;
+  max-width: 900px;
 }
 
 .hero-badge {
   display: inline-block;
-  padding: .35rem 1rem;
-  background: rgba(99, 102, 241, .15);
-  border: 1px solid rgba(99, 102, 241, .3);
+  padding: .4rem 1.2rem;
+  background: rgba(99, 102, 241, 0.08);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 100px;
-  font-size: .82rem;
-  font-weight: 500;
+  font-size: .75rem;
+  font-weight: 600;
   color: #a5b4fc;
   margin-bottom: 1.5rem;
-  letter-spacing: .04em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.hero-badge:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .hero h1 {
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(2rem, 7vw, 4.2rem);
   font-weight: 800;
-  line-height: 1;
-  margin-bottom: 1.2rem;
-  letter-spacing: -.02em;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
 }
 
 .accent {
@@ -195,16 +194,18 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  border-radius: 10px;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
+  background: rgba(245, 158, 11, 0.05);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.85rem;
   color: #fbbf24;
-  margin-bottom: 2rem;
-  max-width: 480px;
+  margin-bottom: 2.5rem;
+  max-width: 500px;
   text-align: left;
   line-height: 1.5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   animation: fadeInUp 0.5s ease 0.3s both;
 }
 
@@ -315,15 +316,16 @@ a {
 
 .search-wrap input {
   flex: 1;
-  padding: .85rem 1.2rem;
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  background: rgba(28, 28, 40, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   color: var(--text);
   font-family: inherit;
-  font-size: .95rem;
+  font-size: 1rem;
   outline: none;
-  transition: .2s;
+  transition: all 0.3s ease;
 }
 
 .search-wrap input:focus {
@@ -336,21 +338,23 @@ a {
 }
 
 .search-wrap button {
-  padding: .85rem 1.5rem;
-  background: var(--accent);
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   color: #fff;
   font-family: inherit;
-  font-size: .95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: .2s;
+  transition: all 0.3s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .search-wrap button:hover {
-  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 /* Stats */
@@ -1990,6 +1994,50 @@ a {
   border-radius: 50%;
   margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
+}
+
+/* ── MOBILE OPTIMIZATION ── */
+@media (max-width: 768px) {
+  .hero {
+    padding: 6rem 1rem 3rem !important;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .hero-sub {
+    font-size: 1.05rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .search-wrap {
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .search-wrap input {
+    width: 100% !important;
+    height: 52px !important;
+  }
+
+  .search-wrap button {
+    width: 100% !important;
+    height: 52px !important;
+  }
+
+  .hero-stats {
+    gap: 1.5rem !important;
+    margin-top: 2rem !important;
+  }
+
+  .stat-num {
+    font-size: 1.6rem !important;
+  }
 }
 
 @keyframes spin {
