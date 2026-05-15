@@ -43,9 +43,17 @@
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/style.css"/>
-  <script src="/js/theme.js"></script>
+  <style>
+    :root { --bg: #0a0a0f; --text: #f0f0f8; --accent: #6366f1; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; }
+    .hero { min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 8rem 1.5rem 4rem; text-align: center; }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 7vw, 4.2rem); font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; }
+    .nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(10px); height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; box-sizing: border-box; }
+  </style>
+  <script src="/js/theme.js" defer></script>
 </head>
 <body>
 
@@ -307,6 +315,6 @@
   </div>
 </div>
 
-<script src="/js/main.js?v=2"></script>
+<script src="/js/main.js?v=2" defer></script>
 </body>
 </html>
