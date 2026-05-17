@@ -1,4 +1,4 @@
-const CACHE_NAME = 'synapse-cache-v1';
+const CACHE_NAME = 'synapse-cache-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,28 +7,61 @@ const ASSETS = [
   '/js/theme.js'
 ];
 
-// Install Event
+// Install Event - Pre-cache core assets
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('Caching assets');
+      console.log('[SW] Pre-caching static assets');
       return cache.addAll(ASSETS);
-    })
+    }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event
+// Activate Event - Clean up stale cache versions
 self.addEventListener('activate', event => {
-  console.log('Service Worker activated');
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('[SW] Purging old cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-// Fetch Event (Network First Strategy)
+// Fetch Event - Network First with Cache Fallback for Static Assets Only
 self.addEventListener('fetch', event => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+
+  // Only handle standard HTTP/HTTPS requests
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
+  // Bypass caching entirely for dynamic backend API, Auth, Admin, and Student routes
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/auth/') ||
+    url.pathname.startsWith('/admin/') ||
+    url.pathname.startsWith('/student/')
+  ) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // If network is fine, clone it and put in cache
-        if (response.status === 200) {
+        // Cache valid responses (both standard 200 OK and opaque 0 responses from CDNs)
+        if (response && (response.status === 200 || response.status === 0)) {
           const resClone = response.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, resClone);
@@ -37,7 +70,7 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        // If network fails, try to get from cache
+        // Fall back to cache on network failure
         return caches.match(event.request);
       })
   );

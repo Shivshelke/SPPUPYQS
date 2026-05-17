@@ -63,38 +63,48 @@ router.post('/google-login', async (req, res) => {
 
 // POST /student/register
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password)
-    return res.status(400).json({ error: 'Username, email, and password are required.' });
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password)
+      return res.status(400).json({ error: 'Username, email, and password are required.' });
 
-  const exists = await Student.findOne({ $or: [{ username }, { email }] });
-  if (exists) return res.status(400).json({ error: 'Username or email already in use.' });
+    const exists = await Student.findOne({ $or: [{ username }, { email }] });
+    if (exists) return res.status(400).json({ error: 'Username or email already in use.' });
 
-  const hashed = await bcrypt.hash(password, 10);
-  const student = await Student.create({ username, email, password: hashed, isPremium: false });
+    const hashed = await bcrypt.hash(password, 10);
+    const student = await Student.create({ username, email, password: hashed, isPremium: false });
 
-  req.session.isStudent    = true;
-  req.session.studentUser  = username;
-  req.session.isPremium    = false;
-  res.json({ success: true, message: 'Registration successful.' });
+    req.session.isStudent    = true;
+    req.session.studentUser  = username;
+    req.session.isPremium    = false;
+    res.json({ success: true, message: 'Registration successful.' });
+  } catch (error) {
+    console.error("[Student Register Error]:", error);
+    res.status(500).json({ error: 'Failed to register. The database might be warming up, please try again.' });
+  }
 });
 
 // POST /student/login
 router.post('/login', async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password)
-    return res.status(400).json({ error: 'Username, email, and password required.' });
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password)
+      return res.status(400).json({ error: 'Username, email, and password required.' });
 
-  const student = await Student.findOne({ username, email });
-  if (!student) return res.status(401).json({ error: 'Invalid credentials.' });
+    const student = await Student.findOne({ username, email });
+    if (!student) return res.status(401).json({ error: 'Invalid credentials.' });
 
-  const valid = await bcrypt.compare(password, student.password);
-  if (!valid) return res.status(401).json({ error: 'Invalid credentials.' });
+    const valid = await bcrypt.compare(password, student.password);
+    if (!valid) return res.status(401).json({ error: 'Invalid credentials.' });
 
-  req.session.isStudent   = true;
-  req.session.studentUser = username;
-  req.session.isPremium   = student.isPremium || false;
-  return res.json({ success: true, username, isPremium: req.session.isPremium });
+    req.session.isStudent   = true;
+    req.session.studentUser = username;
+    req.session.isPremium   = student.isPremium || false;
+    return res.json({ success: true, username, isPremium: req.session.isPremium });
+  } catch (error) {
+    console.error("[Student Login Error]:", error);
+    res.status(500).json({ error: 'Failed to log in. The database might be warming up, please try again.' });
+  }
 });
 
 // POST /student/logout
@@ -107,33 +117,43 @@ router.post('/logout', (req, res) => {
 
 // GET /student/status
 router.get('/status', async (req, res) => {
-  if (req.session && req.session.isStudent) {
-    const student = await Student.findOne({ username: req.session.studentUser });
-    if (!student) return res.json({ loggedIn: false });
-    
-    // Sync session
-    req.session.isPremium = student.isPremium;
-    
-    return res.json({ 
-      loggedIn: true, 
-      username: student.username, 
-      isPremium: student.isPremium,
-      premiumStatus: student.premiumStatus || 'none'
-    });
+  try {
+    if (req.session && req.session.isStudent) {
+      const student = await Student.findOne({ username: req.session.studentUser });
+      if (!student) return res.json({ loggedIn: false });
+      
+      // Sync session
+      req.session.isPremium = student.isPremium;
+      
+      return res.json({ 
+        loggedIn: true, 
+        username: student.username, 
+        isPremium: student.isPremium,
+        premiumStatus: student.premiumStatus || 'none'
+      });
+    }
+    res.json({ loggedIn: false });
+  } catch (error) {
+    console.error("[Student Status Error]:", error);
+    res.status(500).json({ error: 'Failed to sync student status.' });
   }
-  res.json({ loggedIn: false });
 });
 
 // POST /student/buy-premium
 router.post('/buy-premium', async (req, res) => {
-  if (!req.session || !req.session.isStudent)
-    return res.status(401).json({ error: 'Unauthorized.' });
+  try {
+    if (!req.session || !req.session.isStudent)
+      return res.status(401).json({ error: 'Unauthorized.' });
 
-  await Student.updateOne(
-    { username: req.session.studentUser }, 
-    { premiumStatus: 'pending', requestedAt: new Date(), requestSeen: false }
-  );
-  res.json({ success: true, message: 'Your request for Premium access has been sent to the Admin! ✨' });
+    await Student.updateOne(
+      { username: req.session.studentUser }, 
+      { premiumStatus: 'pending', requestedAt: new Date(), requestSeen: false }
+    );
+    res.json({ success: true, message: 'Your request for Premium access has been sent to the Admin! ✨' });
+  } catch (error) {
+    console.error("[Buy Premium Error]:", error);
+    res.status(500).json({ error: 'Failed to request premium access. Please try again.' });
+  }
 });
 
 module.exports = router;

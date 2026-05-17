@@ -123,19 +123,24 @@ router.get('/config', (req, res) => res.json(CONFIG));
 
 // GET /api/files
 router.get('/files', async (req, res) => {
-  const { year, branch, subject, semester, search } = req.query;
-  const query = { contentType: 'regular' };
-  if (year) query.year = year;
-  if (branch) query.branch = branch;
-  if (subject) query.subject = subject;
-  if (semester) query.semester = semester;
+  try {
+    const { year, branch, subject, semester, search } = req.query;
+    const query = { contentType: 'regular' };
+    if (year) query.year = year;
+    if (branch) query.branch = branch;
+    if (subject) query.subject = subject;
+    if (semester) query.semester = semester;
 
-  if (search) {
-    const r = new RegExp(search, 'i');
-    query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
+    if (search) {
+      const r = new RegExp(search, 'i');
+      query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
+    }
+    const files = await File.find(query).sort({ uploadDate: -1 });
+    res.json(files);
+  } catch (error) {
+    console.error("[Files API Error]:", error);
+    res.status(500).json({ error: "Failed to retrieve files. The database might be warming up, please try again." });
   }
-  const files = await File.find(query).sort({ uploadDate: -1 });
-  res.json(files);
 });
 
 // GET /api/preview/:id — Generate a blurred image preview of the first page
@@ -168,28 +173,33 @@ router.get('/preview/:id', async (req, res) => {
 
 // GET /api/premium-files
 router.get('/premium-files', async (req, res) => {
-  const { type, year, branch, semester } = req.query;
-  const query = type ? { contentType: type } : { contentType: { $ne: 'regular' } };
+  try {
+    const { type, year, branch, semester } = req.query;
+    const query = type ? { contentType: type } : { contentType: { $ne: 'regular' } };
 
-  if (year) query.year = year;
-  if (branch) query.branch = branch;
-  if (semester) query.semester = semester;
+    if (year) query.year = year;
+    if (branch) query.branch = branch;
+    if (semester) query.semester = semester;
 
-  const files = await File.find(query).sort({ uploadDate: -1 });
+    const files = await File.find(query).sort({ uploadDate: -1 });
 
-  // If user is premium or admin, return everything.
-  // Otherwise, remove the 'url' field to prevent direct downloads.
-  const isAuthorized = req.session && (req.session.isAdmin || (req.session.isStudent && req.session.isPremium));
+    // If user is premium or admin, return everything.
+    // Otherwise, remove the 'url' field to prevent direct downloads.
+    const isAuthorized = req.session && (req.session.isAdmin || (req.session.isStudent && req.session.isPremium));
 
-  if (isAuthorized) {
-    return res.json(files);
-  } else {
-    const publicFiles = files.map(f => {
-      const obj = f.toObject();
-      delete obj.url; // Prevent download
-      return obj;
-    });
-    return res.json(publicFiles);
+    if (isAuthorized) {
+      return res.json(files);
+    } else {
+      const publicFiles = files.map(f => {
+        const obj = f.toObject();
+        delete obj.url; // Prevent download
+        return obj;
+      });
+      return res.json(publicFiles);
+    }
+  } catch (error) {
+    console.error("[Premium Files API Error]:", error);
+    res.status(500).json({ error: "Failed to retrieve premium files. The database might be warming up, please try again." });
   }
 });
 
@@ -225,39 +235,44 @@ router.get('/stats', async (req, res) => {
 
 // POST /api/feedback
 router.post('/feedback', async (req, res) => {
-  const { name, message } = req.body;
-  if (!message || !message.trim())
-    return res.status(400).json({ error: 'Message is required.' });
-
-  const safeName = name && name.trim() ? name.trim() : 'Anonymous';
-  await Feedback.create({ name: safeName, message: message.trim() });
-
-  // Email notification
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    try {
-      const t = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
-      await t.sendMail({ from: `"Synapse" <${process.env.EMAIL_USER}>`, to: process.env.EMAIL_USER, subject: `Feedback from ${safeName}`, text: message.trim() });
-    } catch (e) { console.error('Email error:', e); }
-  }
-  // Formspree Integration
   try {
-    const data = JSON.stringify({ name: safeName, message: message.trim() });
-    const options = {
-      hostname: 'formspree.io',
-      path: '/f/xjgjlvgo',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': data.length
-      }
-    };
-    const formReq = https.request(options);
-    formReq.on('error', (e) => console.error('Formspree error:', e));
-    formReq.write(data);
-    formReq.end();
-  } catch (e) { console.error('Formspree integration error:', e); }
+    const { name, message } = req.body;
+    if (!message || !message.trim())
+      return res.status(400).json({ error: 'Message is required.' });
 
-  res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
+    const safeName = name && name.trim() ? name.trim() : 'Anonymous';
+    await Feedback.create({ name: safeName, message: message.trim() });
+
+    // Email notification
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const t = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
+        await t.sendMail({ from: `"Synapse" <${process.env.EMAIL_USER}>`, to: process.env.EMAIL_USER, subject: `Feedback from ${safeName}`, text: message.trim() });
+      } catch (e) { console.error('Email error:', e); }
+    }
+    // Formspree Integration
+    try {
+      const data = JSON.stringify({ name: safeName, message: message.trim() });
+      const options = {
+        hostname: 'formspree.io',
+        path: '/f/xjgjlvgo',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length
+        }
+      };
+      const formReq = https.request(options);
+      formReq.on('error', (e) => console.error('Formspree error:', e));
+      formReq.write(data);
+      formReq.end();
+    } catch (e) { console.error('Formspree integration error:', e); }
+
+    res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
+  } catch (error) {
+    console.error("[Feedback API Error]:", error);
+    res.status(500).json({ error: "Failed to submit feedback. The database might be warming up, please try again." });
+  }
 });
 
 // POST /api/feedback/mark-read
