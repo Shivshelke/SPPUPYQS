@@ -23,20 +23,23 @@
 }
 
 [data-theme="light"] {
-  --bg: #ffffff;
-  --surface: #f3f4f6;
-  --surface2: #e5e7eb;
-  --border: #e2e8f0;
-  --border-light: #cbd5e1;
-  --accent: #4f46e5;
-  --accent-secondary: #7c3aed;
-  --accent-hover: #4338ca;
-  --accent-glow: rgba(79, 70, 229, 0.15);
-  --text: #111827;
-  --text-secondary: #4b5563;
-  --muted: #9ca3af;
-  --card-hover: #f9fafb;
-  --nav-bg: rgba(255, 255, 255, 0.85);
+  --bg: #fcfcfd;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: rgba(0, 0, 0, 0.04);
+  --border-light: rgba(0, 0, 0, 0.02);
+  --accent: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-hover: #4f46e5;
+  --accent-glow: rgba(99, 102, 241, 0.12);
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --muted: #94a3b8;
+  --card-hover: #ffffff;
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.02);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02);
 }
 
 *,
@@ -343,7 +346,12 @@ a {
   font-family: inherit;
   font-size: 1rem;
   outline: none;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] .search-wrap input {
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
 }
 
 .search-wrap input:focus {
@@ -446,6 +454,17 @@ a {
   transition: .25s;
   position: relative;
   overflow: hidden;
+  box-shadow: none;
+}
+
+[data-theme="light"] .year-card {
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+}
+
+[data-theme="light"] .year-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px);
 }
 
 .year-card::before {

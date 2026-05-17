@@ -317,6 +317,46 @@
   </div>
 </div>
 
+<!-- ── Chatbot Widget ── -->
+<div id="chatWidget" class="chat-widget">
+  <div class="chat-header" onclick="toggleChat()">
+    <div class="chat-header-left">
+      <div class="bot-avatar">
+        🤖
+        <div class="bot-status-dot"></div>
+      </div>
+      <div class="chat-header-info">
+        <div class="chat-header-title">SYNAPSE Assistant</div>
+        <div class="chat-header-status">Online</div>
+      </div>
+    </div>
+    <button class="chat-toggle-btn" aria-label="Toggle chat">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
+  </div>
+  <div id="chatBody" class="chat-body" style="display: none;">
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-message bot-message">
+        <div class="message-content">Hi there! 👋 I am the SYNAPSE Assistant. How can I help you today? You can ask me about SPPU PYQs, Branches, or Premium content!</div>
+        <div class="message-time">Just now</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+        <input type="text" id="chatInput" placeholder="Ask SYNAPSE Assistant..." onkeypress="handleChatKeypress(event)" />
+        <button class="chat-send-btn" onclick="sendChatMessage()" aria-label="Send message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transform: rotate(45deg);">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/js/main.js?v=2" defer></script>
 </body>
 </html>

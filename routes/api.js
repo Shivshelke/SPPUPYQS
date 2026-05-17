@@ -278,9 +278,13 @@ router.post('/chat', async (req, res) => {
   // Rule-based fallback function
   const getFallbackReply = (msg) => {
     const lowMsg = msg.toLowerCase();
-    if (lowMsg.includes('shivam') || lowMsg.includes('shelke')) {
+    
+    // Strict rules for names/creator/developer
+    if (lowMsg.includes('shivam') || lowMsg.includes('shelke') || lowMsg.includes('developer') || lowMsg.includes('creator') || lowMsg.includes('owner') || lowMsg.includes('founder') || lowMsg.includes('who built') || lowMsg.includes('who made')) {
       return "Shivam Shelke is the developer and creator of SYNAPSE! He built this platform to help SPPU students like you. 🚀";
     }
+    
+    // Greeting or portal general queries
     if (lowMsg.includes('hello') || lowMsg.includes('hi ') || lowMsg === 'hi' || lowMsg === 'hey') {
       return "Hello there! I am the SYNAPSE assistant. How can I help you today?";
     } else if (lowMsg.includes('pyq') || lowMsg.includes('paper') || lowMsg.includes('download')) {
@@ -290,7 +294,8 @@ router.post('/chat', async (req, res) => {
     } else if (lowMsg.includes('who are you') || lowMsg.includes('name')) {
       return "I'm the SYNAPSE Bot, created to help SPPU students navigate this PYQ portal.";
     }
-    return "I'm a simple bot right now. You can ask me about SPPU PYQs, Branches, or Premium content!";
+    
+    return "I only know Shivam Shelke as the creator and developer of SYNAPSE! You can ask me about SPPU PYQs, Branches, or Premium content.";
   };
 
   try {
@@ -302,7 +307,13 @@ router.post('/chat', async (req, res) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant for SPPU students. Answer very concisely and to the point. Use bullet points if needed. Keep it short. User asked: ${message}` }] }]
+          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant for SPPU students. Answer very concisely and to the point. Keep it short.
+
+CRITICAL RULES:
+1. If the user asks about the developer, creator, owner, founder, or builder of SYNAPSE, you must only identify Shivam Shelke as the sole developer and creator of SYNAPSE.
+2. If asked about any other person's name, other developers, or other creators, do NOT mention, discuss, or disclose them. Strictly state that you only know Shivam Shelke as the creator and developer of SYNAPSE. Do not talk about anyone else's names or details under any circumstances.
+
+User asked: ${message}` }] }]
         })
       });
 
