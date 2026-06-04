@@ -214,7 +214,8 @@ function setupDragDrop() {
 async function doUpload() {
   const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch').value;
-  const semester = document.getElementById('upSemester').value;
+  const semesterEl = document.getElementById('upSemester');
+  const semester = semesterEl ? semesterEl.value : '';
   const subject = document.getElementById('upSubject').value;
   const customSubject = document.getElementById('upCustomSubject').value.trim();
   const customFileName = document.getElementById('upCustomFileName').value.trim();
@@ -222,7 +223,7 @@ async function doUpload() {
 
   if (!year) { showUploadAlert('Please select a year.', 'error'); return; }
   if (!branch) { showUploadAlert('Please select a branch.', 'error'); return; }
-  if (!semester) { showUploadAlert('Please select a semester.', 'error'); return; }
+  if (semesterEl && !semester) { showUploadAlert('Please select a semester.', 'error'); return; }
   if (!subject) { showUploadAlert('Please select a subject.', 'error'); return; }
   if (subject === '__custom__' && !customSubject) {
     showUploadAlert('Please enter a custom subject name.', 'error'); return;
@@ -267,7 +268,7 @@ async function doUpload() {
       clearFile();
       document.getElementById('upYear').value = '';
       document.getElementById('upBranch').value = '';
-      document.getElementById('upSemester').value = '';
+      if (semesterEl) semesterEl.value = '';
       document.getElementById('upSubject').value = '';
       document.getElementById('upCustomFileName').value = '';
       document.getElementById('upBranch').disabled = true;
@@ -632,7 +633,8 @@ window.doPremiumUpload = async function () {
   const type = document.getElementById('prmType').value;
   const year = document.getElementById('prmYear').value;
   const branch = document.getElementById('prmBranch').value;
-  const semester = document.getElementById('prmSemester').value;
+  const semesterEl = document.getElementById('prmSemester');
+  const semester = semesterEl ? semesterEl.value : '';
   const subject = document.getElementById('prmSubject').value.trim();
   const custom = document.getElementById('prmCustomName').value.trim();
   const file = document.getElementById('prmPdfInput').files[0];
@@ -640,7 +642,7 @@ window.doPremiumUpload = async function () {
   if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
   if (!year) { showPrmAlert('Please select a year.', 'error'); return; }
   if (!branch) { showPrmAlert('Please select a branch.', 'error'); return; }
-  if (!semester) { showPrmAlert('Please select a semester.', 'error'); return; }
+  if (semesterEl && !semester) { showPrmAlert('Please select a semester.', 'error'); return; }
   if (!subject) { showPrmAlert('Please enter a subject name.', 'error'); return; }
   if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
 
@@ -682,7 +684,7 @@ window.doPremiumUpload = async function () {
       document.getElementById('prmType').value = '';
       document.getElementById('prmYear').value = '';
       document.getElementById('prmBranch').value = '';
-      document.getElementById('prmSemester').value = '';
+      if (semesterEl) semesterEl.value = '';
       document.getElementById('prmSubject').value = '';
       document.getElementById('prmBranch').disabled = true;
 
