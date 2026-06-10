@@ -98,8 +98,56 @@ async function init() {
     const configRes = await fetch('/api/config');
     CONFIG = await configRes.json();
     populateKeywords();
+    await handleHashChange();
   } catch (e) { console.error('Config load error', e); }
 }
+
+let isHandlingHash = false;
+
+async function handleHashChange() {
+  if (isHandlingHash) return;
+  isHandlingHash = true;
+
+  try {
+    const hash = decodeURIComponent(window.location.hash.replace('#', ''));
+    if (!hash) {
+      isHandlingHash = false;
+      return;
+    }
+
+    const parts = hash.split('/');
+    const year = parts[0];
+    const validYears = ['first', 'second', 'third', 'fourth'];
+    if (!validYears.includes(year)) {
+      isHandlingHash = false;
+      return;
+    }
+
+    // Load Year
+    selectYear(year);
+
+    if (year === 'first') {
+      const subject = parts[1];
+      if (subject) {
+        await selectSubject(subject);
+      }
+    } else {
+      const branch = parts[1];
+      const subject = parts[2];
+      if (branch) {
+        await selectBranch(branch, CONFIG[year]);
+        if (subject) {
+          await selectSubject(subject);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error handling hash change', e);
+  } finally {
+    isHandlingHash = false;
+  }
+}
+window.addEventListener('hashchange', handleHashChange);
 
 function populateKeywords() {
   const suggestions = new Set();
@@ -114,6 +162,10 @@ function populateKeywords() {
 function selectYear(year) {
   currentYear = year;
   currentBranch = null;
+
+  if (!isHandlingHash) {
+    window.location.hash = year;
+  }
 
   const yearData = CONFIG[year];
   if (!yearData) return;
@@ -153,6 +205,10 @@ function selectYear(year) {
 // ── Branch selection ──────────────────────────────────────────────────────────
 async function selectBranch(branch, yearData) {
   currentBranch = branch;
+
+  if (!isHandlingHash) {
+    window.location.hash = `${currentYear}/${branch}`;
+  }
 
   // Highlight selected
   document.querySelectorAll('#branchGrid .tag').forEach(t =>
@@ -194,6 +250,14 @@ function buildSubjectTags(subjects) {
 
 // ── Subject selection ─────────────────────────────────────────────────────────
 async function selectSubject(subject) {
+  if (!isHandlingHash) {
+    if (currentYear === 'first') {
+      window.location.hash = `${currentYear}/${subject}`;
+    } else {
+      window.location.hash = `${currentYear}/${currentBranch}/${subject}`;
+    }
+  }
+
   document.querySelectorAll('#subjectGrid .tag').forEach(t =>
     t.classList.toggle('active', t.textContent === subject)
   );

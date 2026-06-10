@@ -8,7 +8,7 @@
   <title>SPPU PYQ 2024 Pattern — Pune University Engineering Question Papers | SYNAPSE</title>
   <meta name="title" content="SPPU PYQ 2024 Pattern — Pune University Engineering Question Papers | SYNAPSE">
   <meta name="description" content="Download SPPU Engineering Previous Year Question Papers (PYQs) for 2024 Pattern. Free access to all branches: Computer, IT, Mechanical, Civil, E&TC, and more. Organized by year and subject.">
-  <meta name="keywords" content="SPPU PYQ, SPPU Question Papers, SPPU Engineering PYQ, 2024 Pattern SPPU, Pune University Question Papers, SPPU Computer Engineering PYQ, SPPU IT PYQ, SPPU Mechanical PYQ, SYNAPSE SPPU, SPPU PYQs 2024 Pattern, SPPU insem pyq, SPPU endsem pyq">
+  <meta name="keywords" content="SPPU PYQ, SPPU Question Papers, SPPU Engineering PYQ, 2024 Pattern SPPU, Pune University Question Papers, SPPU Computer Engineering PYQ, SPPU IT PYQ, SPPU Mechanical PYQ, SYNAPSE SPPU, SPPU PYQs 2024 Pattern, SPPU insem pyq, SPPU endsem pyq, SPPU FE PYQ, SPPU SE IT PYQ, SPPU TE Computer PYQ, SPPU BE question papers, Pune University FE question papers, Pune University SE Mechanical PYQs, SPPU Civil Engineering PYQs">
   <meta name="author" content="SYNAPSE">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://sppupyq.vercel.app/" />
@@ -131,28 +131,33 @@
   <div class="container">
     <div class="section-header">
       <h2>Browse by Year <span class="pattern-badge">2024 Pattern</span></h2>
-      <p>Select your year to explore branches and subjects</p>
+      <p>Select your year to explore branches and subjects: 
+        <a href="#first" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">1st Year (FE)</a>
+        <a href="#second" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">2nd Year (SE)</a>
+        <a href="#third" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">3rd Year (TE)</a>
+        <a href="#fourth" style="text-decoration: underline; color: var(--accent); font-weight: 500;">4th Year (BE)</a>
+      </p>
     </div>
     <div class="year-grid">
-      <div class="year-card" onclick="selectYear('first')">
+      <div class="year-card" onclick="location.hash = 'first'">
         <div class="year-icon">I</div>
         <div class="year-label">1st Year</div>
         <div class="year-sub">Common subjects for all branches</div>
         <div class="year-count" id="count-first">— papers</div>
       </div>
-      <div class="year-card" onclick="selectYear('second')">
+      <div class="year-card" onclick="location.hash = 'second'">
         <div class="year-icon">II</div>
         <div class="year-label">2nd Year</div>
         <div class="year-sub">Branch-specific courses begin</div>
         <div class="year-count" id="count-second">— papers</div>
       </div>
-      <div class="year-card" onclick="selectYear('third')">
+      <div class="year-card" onclick="location.hash = 'third'">
         <div class="year-icon">III</div>
         <div class="year-label">3rd Year</div>
         <div class="year-sub">Advanced engineering subjects</div>
         <div class="year-count" id="count-third">— papers</div>
       </div>
-      <div class="year-card" onclick="selectYear('fourth')">
+      <div class="year-card" onclick="location.hash = 'fourth'">
         <div class="year-icon">IV</div>
         <div class="year-label">4th Year</div>
         <div class="year-sub">Final year specializations</div>
