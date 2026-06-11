@@ -694,7 +694,7 @@
         }
       } catch (error) {
         console.error(error);
-        showMsg('loginError', 'Google login cancelled.');
+        showMsg('loginError', `Google login failed: ${error.message} (${error.code})`);
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
