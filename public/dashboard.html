@@ -151,6 +151,14 @@
           </div>
 
           <div class="form-group">
+            <label>Upload Method</label>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+              <button type="button" class="btn-ghost" id="btnMethodFile" onclick="setUploadMethod('file')" style="flex: 1; padding: 0.6rem; font-weight: 600; border-color: var(--accent); background: rgba(99,102,241,.15); color: var(--accent);">File Upload</button>
+              <button type="button" class="btn-ghost" id="btnMethodLink" onclick="setUploadMethod('link')" style="flex: 1; padding: 0.6rem; font-weight: 600;">Google Drive Link</button>
+            </div>
+          </div>
+
+          <div class="form-group" id="fileUploadContainer">
             <label>PDF File <span class="req">*</span></label>
             <div class="dropzone" id="dropzone" onclick="document.getElementById('pdfInput').click()">
               <div class="drop-icon">⬆</div>
@@ -162,6 +170,11 @@
               <span id="fileName"></span>
               <button onclick="clearFile()">✕</button>
             </div>
+          </div>
+
+          <div class="form-group" id="linkUploadContainer" style="display:none">
+            <label>Google Drive / External PDF Link <span class="req">*</span></label>
+            <input type="url" id="upLink" placeholder="e.g. https://drive.google.com/file/d/... or any direct PDF link" />
           </div>
 
           <div class="upload-progress" id="uploadProgress" style="display:none">
@@ -292,6 +305,14 @@
             <input type="text" id="prmCustomName" placeholder="e.g., Topper_Notes_EM1.pdf" />
           </div>
           <div class="form-group">
+            <label>Upload Method</label>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+              <button type="button" class="btn-ghost" id="prmBtnMethodFile" onclick="setPrmUploadMethod('file')" style="flex: 1; padding: 0.6rem; font-weight: 600; border-color: var(--accent); background: rgba(99,102,241,.15); color: var(--accent);">File Upload</button>
+              <button type="button" class="btn-ghost" id="prmBtnMethodLink" onclick="setPrmUploadMethod('link')" style="flex: 1; padding: 0.6rem; font-weight: 600;">Google Drive Link</button>
+            </div>
+          </div>
+
+          <div class="form-group" id="prmFileUploadContainer">
             <label>PDF File <span class="req">*</span></label>
             <div class="dropzone" id="prmDropzone" onclick="document.getElementById('prmPdfInput').click()">
               <div class="drop-icon">⬆</div>
@@ -303,6 +324,11 @@
               <span id="prmFileNameDisplay"></span>
               <button onclick="window.clearPremiumFile()">✕</button>
             </div>
+          </div>
+
+          <div class="form-group" id="prmLinkUploadContainer" style="display:none">
+            <label>Google Drive / External PDF Link <span class="req">*</span></label>
+            <input type="url" id="prmLink" placeholder="e.g. https://drive.google.com/file/d/... or any direct PDF link" />
           </div>
           <div class="upload-progress" id="prmUploadProgress" style="display:none">
             <div class="progress-bar">

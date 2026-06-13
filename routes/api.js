@@ -82,6 +82,10 @@ router.get('/download/:id', async (req, res) => {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
 
+    if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
+      return res.redirect(file.url);
+    }
+
     let baseName = (file.originalName || file.subject || 'file').trim();
     if (baseName.toLowerCase().endsWith('.pdf')) {
       baseName = baseName.slice(0, -4);
@@ -98,6 +102,10 @@ router.get('/view/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
+      return res.redirect(file.url);
+    }
 
     let baseName = (file.originalName || file.subject || 'file').trim();
     if (baseName.toLowerCase().endsWith('.pdf')) {
@@ -148,6 +156,11 @@ router.get('/preview/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
+      const previewUrl = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1100" viewBox="0 0 800 1100"><rect width="800" height="1100" fill="%231e293b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="28" fill="%23a5b4fc">SYNAPSE PREMIUM</text><text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="20" fill="%2394a3b8">Premium Document (Google Drive Link)</text><text x="50%" y="62%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%2364748b">No preview available. Get Premium to view this link.</text></svg>`;
+      return res.json({ previewUrl });
+    }
 
     // Cloudinary transformation: Page 1, Blur 1000, Width 800, format JPG
     // We insert transformations after "/upload/"

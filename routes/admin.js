@@ -64,23 +64,49 @@ router.get('/dashboard', (req, res) => {
 router.post('/upload', (req, res) => {
   upload.single('pdf')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
-    const { year, branch, subject, customSubject, contentType, semester } = req.body;
-    if (!req.file) return res.status(400).json({ error: 'File required.' });
+    const { year, branch, subject, customSubject, contentType, semester, isLink, linkUrl, customFileName } = req.body;
 
     const finalSubject = customSubject && customSubject.trim() ? customSubject.trim() : subject;
-    const record = {
-      originalName: req.file.originalname,
-      storedName: req.file.filename || req.file.public_id,
-      year: year || 'any',
-      branch: branch || 'any',
-      subject: finalSubject,
-      semester: semester || 'any',
-      size: req.file.size || 0,
-      uploadedBy: req.session.adminUser,
-      url: req.file.path,
-      publicId: req.file.filename || req.file.public_id,
-      contentType: contentType || 'regular'
-    };
+
+    let record;
+    if (isLink === 'true') {
+      if (!linkUrl) return res.status(400).json({ error: 'Link URL required.' });
+
+      const fileName = customFileName && customFileName.trim()
+        ? customFileName.trim()
+        : `${finalSubject || 'document'}.pdf`;
+
+      record = {
+        originalName: fileName,
+        storedName: `google-drive_${Date.now()}`,
+        year: year || 'any',
+        branch: branch || 'any',
+        subject: finalSubject,
+        semester: semester || 'any',
+        size: 0,
+        uploadedBy: req.session.adminUser,
+        url: linkUrl,
+        publicId: `google-drive_${Date.now()}`,
+        contentType: contentType || 'regular'
+      };
+    } else {
+      if (!req.file) return res.status(400).json({ error: 'File required.' });
+
+      record = {
+        originalName: req.file.originalname,
+        storedName: req.file.filename || req.file.public_id,
+        year: year || 'any',
+        branch: branch || 'any',
+        subject: finalSubject,
+        semester: semester || 'any',
+        size: req.file.size || 0,
+        uploadedBy: req.session.adminUser,
+        url: req.file.path,
+        publicId: req.file.filename || req.file.public_id,
+        contentType: contentType || 'regular'
+      };
+    }
+
     const saved = await File.create(record);
     res.json({ success: true, file: saved });
   });
@@ -91,7 +117,11 @@ router.delete('/files/:id', async (req, res) => {
   const file = await File.findById(req.params.id);
   if (!file) return res.status(404).json({ error: 'File not found.' });
 
-  try { await cloudinary.uploader.destroy(file.publicId, { resource_type: 'raw' }); } catch (e) { }
+  try {
+    if (file.publicId && !file.publicId.startsWith('google-drive')) {
+      await cloudinary.uploader.destroy(file.publicId, { resource_type: 'raw' });
+    }
+  } catch (e) { }
   await File.deleteOne({ _id: req.params.id });
   res.json({ success: true });
 });

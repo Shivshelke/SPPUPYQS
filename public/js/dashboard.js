@@ -210,6 +210,67 @@ function setupDragDrop() {
   });
 }
 
+let currentUploadMethod = 'file';
+let currentPrmUploadMethod = 'file';
+
+function setUploadMethod(method) {
+  currentUploadMethod = method;
+  const btnFile = document.getElementById('btnMethodFile');
+  const btnLink = document.getElementById('btnMethodLink');
+  const fileContainer = document.getElementById('fileUploadContainer');
+  const linkContainer = document.getElementById('linkUploadContainer');
+
+  if (method === 'file') {
+    fileContainer.style.display = 'block';
+    linkContainer.style.display = 'none';
+    btnFile.style.borderColor = 'var(--accent)';
+    btnFile.style.background = 'rgba(99,102,241,.15)';
+    btnFile.style.color = 'var(--accent)';
+    btnLink.style.borderColor = '';
+    btnLink.style.background = '';
+    btnLink.style.color = '';
+  } else {
+    fileContainer.style.display = 'none';
+    linkContainer.style.display = 'block';
+    btnLink.style.borderColor = 'var(--accent)';
+    btnLink.style.background = 'rgba(99,102,241,.15)';
+    btnLink.style.color = 'var(--accent)';
+    btnFile.style.borderColor = '';
+    btnFile.style.background = '';
+    btnFile.style.color = '';
+  }
+}
+window.setUploadMethod = setUploadMethod;
+
+function setPrmUploadMethod(method) {
+  currentPrmUploadMethod = method;
+  const btnFile = document.getElementById('prmBtnMethodFile');
+  const btnLink = document.getElementById('prmBtnMethodLink');
+  const fileContainer = document.getElementById('prmFileUploadContainer');
+  const linkContainer = document.getElementById('prmLinkUploadContainer');
+
+  if (method === 'file') {
+    fileContainer.style.display = 'block';
+    linkContainer.style.display = 'none';
+    btnFile.style.borderColor = 'var(--accent)';
+    btnFile.style.background = 'rgba(99,102,241,.15)';
+    btnFile.style.color = 'var(--accent)';
+    btnLink.style.borderColor = '';
+    btnLink.style.background = '';
+    btnLink.style.color = '';
+  } else {
+    fileContainer.style.display = 'none';
+    linkContainer.style.display = 'block';
+    btnLink.style.borderColor = 'var(--accent)';
+    btnLink.style.background = 'rgba(99,102,241,.15)';
+    btnLink.style.color = 'var(--accent)';
+    btnFile.style.borderColor = '';
+    btnFile.style.background = '';
+    btnFile.style.color = '';
+  }
+}
+window.setPrmUploadMethod = setPrmUploadMethod;
+
 // ── Upload ────────────────────────────────────────────────────────────────────
 async function doUpload() {
   const year = document.getElementById('upYear').value;
@@ -220,6 +281,7 @@ async function doUpload() {
   const customSubject = document.getElementById('upCustomSubject').value.trim();
   const customFileName = document.getElementById('upCustomFileName').value.trim();
   const file = document.getElementById('pdfInput').files[0];
+  const linkUrl = document.getElementById('upLink').value.trim();
 
   if (!year) { showUploadAlert('Please select a year.', 'error'); return; }
   if (!branch) { showUploadAlert('Please select a branch.', 'error'); return; }
@@ -228,7 +290,15 @@ async function doUpload() {
   if (subject === '__custom__' && !customSubject) {
     showUploadAlert('Please enter a custom subject name.', 'error'); return;
   }
-  if (!file) { showUploadAlert('Please select a PDF file.', 'error'); return; }
+
+  if (currentUploadMethod === 'file') {
+    if (!file) { showUploadAlert('Please select a PDF file.', 'error'); return; }
+  } else {
+    if (!linkUrl) { showUploadAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
+    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+      showUploadAlert('Please enter a valid URL (starting with http:// or https://).', 'error'); return;
+    }
+  }
 
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -254,7 +324,13 @@ async function doUpload() {
   fd.append('subject', subject === '__custom__' ? customSubject : subject);
   if (subject === '__custom__') fd.append('customSubject', customSubject);
   if (customFileName) fd.append('customFileName', customFileName);
-  fd.append('pdf', file);
+  
+  if (currentUploadMethod === 'file') {
+    fd.append('pdf', file);
+  } else {
+    fd.append('isLink', 'true');
+    fd.append('linkUrl', linkUrl);
+  }
 
   try {
     const res = await fetch('/admin/upload', { method: 'POST', body: fd });
@@ -266,6 +342,7 @@ async function doUpload() {
       progressText.textContent = 'Upload complete!';
       showUploadAlert('Paper uploaded successfully! ✓', 'success');
       clearFile();
+      document.getElementById('upLink').value = '';
       document.getElementById('upYear').value = '';
       document.getElementById('upBranch').value = '';
       if (semesterEl) semesterEl.value = '';
@@ -638,13 +715,22 @@ window.doPremiumUpload = async function () {
   const subject = document.getElementById('prmSubject').value.trim();
   const custom = document.getElementById('prmCustomName').value.trim();
   const file = document.getElementById('prmPdfInput').files[0];
+  const linkUrl = document.getElementById('prmLink').value.trim();
 
   if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
   if (!year) { showPrmAlert('Please select a year.', 'error'); return; }
   if (!branch) { showPrmAlert('Please select a branch.', 'error'); return; }
   if (semesterEl && !semester) { showPrmAlert('Please select a semester.', 'error'); return; }
   if (!subject) { showPrmAlert('Please enter a subject name.', 'error'); return; }
-  if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
+
+  if (currentPrmUploadMethod === 'file') {
+    if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
+  } else {
+    if (!linkUrl) { showPrmAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
+    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+      showPrmAlert('Please enter a valid URL (starting with http:// or https://).', 'error'); return;
+    }
+  }
 
   const btn = document.getElementById('prmUploadBtn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -669,7 +755,13 @@ window.doPremiumUpload = async function () {
   fd.append('semester', semester);
   fd.append('subject', subject);
   if (custom) fd.append('customFileName', custom);
-  fd.append('pdf', file);
+  
+  if (currentPrmUploadMethod === 'file') {
+    fd.append('pdf', file);
+  } else {
+    fd.append('isLink', 'true');
+    fd.append('linkUrl', linkUrl);
+  }
 
   try {
     const res = await fetch('/admin/upload', { method: 'POST', body: fd });
@@ -681,6 +773,7 @@ window.doPremiumUpload = async function () {
       progressText.textContent = 'Upload complete!';
       showPrmAlert('Premium content uploaded successfully! ✨', 'success');
       window.clearPremiumFile();
+      document.getElementById('prmLink').value = '';
       document.getElementById('prmType').value = '';
       document.getElementById('prmYear').value = '';
       document.getElementById('prmBranch').value = '';

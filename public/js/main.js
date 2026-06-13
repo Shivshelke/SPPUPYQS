@@ -303,19 +303,26 @@ function renderFileGrid(files, gridId) {
     return;
   }
 
-  grid.innerHTML = files.map((f, i) => `
-    <div class="file-card fade-in-card" style="animation-delay: ${i * 0.05}s">
-      <div class="file-icon">📄</div>
-      <div class="file-info">
-        <div class="file-name" title="${escHtml(f.originalName)}">${escHtml(f.originalName)}</div>
-        <div class="file-meta">${escHtml(f.subject)} · ${formatSize(f.size)}</div>
-        <div class="file-meta">${formatDate(f.uploadDate)}</div>
+  grid.innerHTML = files.map((f, i) => {
+    const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
+    const downloadBtn = isGdLink 
+      ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
+      : `<a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>`;
+
+    return `
+      <div class="file-card fade-in-card" style="animation-delay: ${i * 0.05}s">
+        <div class="file-icon">📄</div>
+        <div class="file-info">
+          <div class="file-name" title="${escHtml(f.originalName)}">${escHtml(f.originalName)}</div>
+          <div class="file-meta">${escHtml(f.subject)} · ${formatSize(f.size)}</div>
+          <div class="file-meta">${formatDate(f.uploadDate)}</div>
+        </div>
+        <div class="file-actions">
+          ${downloadBtn}
+        </div>
       </div>
-      <div class="file-actions">
-        <a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ── Local filter ──────────────────────────────────────────────────────────────
@@ -602,8 +609,12 @@ async function openPremiumModal(type) {
       list.innerHTML = '<li><span style="color:var(--muted)">No files available yet.</span></li>';
     } else {
       list.innerHTML = files.map(f => {
+        const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
         const actionBtn = isPremiumUser
-          ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
+          ? (isGdLink
+              ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
+              : `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
+            )
           : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
 
         return `
