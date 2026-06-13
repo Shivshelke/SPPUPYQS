@@ -11,6 +11,7 @@ const schema = new mongoose.Schema({
   uploadedBy: String,
   url: String,
   publicId: String,
-  contentType: { type: String, default: 'regular' }
+  contentType: { type: String, default: 'regular' },
+  pattern: { type: String, default: '2024' }
 });
 module.exports = mongoose.model('File', schema);

@@ -134,11 +134,18 @@ function onYearChange() {
   const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch');
   const subj = document.getElementById('upSubject');
+  const patternGroup = document.getElementById('upPatternGroup');
 
   branch.innerHTML = '<option value="">— Select Branch —</option>';
   subj.innerHTML = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
   branch.disabled = true;
   subj.disabled = true;
+
+  if (year && year !== 'first') {
+    patternGroup.style.display = 'block';
+  } else {
+    patternGroup.style.display = 'none';
+  }
 
   if (!year || !CONFIG[year]) return;
 
@@ -151,9 +158,15 @@ function onYearChange() {
   branch.disabled = false;
 }
 
+function onPatternChange() {
+  onBranchChange();
+}
+window.onPatternChange = onPatternChange;
+
 function onBranchChange() {
   const year = document.getElementById('upYear').value;
   const branchVal = document.getElementById('upBranch').value;
+  const patternVal = document.getElementById('upPattern').value;
   const subj = document.getElementById('upSubject');
 
   subj.innerHTML = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
@@ -166,7 +179,14 @@ function onBranchChange() {
     if (Array.isArray(CONFIG[year].subjects)) {
       subjects = CONFIG[year].subjects;
     } else if (typeof CONFIG[year].subjects === 'object') {
-      subjects = CONFIG[year].subjects[branchVal] || [];
+      const branchData = CONFIG[year].subjects[branchVal];
+      if (branchData) {
+        if (Array.isArray(branchData)) {
+          subjects = branchData;
+        } else if (typeof branchData === 'object') {
+          subjects = branchData[patternVal] || [];
+        }
+      }
     }
   }
 
@@ -291,6 +311,7 @@ async function doUpload() {
   const customFileName = document.getElementById('upCustomFileName').value.trim();
   const file = document.getElementById('pdfInput').files[0];
   const linkUrl = document.getElementById('upLink').value.trim();
+  const patternVal = document.getElementById('upPattern').value;
 
   if (!year) { showUploadAlert('Please select a year.', 'error'); return; }
   if (!branch) { showUploadAlert('Please select a branch.', 'error'); return; }
@@ -337,6 +358,11 @@ async function doUpload() {
   fd.append('subject', subject === '__custom__' ? customSubject : subject);
   if (subject === '__custom__') fd.append('customSubject', customSubject);
   if (customFileName) fd.append('customFileName', customFileName);
+  if (year !== 'first') {
+    // pattern Val will be e.g. "2024 Pattern" or "2019 Pattern", let's extract the year part e.g. "2024" or "2019"
+    const patternYear = patternVal.split(' ')[0];
+    fd.append('pattern', patternYear);
+  }
   
   if (currentUploadMethod === 'file') {
     fd.append('pdf', file);
@@ -568,21 +594,50 @@ async function loadCatStructure() {
         }
       } else if (typeof yearData.subjects === 'object') {
         const entries = Object.entries(yearData.subjects);
-        const hasSubjects = entries.some(([_, subjs]) => subjs && subjs.length > 0);
+        const hasSubjects = entries.some(([_, subjs]) => {
+          if (!subjs) return false;
+          if (Array.isArray(subjs)) return subjs.length > 0;
+          return Object.values(subjs).some(arr => arr && arr.length > 0);
+        });
         if (hasSubjects) {
           subjectsHtml = `
             <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Subjects by Branch:</div>
             <div style="display:flex; flex-direction:column; gap:0.5rem; padding-left:0.5rem; border-left: 2px solid var(--border);">
               ${entries.map(([branchName, subjs]) => {
-                if (!subjs || !subjs.length) return '';
-                return `
-                  <div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.2rem; font-weight:600;">${escHtml(branchName)}:</div>
-                    <div class="cat-tag-list">
-                      ${subjs.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+                if (!subjs) return '';
+                if (Array.isArray(subjs)) {
+                  if (!subjs.length) return '';
+                  return `
+                    <div>
+                      <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.2rem; font-weight:600;">${escHtml(branchName)}:</div>
+                      <div class="cat-tag-list">
+                        ${subjs.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+                      </div>
                     </div>
-                  </div>
-                `;
+                  `;
+                } else {
+                  const patternEntries = Object.entries(subjs);
+                  const hasPatternSubjects = patternEntries.some(([_, sList]) => sList && sList.length > 0);
+                  if (!hasPatternSubjects) return '';
+                  return `
+                    <div>
+                      <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.2rem; font-weight:600;">${escHtml(branchName)}:</div>
+                      <div style="display:flex; flex-direction:column; gap:0.3rem; padding-left:0.5rem; margin-top:0.2rem;">
+                        ${patternEntries.map(([patternName, sList]) => {
+                          if (!sList || !sList.length) return '';
+                          return `
+                            <div>
+                              <div style="font-size:0.7rem; color:var(--muted); margin-bottom:0.1rem; font-style:italic;">${escHtml(patternName)}:</div>
+                              <div class="cat-tag-list">
+                                ${sList.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+                              </div>
+                            </div>
+                          `;
+                        }).join('')}
+                      </div>
+                    </div>
+                  `;
+                }
               }).join('')}
             </div>
           `;
@@ -607,9 +662,11 @@ function onCatYearChange() {
   const year = document.getElementById('catYear').value;
   const branchGroup = document.getElementById('catBranchGroup');
   const branchSelect = document.getElementById('catBranchSelect');
+  const patternGroup = document.getElementById('catPatternGroup');
 
   branchSelect.innerHTML = '<option value="">— Select Branch —</option>';
   branchGroup.style.display = 'none';
+  patternGroup.style.display = 'none';
 
   if (!year || year === 'first') return;
 
@@ -622,6 +679,7 @@ function onCatYearChange() {
       branchSelect.appendChild(opt);
     });
     branchGroup.style.display = 'block';
+    patternGroup.style.display = 'block';
   }
 }
 window.onCatYearChange = onCatYearChange;
@@ -629,15 +687,17 @@ window.onCatYearChange = onCatYearChange;
 async function addSubject() {
   const year = document.getElementById('catYear').value;
   const branch = document.getElementById('catBranchSelect').value;
+  const pattern = document.getElementById('catPatternSelect').value;
   const subject = document.getElementById('catSubject').value.trim();
   
   if (!year) { showCatAlert('Select a year.', 'error'); return; }
   if (year !== 'first' && !branch) { showCatAlert('Select a branch.', 'error'); return; }
+  if (year !== 'first' && !pattern) { showCatAlert('Select a pattern.', 'error'); return; }
   if (!subject) { showCatAlert('Enter a subject name.', 'error'); return; }
 
   const res = await fetch('/admin/config/subject', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ year, branch, subject })
+    body: JSON.stringify({ year, branch, subject, pattern })
   });
   const data = await res.json();
   if (data.success) {
@@ -764,10 +824,32 @@ window.clearPremiumFile = function () {
 window.onPrmYearChange = function () {
   const year = document.getElementById('prmYear').value;
   const branch = document.getElementById('prmBranch');
+  const branchPatternRow = document.getElementById('prmBranchPatternRow');
+  const patternGroup = document.getElementById('prmPatternGroup');
+
   branch.innerHTML = '<option value="">— Select Branch —</option>';
   branch.disabled = true;
 
-  if (!year || !CONFIG[year]) return;
+  if (year && year !== 'first') {
+    branchPatternRow.style.display = 'flex';
+    patternGroup.style.display = 'block';
+  } else if (year === 'first') {
+    branchPatternRow.style.display = 'flex';
+    patternGroup.style.display = 'none';
+  } else {
+    branchPatternRow.style.display = 'none';
+    patternGroup.style.display = 'none';
+  }
+
+  if (!year || !CONFIG[year]) {
+    if (year === 'first') {
+      const opt = document.createElement('option');
+      opt.value = 'FE'; opt.textContent = 'FE';
+      branch.appendChild(opt);
+      branch.value = 'FE';
+    }
+    return;
+  }
 
   const branches = CONFIG[year].branches;
   branches.forEach(b => {
@@ -788,6 +870,7 @@ window.doPremiumUpload = async function () {
   const custom = document.getElementById('prmCustomName').value.trim();
   const file = document.getElementById('prmPdfInput').files[0];
   const linkUrl = document.getElementById('prmLink').value.trim();
+  const patternVal = document.getElementById('prmPattern').value;
 
   if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
   if (!year) { showPrmAlert('Please select a year.', 'error'); return; }
@@ -831,6 +914,10 @@ window.doPremiumUpload = async function () {
   fd.append('semester', semester);
   fd.append('subject', subject);
   if (custom) fd.append('customFileName', custom);
+  if (year !== 'first') {
+    const patternYear = patternVal.split(' ')[0];
+    fd.append('pattern', patternYear);
+  }
   
   if (currentPrmUploadMethod === 'file') {
     fd.append('pdf', file);
@@ -856,6 +943,7 @@ window.doPremiumUpload = async function () {
       if (semesterEl) semesterEl.value = '';
       document.getElementById('prmSubject').value = '';
       document.getElementById('prmBranch').disabled = true;
+      document.getElementById('prmBranchPatternRow').style.display = 'none';
 
       await window.loadPremiumAdminFiles();
     } else {

@@ -232,31 +232,117 @@ async function selectBranch(branch, yearData) {
       configSubjects = yearData.subjects[branch] || [];
     }
   }
-  const allSubjects = [...new Set([...configSubjects, ...subjectsWithFiles])];
 
-  buildSubjectTags(allSubjects.length ? allSubjects : subjectsWithFiles);
+  if (currentYear === 'first') {
+    const allSubjects = [...new Set([...configSubjects, ...subjectsWithFiles])];
+    buildSubjectTags(allSubjects.length ? allSubjects : subjectsWithFiles, false);
+  } else {
+    // Group subjects by pattern: { "2024 Pattern": [...], "2019 Pattern": [...] }
+    const subjectsByPattern = {
+      "2024 Pattern": [],
+      "2019 Pattern": []
+    };
+
+    if (configSubjects) {
+      if (Array.isArray(configSubjects)) {
+        subjectsByPattern["2024 Pattern"] = [...configSubjects];
+      } else if (typeof configSubjects === 'object') {
+        if (configSubjects["2024 Pattern"]) {
+          subjectsByPattern["2024 Pattern"] = [...configSubjects["2024 Pattern"]];
+        }
+        if (configSubjects["2019 Pattern"]) {
+          subjectsByPattern["2019 Pattern"] = [...configSubjects["2019 Pattern"]];
+        }
+      }
+    }
+
+    // Add subjects with files
+    files.forEach(f => {
+      const patName = (f.pattern === '2019') ? '2019 Pattern' : '2024 Pattern';
+      if (!subjectsByPattern[patName]) {
+        subjectsByPattern[patName] = [];
+      }
+      if (!subjectsByPattern[patName].includes(f.subject)) {
+        const otherPat = (patName === '2019 Pattern') ? '2024 Pattern' : '2019 Pattern';
+        if (!subjectsByPattern[otherPat] || !subjectsByPattern[otherPat].includes(f.subject)) {
+          subjectsByPattern[patName].push(f.subject);
+        }
+      }
+    });
+
+    buildSubjectTags(subjectsByPattern, true);
+  }
 }
 
-function buildSubjectTags(subjects) {
+function buildSubjectTags(subjects, isGrouped = false) {
   const grid = document.getElementById('subjectGrid');
   grid.innerHTML = '';
 
-  if (!subjects || !subjects.length) {
+  if (!subjects) {
     grid.innerHTML = '<div class="empty-state small"><span class="empty-icon">📭</span>No subjects available yet.</div>';
     return;
   }
 
-  subjects.forEach(subject => {
-    const tag = document.createElement('div');
-    tag.className = 'tag';
-    tag.textContent = subject;
-    tag.onclick = () => selectSubject(subject);
-    grid.appendChild(tag);
-  });
+  if (!isGrouped) {
+    if (!subjects.length) {
+      grid.innerHTML = '<div class="empty-state small"><span class="empty-icon">📭</span>No subjects available yet.</div>';
+      return;
+    }
+    subjects.forEach(subject => {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.textContent = subject;
+      tag.onclick = () => selectSubject(subject);
+      grid.appendChild(tag);
+    });
+  } else {
+    const patterns = Object.entries(subjects);
+    const hasAnySubjects = patterns.some(([_, list]) => list && list.length > 0);
+    if (!hasAnySubjects) {
+      grid.innerHTML = '<div class="empty-state small"><span class="empty-icon">📭</span>No subjects available yet.</div>';
+      return;
+    }
+
+    patterns.forEach(([patternName, list]) => {
+      if (!list || !list.length) return;
+
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'pattern-group';
+      groupDiv.style.width = '100%';
+      groupDiv.style.marginBottom = '1.5rem';
+
+      const header = document.createElement('h4');
+      header.textContent = patternName;
+      header.className = 'pattern-header';
+      header.style.fontSize = '1.1rem';
+      header.style.color = 'var(--accent)';
+      header.style.marginBottom = '0.8rem';
+      header.style.fontWeight = '700';
+      header.style.borderBottom = '1px solid var(--border)';
+      header.style.paddingBottom = '0.3rem';
+      groupDiv.appendChild(header);
+
+      const tagsContainer = document.createElement('div');
+      tagsContainer.style.display = 'flex';
+      tagsContainer.style.flexWrap = 'wrap';
+      tagsContainer.style.gap = '0.6rem';
+
+      list.forEach(subject => {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.textContent = subject;
+        tag.onclick = () => selectSubject(subject, patternName.split(' ')[0]);
+        tagsContainer.appendChild(tag);
+      });
+
+      groupDiv.appendChild(tagsContainer);
+      grid.appendChild(groupDiv);
+    });
+  }
 }
 
 // ── Subject selection ─────────────────────────────────────────────────────────
-async function selectSubject(subject) {
+async function selectSubject(subject, pattern) {
   if (!isHandlingHash) {
     if (currentYear === 'first') {
       window.location.hash = `${currentYear}/${subject}`;
@@ -274,6 +360,7 @@ async function selectSubject(subject) {
 
   const params = new URLSearchParams({ year: currentYear, subject });
   if (currentBranch && currentBranch !== 'FE') params.append('branch', currentBranch);
+  if (pattern) params.append('pattern', pattern);
 
   try {
     // Show skeletons

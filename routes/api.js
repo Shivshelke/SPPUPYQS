@@ -137,7 +137,7 @@ router.get('/config', async (req, res) => {
 // GET /api/files
 router.get('/files', async (req, res) => {
   try {
-    const { year, branch, subject, semester, search } = req.query;
+    const { year, branch, subject, semester, search, pattern } = req.query;
     const query = { contentType: 'regular' };
     if (year) query.year = year;
     if (branch) query.branch = branch;
@@ -146,8 +146,26 @@ router.get('/files', async (req, res) => {
 
     if (search) {
       const r = new RegExp(search, 'i');
-      query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
+      query.$and = [
+        { $or: [{ originalName: r }, { subject: r }, { branch: r }] }
+      ];
+      if (pattern) {
+        if (pattern === '2024') {
+          query.$and.push({ $or: [{ pattern: '2024' }, { pattern: { $exists: false } }] });
+        } else {
+          query.$and.push({ pattern: pattern });
+        }
+      }
+    } else {
+      if (pattern) {
+        if (pattern === '2024') {
+          query.$or = [{ pattern: '2024' }, { pattern: { $exists: false } }];
+        } else {
+          query.pattern = pattern;
+        }
+      }
     }
+
     const files = await File.find(query).sort({ uploadDate: -1 });
     res.json(files);
   } catch (error) {

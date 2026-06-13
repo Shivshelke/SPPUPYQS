@@ -132,6 +132,14 @@
             </div>
           </div>
 
+          <div class="form-group" id="upPatternGroup" style="display:none">
+            <label>Pattern <span class="req">*</span></label>
+            <select id="upPattern" onchange="onPatternChange()">
+              <option value="2024 Pattern">2024 Pattern</option>
+              <option value="2019 Pattern">2019 Pattern</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label>Subject <span class="req">*</span></label>
             <select id="upSubject" disabled>
@@ -239,6 +247,13 @@
               <option value="">— Select Branch —</option>
             </select>
           </div>
+          <div class="form-group" id="catPatternGroup" style="display:none">
+            <label>Pattern</label>
+            <select id="catPatternSelect">
+              <option value="2024 Pattern">2024 Pattern</option>
+              <option value="2019 Pattern">2019 Pattern</option>
+            </select>
+          </div>
           <div class="form-group">
             <label>Subject Name</label>
             <input type="text" id="catSubject" placeholder="e.g. Data Structures" />
@@ -293,12 +308,27 @@
             </div>
             <div class="form-group">
               <label>Year</label>
-              <select id="prmYear">
+              <select id="prmYear" onchange="window.onPrmYearChange()">
                 <option value="">— Any Year —</option>
                 <option value="first">1st Year</option>
                 <option value="second">2nd Year</option>
                 <option value="third">3rd Year</option>
                 <option value="fourth">4th Year</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" id="prmBranchPatternRow" style="display:none">
+            <div class="form-group">
+              <label>Branch</label>
+              <select id="prmBranch" disabled>
+                <option value="">— Select Branch —</option>
+              </select>
+            </div>
+            <div class="form-group" id="prmPatternGroup" style="display:none">
+              <label>Pattern</label>
+              <select id="prmPattern">
+                <option value="2024 Pattern">2024 Pattern</option>
+                <option value="2019 Pattern">2019 Pattern</option>
               </select>
             </div>
           </div>

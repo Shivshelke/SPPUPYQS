@@ -66,7 +66,7 @@ router.get('/dashboard', (req, res) => {
 router.post('/upload', (req, res) => {
   upload.single('pdf')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
-    const { year, branch, subject, customSubject, contentType, semester, isLink, linkUrl, customFileName } = req.body;
+    const { year, branch, subject, customSubject, contentType, semester, isLink, linkUrl, customFileName, pattern } = req.body;
     
     const finalSubject = customSubject && customSubject.trim() ? customSubject.trim() : subject;
     
@@ -95,7 +95,8 @@ router.post('/upload', (req, res) => {
           uploadedBy: req.session.adminUser,
           url: url,
           publicId: `google-drive_${Date.now()}_${i}`,
-          contentType: contentType || 'regular'
+          contentType: contentType || 'regular',
+          pattern: pattern || '2024'
         };
         return File.create(record);
       });
@@ -116,7 +117,8 @@ router.post('/upload', (req, res) => {
         uploadedBy: req.session.adminUser,
         url: req.file.path,
         publicId: req.file.filename || req.file.public_id,
-        contentType: contentType || 'regular'
+        contentType: contentType || 'regular',
+        pattern: pattern || '2024'
       };
       
       const saved = await File.create(record);
@@ -171,7 +173,7 @@ const CategoryConfig = require('../models/CategoryConfig');
 
 // POST /admin/config/subject
 router.post('/config/subject', async (req, res) => {
-  const { year, branch, subject } = req.body;
+  const { year, branch, subject, pattern } = req.body;
   if (!year || !subject || !subject.trim()) {
     return res.status(400).json({ error: 'Year and Subject are required.' });
   }
@@ -198,15 +200,30 @@ router.post('/config/subject', async (req, res) => {
       if (!branch) {
         return res.status(400).json({ error: 'Branch is required for 2nd, 3rd, and 4th Year.' });
       }
+      if (!pattern) {
+        return res.status(400).json({ error: 'Pattern is required for 2nd, 3rd, and 4th Year.' });
+      }
       const cleanBranch = branch.trim();
+      const cleanPattern = pattern.trim(); // e.g. "2019 Pattern" or "2024 Pattern"
+
       if (!yearData.subjects || typeof yearData.subjects !== 'object' || Array.isArray(yearData.subjects)) {
         yearData.subjects = {};
       }
       if (!yearData.subjects[cleanBranch]) {
-        yearData.subjects[cleanBranch] = [];
+        yearData.subjects[cleanBranch] = {};
       }
-      if (!yearData.subjects[cleanBranch].includes(cleanSubject)) {
-        yearData.subjects[cleanBranch].push(cleanSubject);
+      if (Array.isArray(yearData.subjects[cleanBranch])) {
+        const oldSubjects = yearData.subjects[cleanBranch];
+        yearData.subjects[cleanBranch] = {
+          "2024 Pattern": oldSubjects,
+          "2019 Pattern": []
+        };
+      }
+      if (!yearData.subjects[cleanBranch][cleanPattern]) {
+        yearData.subjects[cleanBranch][cleanPattern] = [];
+      }
+      if (!yearData.subjects[cleanBranch][cleanPattern].includes(cleanSubject)) {
+        yearData.subjects[cleanBranch][cleanPattern].push(cleanSubject);
       }
     }
 
