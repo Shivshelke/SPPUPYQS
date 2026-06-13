@@ -118,16 +118,34 @@ router.get('/view/:id', async (req, res) => {
   }
 });
 
-// Hardcoded config (year/branch/subject taxonomy stored in memory)
-const CONFIG = {
-  first: { label: '1st Year', branches: ['FE'], subjects: ['Engineering Mathematics – I', 'Engineering Mathematics – II', 'Engineering Physics', 'Engineering Chemistry', 'Basic Electrical Engineering', 'Basic Electronics Engineering', 'Engineering Graphics', 'Engineering Mechanics', 'Fundamentals of Programming Languages', 'Programming and Problem Solving'] },
-  second: { label: '2nd Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] },
-  third: { label: '3rd Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] },
-  fourth: { label: '4th Year', branches: ['Computer Engineering', 'Information Technology', 'AIML', 'Electronics & Telecommunication', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Chemical Engineering', 'Instrumentation Engineering', 'Production Engineering'], subjects: [] }
-};
+const fs = require('fs');
+const path = require('path');
+const configPath = path.join(__dirname, '../data/config.json');
+
+let CONFIG = {};
+
+function loadConfigFromFile() {
+  try {
+    const raw = fs.readFileSync(configPath, 'utf8');
+    const fullConfig = JSON.parse(raw);
+    CONFIG = fullConfig.years;
+  } catch (e) {
+    console.error('Error loading config file:', e);
+    CONFIG = {
+      first: { label: '1st Year', branches: ['FE'], subjects: [] },
+      second: { label: '2nd Year', branches: [], subjects: {} },
+      third: { label: '3rd Year', branches: [], subjects: {} },
+      fourth: { label: '4th Year', branches: [], subjects: {} }
+    };
+  }
+}
+loadConfigFromFile();
 
 // GET /api/config
-router.get('/config', (req, res) => res.json(CONFIG));
+router.get('/config', (req, res) => {
+  loadConfigFromFile();
+  res.json(CONFIG);
+});
 
 // GET /api/files
 router.get('/files', async (req, res) => {

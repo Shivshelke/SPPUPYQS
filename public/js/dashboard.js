@@ -153,6 +153,7 @@ function onYearChange() {
 
 function onBranchChange() {
   const year = document.getElementById('upYear').value;
+  const branchVal = document.getElementById('upBranch').value;
   const subj = document.getElementById('upSubject');
 
   subj.innerHTML = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
@@ -160,7 +161,15 @@ function onBranchChange() {
 
   if (!year || !CONFIG[year]) return;
 
-  const subjects = CONFIG[year].subjects || [];
+  let subjects = [];
+  if (CONFIG[year].subjects) {
+    if (Array.isArray(CONFIG[year].subjects)) {
+      subjects = CONFIG[year].subjects;
+    } else if (typeof CONFIG[year].subjects === 'object') {
+      subjects = CONFIG[year].subjects[branchVal] || [];
+    }
+  }
+
   subjects.forEach(s => {
     const opt = document.createElement('option');
     opt.value = s; opt.textContent = s;
@@ -541,31 +550,90 @@ async function loadCatStructure() {
   const data = await res.json();
   const el = document.getElementById('catStructure');
 
-  el.innerHTML = Object.entries(data).map(([key, yearData]) => `
-    <div class="cat-year-block">
-      <div class="cat-year-title">${escHtml(yearData.label)}</div>
-      <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Branches:</div>
-      <div class="cat-tag-list" style="margin-bottom:.6rem">
-        ${yearData.branches.map(b => `<span class="cat-tag">${escHtml(b)}</span>`).join('')}
-      </div>
-      ${yearData.subjects.length ? `
-        <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Subjects:</div>
-        <div class="cat-tag-list">
-          ${yearData.subjects.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+  el.innerHTML = Object.entries(data).map(([key, yearData]) => {
+    let subjectsHtml = '';
+    if (yearData.subjects) {
+      if (Array.isArray(yearData.subjects)) {
+        if (yearData.subjects.length > 0) {
+          subjectsHtml = `
+            <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Subjects:</div>
+            <div class="cat-tag-list">
+              ${yearData.subjects.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+            </div>
+          `;
+        }
+      } else if (typeof yearData.subjects === 'object') {
+        const entries = Object.entries(yearData.subjects);
+        const hasSubjects = entries.some(([_, subjs]) => subjs && subjs.length > 0);
+        if (hasSubjects) {
+          subjectsHtml = `
+            <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Subjects by Branch:</div>
+            <div style="display:flex; flex-direction:column; gap:0.5rem; padding-left:0.5rem; border-left: 2px solid var(--border);">
+              ${entries.map(([branchName, subjs]) => {
+                if (!subjs || !subjs.length) return '';
+                return `
+                  <div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.2rem; font-weight:600;">${escHtml(branchName)}:</div>
+                    <div class="cat-tag-list">
+                      ${subjs.map(s => `<span class="cat-tag">${escHtml(s)}</span>`).join('')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+      }
+    }
+
+    return `
+      <div class="cat-year-block">
+        <div class="cat-year-title">${escHtml(yearData.label)}</div>
+        <div style="margin-bottom:.4rem;font-size:.78rem;color:var(--muted)">Branches:</div>
+        <div class="cat-tag-list" style="margin-bottom:.6rem">
+          ${yearData.branches.map(b => `<span class="cat-tag">${escHtml(b)}</span>`).join('')}
         </div>
-      ` : ''}
-    </div>
-  `).join('');
+        ${subjectsHtml}
+      </div>
+    `;
+  }).join('');
 }
+
+function onCatYearChange() {
+  const year = document.getElementById('catYear').value;
+  const branchGroup = document.getElementById('catBranchGroup');
+  const branchSelect = document.getElementById('catBranchSelect');
+
+  branchSelect.innerHTML = '<option value="">— Select Branch —</option>';
+  branchGroup.style.display = 'none';
+
+  if (!year || year === 'first') return;
+
+  if (CONFIG && CONFIG[year]) {
+    const branches = CONFIG[year].branches || [];
+    branches.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b;
+      opt.textContent = b;
+      branchSelect.appendChild(opt);
+    });
+    branchGroup.style.display = 'block';
+  }
+}
+window.onCatYearChange = onCatYearChange;
 
 async function addSubject() {
   const year = document.getElementById('catYear').value;
+  const branch = document.getElementById('catBranchSelect').value;
   const subject = document.getElementById('catSubject').value.trim();
+  
+  if (!year) { showCatAlert('Select a year.', 'error'); return; }
+  if (year !== 'first' && !branch) { showCatAlert('Select a branch.', 'error'); return; }
   if (!subject) { showCatAlert('Enter a subject name.', 'error'); return; }
 
   const res = await fetch('/admin/config/subject', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ year, subject })
+    body: JSON.stringify({ year, branch, subject })
   });
   const data = await res.json();
   if (data.success) {

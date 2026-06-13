@@ -224,7 +224,14 @@ async function selectBranch(branch, yearData) {
   // Collect unique subjects with files
   const subjectsWithFiles = [...new Set(files.map(f => f.subject))];
   // Also include configured subjects
-  const configSubjects = yearData.subjects || [];
+  let configSubjects = [];
+  if (yearData.subjects) {
+    if (Array.isArray(yearData.subjects)) {
+      configSubjects = yearData.subjects;
+    } else if (typeof yearData.subjects === 'object') {
+      configSubjects = yearData.subjects[branch] || [];
+    }
+  }
   const allSubjects = [...new Set([...configSubjects, ...subjectsWithFiles])];
 
   buildSubjectTags(allSubjects.length ? allSubjects : subjectsWithFiles);
