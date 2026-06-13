@@ -60,39 +60,52 @@ router.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/dashboard.html'));
 });
 
+
+
 // POST /admin/upload
 router.post('/upload', (req, res) => {
   upload.single('pdf')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
     const { year, branch, subject, customSubject, contentType, semester, isLink, linkUrl, customFileName } = req.body;
-
+    
     const finalSubject = customSubject && customSubject.trim() ? customSubject.trim() : subject;
-
-    let record;
+    
     if (isLink === 'true') {
       if (!linkUrl) return res.status(400).json({ error: 'Link URL required.' });
-
-      const fileName = customFileName && customFileName.trim()
-        ? customFileName.trim()
-        : `${finalSubject || 'document'}.pdf`;
-
-      record = {
-        originalName: fileName,
-        storedName: `google-drive_${Date.now()}`,
-        year: year || 'any',
-        branch: branch || 'any',
-        subject: finalSubject,
-        semester: semester || 'any',
-        size: 0,
-        uploadedBy: req.session.adminUser,
-        url: linkUrl,
-        publicId: `google-drive_${Date.now()}`,
-        contentType: contentType || 'regular'
-      };
+      
+      const urls = linkUrl.split(/[\r\n,]+/).map(u => u.trim()).filter(Boolean);
+      if (!urls.length) return res.status(400).json({ error: 'At least one valid URL is required.' });
+      
+      const promises = urls.map((url, i) => {
+        let fileName = '';
+        if (urls.length === 1 && customFileName && customFileName.trim()) {
+          fileName = customFileName.trim();
+        } else {
+          fileName = `${finalSubject || 'document'}${urls.length > 1 ? '_' + (i + 1) : ''}.pdf`;
+        }
+        
+        const record = {
+          originalName: fileName,
+          storedName: `google-drive_${Date.now()}_${i}`,
+          year: year || 'any',
+          branch: branch || 'any',
+          subject: finalSubject,
+          semester: semester || 'any',
+          size: 0,
+          uploadedBy: req.session.adminUser,
+          url: url,
+          publicId: `google-drive_${Date.now()}_${i}`,
+          contentType: contentType || 'regular'
+        };
+        return File.create(record);
+      });
+      
+      const savedRecords = await Promise.all(promises);
+      return res.json({ success: true, files: savedRecords });
     } else {
       if (!req.file) return res.status(400).json({ error: 'File required.' });
-
-      record = {
+      
+      const record = {
         originalName: req.file.originalname,
         storedName: req.file.filename || req.file.public_id,
         year: year || 'any',
@@ -105,10 +118,10 @@ router.post('/upload', (req, res) => {
         publicId: req.file.filename || req.file.public_id,
         contentType: contentType || 'regular'
       };
+      
+      const saved = await File.create(record);
+      return res.json({ success: true, file: saved });
     }
-
-    const saved = await File.create(record);
-    res.json({ success: true, file: saved });
   });
 });
 

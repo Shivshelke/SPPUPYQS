@@ -304,8 +304,12 @@ async function doUpload() {
     if (!file) { showUploadAlert('Please select a PDF file.', 'error'); return; }
   } else {
     if (!linkUrl) { showUploadAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
-    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
-      showUploadAlert('Please enter a valid URL (starting with http:// or https://).', 'error'); return;
+    const lines = linkUrl.split(/[\r\n,]+/).map(u => u.trim()).filter(Boolean);
+    if (!lines.length) { showUploadAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
+    for (const line of lines) {
+      if (!line.startsWith('http://') && !line.startsWith('https://')) {
+        showUploadAlert(`Invalid URL: "${line}". All links must start with http:// or https://`, 'error'); return;
+      }
     }
   }
 
@@ -795,8 +799,12 @@ window.doPremiumUpload = async function () {
     if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
   } else {
     if (!linkUrl) { showPrmAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
-    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
-      showPrmAlert('Please enter a valid URL (starting with http:// or https://).', 'error'); return;
+    const lines = linkUrl.split(/[\r\n,]+/).map(u => u.trim()).filter(Boolean);
+    if (!lines.length) { showPrmAlert('Please enter a Google Drive / PDF Link.', 'error'); return; }
+    for (const line of lines) {
+      if (!line.startsWith('http://') && !line.startsWith('https://')) {
+        showPrmAlert(`Invalid URL: "${line}". All links must start with http:// or https://`, 'error'); return;
+      }
     }
   }
 
