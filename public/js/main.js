@@ -245,7 +245,13 @@ async function selectBranch(branch, yearData) {
 
     if (configSubjects) {
       if (Array.isArray(configSubjects)) {
-        subjectsByPattern["2024 Pattern"] = [...configSubjects];
+        configSubjects.forEach(s => {
+          if (s.toLowerCase().includes('2019')) {
+            subjectsByPattern["2019 Pattern"].push(s);
+          } else {
+            subjectsByPattern["2024 Pattern"].push(s);
+          }
+        });
       } else if (typeof configSubjects === 'object') {
         if (configSubjects["2024 Pattern"]) {
           subjectsByPattern["2024 Pattern"] = [...configSubjects["2024 Pattern"]];
