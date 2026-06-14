@@ -182,6 +182,9 @@ app.get('/', async (req, res) => {
   }
 });
 
+// ── Static files ──────────────────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
+
 // ── SEO Files ─────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -232,6 +235,7 @@ ${Array.from(urls).map(url => `  <url>
 </urlset>`;
 
     res.header('Content-Type', 'text/xml');
+    res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.send(sitemap.trim());
   } catch (err) {
     console.error('Sitemap generation error:', err);
@@ -248,11 +252,6 @@ ${Array.from(urls).map(url => `  <url>
     res.send(sitemap.trim());
   }
 });
-
-// ── Static files ──────────────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
-
-
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/auth', require('./routes/auth'));
