@@ -402,7 +402,18 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
       ? `<ul>\n      ${files.map(f => `<li><a href="/api/download/${f._id}">${f.originalName || f.subject}</a> - ${f.subject} (${f.pattern} Pattern, ${f.branch || 'First Year'})</li>`).join('\n      ')}\n    </ul>`
       : `<p>No papers uploaded yet for this catalog section.</p>`;
 
-    const crawlerContent = `<div id="seo-crawler-content" style="display:none;">\n    <h1>${title}</h1>\n    <p>${description}</p>\n    ${listHtml}\n  </div>`;
+    const seoIntroText = subject 
+      ? `Download Savitribai Phule Pune University (SPPU) Previous Year Question Papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Access free PDF downloads for 2024 Pattern and 2019 Pattern Insem & Endsem exams.`
+      : `Browse all Pune University (SPPU) Engineering Previous Year Question Papers for ${formattedBranch || formattedYear + ' Year'}. Download branch-wise question papers.`;
+
+    const crawlerContent = `
+  <div id="seo-crawler-content" style="display:none;">
+    <h1>SPPU ${formattedSubject || formattedBranch || formattedYear + ' Year'} Previous Year Question Papers (PYQ)</h1>
+    <h2>Savitribai Phule Pune University Exam Papers PDF Download</h2>
+    <p>${seoIntroText}</p>
+    ${listHtml}
+  </div>
+`;
     html = html.replace('<div id="seo-crawler-content" style="display:none;"></div>', crawlerContent);
 
     // Inject dynamic SEO footer directory links
