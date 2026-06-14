@@ -12,25 +12,36 @@ const PORT = process.env.PORT || 3000;
 
 // ── Connect MongoDB ───────────────────────────────────────────────────────────
 // ── Connect MongoDB ───────────────────────────────────────────────────────────
-let cachedConnection = null;
-
 const connectDB = async () => {
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    return cachedConnection;
+  const state = mongoose.connection.readyState;
+
+  // 1. Connected
+  if (state === 1) {
+    return mongoose.connection;
   }
 
+  // 2. Connecting - wait for current connection to resolve
+  if (state === 2) {
+    console.log('⏳ MongoDB connection in progress, waiting...');
+    return new Promise((resolve, reject) => {
+      mongoose.connection.once('connected', () => resolve(mongoose.connection));
+      mongoose.connection.once('error', (err) => reject(err));
+    });
+  }
+
+  // 3. Disconnected / Disconnecting - establish new connection
   try {
     console.log('⏳ Connecting to MongoDB...');
     const db = await mongoose.connect(process.env.MONGODB_URI, {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000, // Increased for stability
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 15000,
+      heartbeatFrequencyMS: 10000
     });
-    cachedConnection = db;
     console.log('✅ MongoDB connected');
     return db;
   } catch (err) {
-    console.error('❌ MongoDB error:', err);
+    console.error('❌ MongoDB connection error:', err);
     throw err;
   }
 };
