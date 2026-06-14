@@ -49,11 +49,16 @@ const connectDB = async () => {
 // Initial connect for local dev or first Vercel invocation
 connectDB();
 
-// Middleware to ensure DB is connected for every request
-app.use(async (req, res, next) => {
-  await connectDB();
-  next();
-});
+// Middleware to ensure DB is connected for database-reliant routes
+const ensureDbConnected = async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection failed in route middleware:', err);
+    res.status(500).json({ error: 'Database connection failed.' });
+  }
+};
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -171,7 +176,7 @@ async function generateSeoDirectory() {
 }
 
 // ── Root SEO Route ────────────────────────────────────────────────────────────
-app.get('/', async (req, res) => {
+app.get('/', ensureDbConnected, async (req, res) => {
   try {
     let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
     const directoryHtml = await generateSeoDirectory();
@@ -194,7 +199,7 @@ Allow: /
 Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
 });
 
-app.get('/sitemap.xml', async (req, res) => {
+app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
   try {
     const File = require('./models/File');
     const files = await File.find({ contentType: 'regular' }, 'year branch subject').lean();
@@ -255,14 +260,14 @@ ${Array.from(urls).map(url => `  <url>
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/auth', require('./routes/auth'));
-app.use('/api', require('./routes/api'));
-app.use('/admin', require('./routes/admin'));
-app.use('/student', require('./routes/student'));
+app.use('/api', ensureDbConnected, require('./routes/api'));
+app.use('/admin', ensureDbConnected, require('./routes/admin'));
+app.use('/student', ensureDbConnected, require('./routes/student'));
 
 
 
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
-app.get('/catalog/:year/:branch?/:subject?', async (req, res) => {
+app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res) => {
   const { year, branch, subject } = req.params;
 
   let title = "SPPU PYQ 2024 Pattern — Pune University Engineering Question Papers | SYNAPSE";
