@@ -217,6 +217,14 @@ async function selectBranch(branch, yearData) {
 
   document.getElementById('subjectStep').style.display = 'block';
 
+  // Show skeletons for subjects while loading
+  const subjectGrid = document.getElementById('subjectGrid');
+  if (subjectGrid) {
+    subjectGrid.innerHTML = Array(5).fill(0).map(() => `
+      <div class="tag skeleton" style="width: 130px; height: 38px; border-radius: 100px; border: none; opacity: 0.65;"></div>
+    `).join('');
+  }
+
   // For 2nd+ year: fetch subjects that actually have files for this branch/year
   const res = await fetch(`/api/files?year=${currentYear}&branch=${encodeURIComponent(branch)}`);
   const files = await res.json();
