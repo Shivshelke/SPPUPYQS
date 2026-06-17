@@ -81,6 +81,66 @@ app.use(session({
 
 // ── SEO Directory & Dynamic Injections Helper ─────────────────────────────────
 const fs = require('fs');
+
+function slugify(text) {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+async function resolveBranchAndSubject(year, branchSlug, subjectSlug) {
+  const File = require('./models/File');
+  const CategoryConfig = require('./models/CategoryConfig');
+
+  let configDoc = await CategoryConfig.findOne({ key: 'years_config' }).lean();
+  let yearsConfig = configDoc ? configDoc.years : {};
+
+  let resolvedBranch = null;
+  let resolvedSubject = null;
+
+  // Gather branches for this year
+  let branches = [];
+  if (yearsConfig[year]) {
+    branches = yearsConfig[year].branches || [];
+  }
+  const dbBranches = await File.distinct('branch', { year }).lean();
+  const allBranches = [...new Set([...branches, ...dbBranches])].filter(Boolean);
+
+  if (branchSlug) {
+    resolvedBranch = allBranches.find(b => slugify(b) === branchSlug) || branchSlug;
+  }
+
+  // Gather subjects for this year + branch
+  let subjects = [];
+  if (yearsConfig[year] && yearsConfig[year].subjects) {
+    const yearSub = yearsConfig[year].subjects;
+    if (Array.isArray(yearSub)) {
+      subjects = yearSub;
+    } else if (typeof yearSub === 'object' && resolvedBranch) {
+      const branchSub = yearSub[resolvedBranch];
+      if (Array.isArray(branchSub)) {
+        subjects = branchSub;
+      } else if (typeof branchSub === 'object' && branchSub !== null) {
+        subjects = Object.values(branchSub).flat();
+      }
+    }
+  }
+  const dbSubjectsQuery = { year };
+  if (resolvedBranch) dbSubjectsQuery.branch = resolvedBranch;
+  const dbSubjects = await File.distinct('subject', dbSubjectsQuery).lean();
+  const allSubjects = [...new Set([...subjects, ...dbSubjects])].filter(Boolean);
+
+  if (subjectSlug) {
+    resolvedSubject = allSubjects.find(s => slugify(s) === subjectSlug) || subjectSlug;
+  }
+
+  return { resolvedBranch, resolvedSubject };
+}
+
 async function generateSeoDirectory() {
   try {
     const File = require('./models/File');
@@ -128,7 +188,7 @@ async function generateSeoDirectory() {
       for (const [brKey, subjectsSet] of Object.entries(yearVal.branches)) {
         const branchUrl = brKey === 'FE'
           ? `/catalog/${yearKey}`
-          : `/catalog/${yearKey}/${encodeURIComponent(brKey)}`;
+          : `/catalog/${yearKey}/${slugify(brKey)}`;
 
         directoryHtml += `
         <details style="border: none; margin-bottom: 0.5rem;" class="directory-branch-details">
@@ -140,8 +200,8 @@ async function generateSeoDirectory() {
 
         Array.from(subjectsSet).sort().forEach(sub => {
           const subUrl = brKey === 'FE'
-            ? `/catalog/${yearKey}/${encodeURIComponent(sub)}`
-            : `/catalog/${yearKey}/${encodeURIComponent(brKey)}/${encodeURIComponent(sub)}`;
+            ? `/catalog/${yearKey}/${slugify(sub)}`
+            : `/catalog/${yearKey}/${slugify(brKey)}/${slugify(sub)}`;
           directoryHtml += `
             <li style="margin: 0; padding: 0;">
               <a href="${subUrl}" style="display: flex; align-items: flex-start; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; padding: 0.2rem 0.4rem; border-radius: 4px;" class="directory-subject-link">
@@ -202,7 +262,11 @@ Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
 app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
   try {
     const File = require('./models/File');
-    const files = await File.find({ contentType: 'regular' }, 'year branch subject').lean();
+    const CategoryConfig = require('./models/CategoryConfig');
+
+    // Fetch config from DB
+    let configDoc = await CategoryConfig.findOne({ key: 'years_config' }).lean();
+    let yearsConfig = configDoc ? configDoc.years : {};
 
     // Create a set of unique URLs
     const urls = new Set();
@@ -210,20 +274,53 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     urls.add('https://sppupyq.vercel.app/student-login.html');
 
     // Add Year page catalogs
-    ['first', 'second', 'third', 'fourth'].forEach(y => {
+    const yearOrder = ['first', 'second', 'third', 'fourth'];
+    yearOrder.forEach(y => {
       urls.add(`https://sppupyq.vercel.app/catalog/${y}`);
     });
 
+    // Populate URLs from CategoryConfig
+    for (const [yearKey, yearVal] of Object.entries(yearsConfig)) {
+      if (!yearOrder.includes(yearKey)) continue;
+
+      if (yearKey === 'first') {
+        const subjects = yearVal.subjects || [];
+        subjects.forEach(sub => {
+          urls.add(`https://sppupyq.vercel.app/catalog/first/${slugify(sub)}`);
+        });
+      } else {
+        const branches = yearVal.branches || [];
+        branches.forEach(br => {
+          urls.add(`https://sppupyq.vercel.app/catalog/${yearKey}/${slugify(br)}`);
+
+          let branchSubjects = [];
+          if (yearVal.subjects) {
+            const val = yearVal.subjects[br];
+            if (Array.isArray(val)) {
+              branchSubjects = val;
+            } else if (typeof val === 'object' && val !== null) {
+              branchSubjects = Object.values(val).flat();
+            }
+          }
+          branchSubjects.forEach(sub => {
+            urls.add(`https://sppupyq.vercel.app/catalog/${yearKey}/${slugify(br)}/${slugify(sub)}`);
+          });
+        });
+      }
+    }
+
+    // Also populate from database files to ensure no file pages are missed
+    const files = await File.find({ contentType: 'regular' }, 'year branch subject').lean();
     files.forEach(f => {
       if (f.year) {
         if (f.year === 'first') {
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app/catalog/first/${encodeURIComponent(f.subject)}`);
+            urls.add(`https://sppupyq.vercel.app/catalog/first/${slugify(f.subject)}`);
           }
         } else if (f.branch) {
-          urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${encodeURIComponent(f.branch)}`);
+          urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${slugify(f.branch)}`);
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${encodeURIComponent(f.branch)}/${encodeURIComponent(f.subject)}`);
+            urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${slugify(f.branch)}/${slugify(f.subject)}`);
           }
         }
       }
@@ -268,24 +365,26 @@ app.use('/student', ensureDbConnected, require('./routes/student'));
 
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
 app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res) => {
-  const { year, branch, subject } = req.params;
+  const { year, branch: branchSlug, subject: subjectSlug } = req.params;
+
+  const { resolvedBranch, resolvedSubject } = await resolveBranchAndSubject(year, branchSlug, subjectSlug);
 
   let title = "SPPU PYQ 2024 Pattern — Pune University Engineering Question Papers | SYNAPSE";
   let description = "Download SPPU Engineering Previous Year Question Papers (PYQs) for 2024 Pattern. Free access to all branches: Computer, IT, Mechanical, Civil, E&TC, and more.";
 
   const formattedYear = year.charAt(0).toUpperCase() + year.slice(1);
-  const formattedBranch = branch ? decodeURIComponent(branch).replace(/-/g, ' ') : '';
-  const formattedSubject = subject ? decodeURIComponent(subject).replace(/-/g, ' ') : '';
+  const formattedBranch = resolvedBranch || '';
+  const formattedSubject = resolvedSubject || '';
 
-  if (subject) {
-    title = `${formattedSubject} | ${formattedBranch || 'First Year'} SPPU PYQ Catalog — SYNAPSE`;
-    description = `Download Savitribai Phule Pune University (SPPU) Previous Year Question Papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Free PDF downloads.`;
-  } else if (branch) {
-    title = `${formattedBranch} (${formattedYear} Year) SPPU Engineering PYQs — SYNAPSE`;
-    description = `Access Savitribai Phule Pune University (SPPU) Engineering ${formattedBranch} branch previous year question papers for ${formattedYear} Year.`;
+  if (resolvedSubject) {
+    title = `${formattedSubject} SPPU PYQ 2024 Pattern (Insem & Endsem) | ${formattedBranch || 'First Year'} — SYNAPSE`;
+    description = `Download Savitribai Phule Pune University (SPPU) Insem & Endsem previous year question papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Free PDF downloads for 2024 Pattern.`;
+  } else if (resolvedBranch) {
+    title = `${formattedBranch} (${formattedYear} Year) SPPU Engineering PYQs (Insem & Endsem) — SYNAPSE`;
+    description = `Access Savitribai Phule Pune University (SPPU) Engineering ${formattedBranch} branch previous year question papers (PYQs) for Insem & Endsem exams.`;
   } else if (year) {
-    title = `${formattedYear} Year SPPU Engineering PYQs — SYNAPSE`;
-    description = `Browse Savitribai Phule Pune University (SPPU) Engineering previous year question papers for ${formattedYear} Year.`;
+    title = `${formattedYear} Year SPPU Engineering PYQs (Insem & Endsem) — SYNAPSE`;
+    description = `Browse Savitribai Phule Pune University (SPPU) Engineering previous year question papers (PYQs) for ${formattedYear} Year Insem & Endsem exams.`;
   }
 
   // Construct Breadcrumbs
@@ -307,20 +406,20 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
     });
   }
 
-  if (branch) {
+  if (branchSlug) {
     breadcrumbList.push({
       "@type": "ListItem",
       "position": 3,
       "name": formattedBranch,
-      "item": `https://sppupyq.vercel.app/catalog/${year}/${encodeURIComponent(branch)}`
+      "item": `https://sppupyq.vercel.app/catalog/${year}/${slugify(branchSlug)}`
     });
   }
 
-  if (subject) {
-    const pos = branch ? 4 : 3;
-    const urlPath = branch
-      ? `https://sppupyq.vercel.app/catalog/${year}/${encodeURIComponent(branch)}/${encodeURIComponent(subject)}`
-      : `https://sppupyq.vercel.app/catalog/${year}/${encodeURIComponent(subject)}`;
+  if (subjectSlug) {
+    const pos = branchSlug ? 4 : 3;
+    const urlPath = branchSlug
+      ? `https://sppupyq.vercel.app/catalog/${year}/${slugify(branchSlug)}/${slugify(subjectSlug)}`
+      : `https://sppupyq.vercel.app/catalog/${year}/${slugify(subjectSlug)}`;
     breadcrumbList.push({
       "@type": "ListItem",
       "position": pos,
@@ -365,8 +464,8 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
     const File = require('./models/File');
     const query = { contentType: 'regular' };
     if (year) query.year = year;
-    if (branch && branch !== 'FE') query.branch = formattedBranch;
-    if (subject) query.subject = formattedSubject;
+    if (branchSlug && branchSlug !== 'FE') query.branch = formattedBranch;
+    if (subjectSlug) query.subject = formattedSubject;
 
     files = await File.find(query).sort({ uploadDate: -1 }).lean();
   } catch (dbErr) {
@@ -397,24 +496,44 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
 </head>`;
     html = html.replace('</head>', schemaScript);
 
-    // Inject dynamic HTML crawler content
-    const listHtml = files.length > 0
-      ? `<ul>\n      ${files.map(f => `<li><a href="/api/download/${f._id}">${f.originalName || f.subject}</a> - ${f.subject} (${f.pattern} Pattern, ${f.branch || 'First Year'})</li>`).join('\n      ')}\n    </ul>`
-      : `<p>No papers uploaded yet for this catalog section.</p>`;
+    // Dynamic Hero Header replacement for SEO
+    const mainHeading = formattedSubject 
+      ? `SPPU ${formattedSubject} <span class="accent">PYQs</span>`
+      : (formattedBranch 
+          ? `SPPU ${formattedBranch} <span class="accent">PYQs</span>`
+          : `SPPU ${formattedYear} Year <span class="accent">PYQs</span>`);
+    
+    const mainSub = formattedSubject 
+      ? `Download Savitribai Phule Pune University (SPPU) Insem and Endsem question papers for ${formattedSubject} (${formattedBranch || 'First Year'}).`
+      : (formattedBranch 
+          ? `Browse and download previous year question papers (PYQs) for SPPU ${formattedBranch} engineering students.`
+          : `Access Savitribai Phule Pune University previous year question papers for ${formattedYear} Year engineering.`);
 
-    const seoIntroText = subject 
+    html = html.replace('<h1>SPPU <span class="accent">PYQ</span> Portal</h1>', `<h1>${mainHeading}</h1>`);
+    html = html.replace('<p class="hero-sub">The most organized archive of previous year question papers for Pune University students.</p>', `<p class="hero-sub">${mainSub}</p>`);
+
+    // Inject dynamic HTML crawler content (rendered visibly)
+    const listHtml = files.length > 0
+      ? `<ul>\n      ${files.map(f => `
+        <li>
+          <a href="/api/download/${f._id}">${f.originalName || f.subject}</a>
+          <span>Subject: ${f.subject} | Pattern: ${f.pattern} | Branch: ${f.branch || 'First Year'}</span>
+        </li>`).join('\n      ')}\n    </ul>`
+      : `<p>No papers uploaded yet for this catalog section. Check back soon!</p>`;
+
+    const seoIntroText = subjectSlug 
       ? `Download Savitribai Phule Pune University (SPPU) Previous Year Question Papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Access free PDF downloads for 2024 Pattern and 2019 Pattern Insem & Endsem exams.`
       : `Browse all Pune University (SPPU) Engineering Previous Year Question Papers for ${formattedBranch || formattedYear + ' Year'}. Download branch-wise question papers.`;
 
     const crawlerContent = `
-  <div id="seo-crawler-content" style="display:none;">
-    <h1>SPPU ${formattedSubject || formattedBranch || formattedYear + ' Year'} Previous Year Question Papers (PYQ)</h1>
-    <h2>Savitribai Phule Pune University Exam Papers PDF Download</h2>
+  <div id="seo-crawler-content" class="seo-crawler-container">
+    <h2>SPPU ${formattedSubject || formattedBranch || formattedYear + ' Year'} Previous Year Question Papers (PYQ)</h2>
+    <h3>Savitribai Phule Pune University Exam Papers PDF Download</h3>
     <p>${seoIntroText}</p>
     ${listHtml}
   </div>
 `;
-    html = html.replace('<div id="seo-crawler-content" style="display:none;"></div>', crawlerContent);
+    html = html.replace('<div id="seo-crawler-content" class="seo-crawler-container"></div>', crawlerContent);
 
     // Inject dynamic SEO footer directory links
     const directoryHtml = await generateSeoDirectory();

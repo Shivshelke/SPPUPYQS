@@ -49,8 +49,23 @@ let allFiles = [];
 let allKeywords = [];
 let currentUsername = null;
 
+function slugify(text) {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
+  const seoCrawler = document.getElementById('seo-crawler-content');
+  if (seoCrawler) {
+    seoCrawler.style.display = 'none';
+  }
+
   // Load Stats independently
   fetch('/api/stats')
     .then(r => r.json())
@@ -110,7 +125,7 @@ async function handleUrlRouting() {
 
   try {
     const path = window.location.pathname;
-    const parts = path.split('/').filter(Boolean); // e.g. ["catalog", "second", "Computer-Engineering", "Discrete-Mathematics"]
+    const parts = path.split('/').filter(Boolean); // e.g. ["catalog", "second", "computer-engineering", "discrete-mathematics"]
     
     if (parts[0] === 'catalog') {
       const year = parts[1];
@@ -124,20 +139,55 @@ async function handleUrlRouting() {
       selectYear(year);
 
       if (year === 'first') {
-        const subject = parts[2];
-        if (subject) {
-          const decodedSubject = decodeURIComponent(subject);
-          await selectSubject(decodedSubject);
+        const subjectSlug = parts[2];
+        if (subjectSlug) {
+          let resolvedSubject = CONFIG.first.subjects.find(s => slugify(s) === subjectSlug);
+          if (!resolvedSubject) {
+            try {
+              const res = await fetch(`/api/files?year=first`);
+              const files = await res.json();
+              resolvedSubject = files.map(f => f.subject).find(s => slugify(s) === subjectSlug);
+            } catch (e) { console.error(e); }
+          }
+          await selectSubject(resolvedSubject || decodeURIComponent(subjectSlug));
         }
       } else {
-        const branch = parts[2];
-        const subject = parts[3];
-        if (branch) {
-          const decodedBranch = decodeURIComponent(branch);
-          await selectBranch(decodedBranch, CONFIG[year]);
-          if (subject) {
-            const decodedSubject = decodeURIComponent(subject);
-            await selectSubject(decodedSubject);
+        const branchSlug = parts[2];
+        const subjectSlug = parts[3];
+        if (branchSlug) {
+          const resolvedBranch = CONFIG[year].branches.find(b => slugify(b) === branchSlug) || decodeURIComponent(branchSlug);
+          await selectBranch(resolvedBranch, CONFIG[year]);
+          if (subjectSlug) {
+            let resolvedSubject = null;
+            let configSubjects = [];
+            if (CONFIG[year].subjects) {
+              if (Array.isArray(CONFIG[year].subjects)) {
+                configSubjects = CONFIG[year].subjects;
+              } else if (typeof CONFIG[year].subjects === 'object') {
+                configSubjects = CONFIG[year].subjects[resolvedBranch] || [];
+              }
+            }
+
+            let flatConfigSubjects = [];
+            if (Array.isArray(configSubjects)) {
+              flatConfigSubjects = configSubjects;
+            } else if (typeof configSubjects === 'object' && configSubjects !== null) {
+              flatConfigSubjects = [
+                ...(configSubjects["2024 Pattern"] || []),
+                ...(configSubjects["2019 Pattern"] || [])
+              ];
+            }
+
+            resolvedSubject = flatConfigSubjects.find(s => slugify(s) === subjectSlug);
+
+            if (!resolvedSubject) {
+              try {
+                const res = await fetch(`/api/files?year=${year}&branch=${encodeURIComponent(resolvedBranch)}`);
+                const files = await res.json();
+                resolvedSubject = files.map(f => f.subject).find(s => slugify(s) === subjectSlug);
+              } catch (e) { console.error(e); }
+            }
+            await selectSubject(resolvedSubject || decodeURIComponent(subjectSlug));
           }
         }
       }
@@ -224,7 +274,7 @@ async function selectBranch(branch, yearData) {
   currentBranch = branch;
 
   if (!isRouting) {
-    history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(branch)}`);
+    history.pushState(null, '', `/catalog/${currentYear}/${slugify(branch)}`);
   }
 
   // Highlight selected
@@ -376,9 +426,9 @@ function buildSubjectTags(subjects, isGrouped = false) {
 async function selectSubject(subject, pattern) {
   if (!isRouting) {
     if (currentYear === 'first') {
-      history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(subject)}`);
+      history.pushState(null, '', `/catalog/${currentYear}/${slugify(subject)}`);
     } else {
-      history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(currentBranch)}/${encodeURIComponent(subject)}`);
+      history.pushState(null, '', `/catalog/${currentYear}/${slugify(currentBranch)}/${slugify(subject)}`);
     }
   }
 
@@ -547,7 +597,7 @@ function goBack() {
       if (currentYear === 'first') {
         history.pushState(null, '', `/catalog/${currentYear}`);
       } else {
-        history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(currentBranch)}`);
+        history.pushState(null, '', `/catalog/${currentYear}/${slugify(currentBranch)}`);
       }
     }
     return;
