@@ -614,9 +614,71 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
 });
 
 // ── Catch-all ─────────────────────────────────────────────────────────────────
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'index.html'))
-);
+app.get('*', async (req, res) => {
+  try {
+    const urlPath = req.path.substring(1).toLowerCase();
+    
+    // Programmatic SEO: Check if the route looks like an SEO keyword
+    if (urlPath && (urlPath.includes('sppu') || urlPath.includes('pyq') || urlPath.includes('pattern') || urlPath.includes('engineering') || urlPath.includes('notes'))) {
+      
+      let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+      
+      // Convert URL path "sppu-pyq-2024-pattern" to "SPPU PYQ 2024 Pattern"
+      let searchKeyword = urlPath.replace(/-/g, ' ');
+      searchKeyword = searchKeyword.split(' ').map(w => {
+        if (w === 'sppu') return 'SPPU';
+        if (w === 'pyq') return 'PYQ';
+        if (w === 'pdf') return 'PDF';
+        if (w === 'insem') return 'Insem';
+        if (w === 'endsem') return 'Endsem';
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+
+      const title = `${searchKeyword} — Download PDF & Notes | SYNAPSE`;
+      const description = `Get the best resources for ${searchKeyword}. Download Savitribai Phule Pune University (SPPU) previous year question papers, notes, syllabus, and solutions in PDF format for 2019, 2024, and 2025 patterns.`;
+
+      // Replace Meta Tags dynamically
+      html = html.replace(/<title>[^<]+<\/title>/g, `<title>${title}</title>`);
+      html = html.replace(/<meta name="title" content="[^"]+"/g, `<meta name="title" content="${title}"`);
+      html = html.replace(/<meta name="description" content="[^"]+"/g, `<meta name="description" content="${description}"`);
+      html = html.replace(/<meta property="og:title" content="[^"]+"/g, `<meta property="og:title" content="${title}"`);
+      html = html.replace(/<meta property="og:description" content="[^"]+"/g, `<meta property="og:description" content="${description}"`);
+      html = html.replace(/<meta property="twitter:title" content="[^"]+"/g, `<meta property="twitter:title" content="${title}"`);
+      html = html.replace(/<meta property="twitter:description" content="[^"]+"/g, `<meta property="twitter:description" content="${description}"`);
+      html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="https://sppupyq.vercel.app${req.originalUrl}"`);
+
+      // Dynamic Hero Header replacement
+      html = html.replace('<h1>SPPU <span class="accent">PYQ</span> Portal</h1>', `<h1 style="font-size: clamp(2rem, 5vw, 3.8rem); font-family: 'DM Sans', sans-serif; letter-spacing: -0.03em; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; padding-bottom: 0.1em; margin-bottom: 1rem; text-align: center;">${searchKeyword}</h1>`);
+      html = html.replace('<p class="hero-sub">The most organized archive of previous year question papers for Pune University students.</p>', `<p class="hero-sub">${description}</p>`);
+
+      // Inject dynamic crawler text block (Mobile Optimized)
+      const crawlerContent = `
+  <div id="seo-crawler-content" class="seo-crawler-container" style="margin-top: clamp(2rem, 5vw, 3rem); background: rgba(255, 255, 255, 0.02); padding: clamp(1.2rem, 5vw, 2rem); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box;">
+    <h2 style="color: var(--accent); margin-bottom: 1rem; font-size: clamp(1.3rem, 4vw, 1.8rem); line-height: 1.3;">${searchKeyword} Download Free</h2>
+    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: clamp(0.9rem, 3vw, 1rem);">We provide the largest collection of SPPU resources. If you are looking for <strong>${searchKeyword}</strong>, you are at the right place. Access the best study materials, insem/endsem papers, syllabus patterns (2019/2024/2025), and solutions exclusively on SYNAPSE.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+      <a href="/#catalog" class="btn primary" style="display: flex; justify-content: center; align-items: center; text-align: center; flex: 1 1 auto; min-width: 200px;">Browse Full SPPU Catalog</a>
+    </div>
+  </div>
+`;
+      html = html.replace('<div id="seo-crawler-content" class="seo-crawler-container"></div>', crawlerContent);
+
+      // Also inject directory links at bottom to ensure crawling continues deeply
+      try {
+        const directoryHtml = await generateSeoDirectory();
+        html = html.replace('<div id="seo-links-directory"></div>', directoryHtml);
+      } catch(e) {}
+
+      return res.send(html);
+    }
+
+    // Default fallback for any other routes
+    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } catch (err) {
+    console.error('Catch-all SEO generation error:', err);
+    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
+});
 
 // ── Local dev server ──────────────────────────────────────────────────────────
 if (require.main === module) {
