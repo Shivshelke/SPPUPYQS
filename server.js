@@ -326,6 +326,74 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       }
     });
 
+    // --- SEO BOOST: Inject all possible subjects for 2019, 2024, and 2025 patterns ---
+    // Since there's a catch-all route mapping to index.html, these URLs will serve the home page
+    const seoPatterns = ['2019 pattern', '2024 pattern', '2025 pattern'];
+    const seoSubjects = [
+      'engineering mathematics 1', 'engineering mathematics 2', 'engineering mathematics 3',
+      'engineering physics', 'engineering chemistry', 'basic electrical engineering',
+      'basic electronics engineering', 'programming for problem solving', 'engineering mechanics',
+      'engineering graphics', 'communication skills', 'environmental studies',
+      'indian knowledge system', 'discrete mathematics', 'data structures and algorithms',
+      'object oriented programming', 'database management systems', 'computer networks',
+      'operating systems', 'software engineering', 'theory of computation',
+      'design and analysis of algorithms', 'artificial intelligence', 'machine learning',
+      'deep learning', 'data science', 'cloud computing', 'internet of things',
+      'big data analytics', 'cyber security', 'computer graphics', 'compiler design',
+      'human computer interaction', 'distributed systems', 'mobile computing', 'devops',
+      'data mining and warehousing', 'natural language processing', 'reinforcement learning',
+      'probability and statistics', 'linear algebra', 'digital signal processing',
+      'signals and systems', 'microprocessors and microcontrollers', 'digital electronics',
+      'control systems', 'power systems', 'electrical machines', 'strength of materials',
+      'fluid mechanics', 'thermodynamics', 'manufacturing processes', 'heat transfer',
+      'structural analysis', 'transportation engineering', 'geotechnical engineering',
+      'surveying', 'robotics', 'industrial automation', 'information and cyber security',
+      'data science and big data analytics', 'web technology', 'systems programming and operating system',
+      'blockchain technology'
+    ];
+    
+    // Add generic broad search terms
+    ['sppu pyq 2024 pattern', 'sppu 2025 pattern', 'sppu 2019 pattern', 
+     'sppu engineering pyq 2024 pattern', 'sppu pyq 2024 pattern computer engineering',
+     'sppu pyq 2024 pattern it engineering', 'sppu pyq 2024 pattern aids',
+     'sppu pyq 2024 pattern entc', 'sppu pyq 2024 pattern mechanical', 
+     'sppu pyq 2024 pattern civil', 'sppu pyq pdf download', 'sppu previous year question papers',
+     'sppu insem question papers', 'sppu endsem question papers', 'sppu notes pdf free download',
+     'sppu engineering notes', 'pune university engineering question papers', 
+     'sppu question paper solution', 'sppu pyq with solution', 'sppu syllabus 2024 pattern pdf',
+     'sppu syllabus 2019 pattern pdf', 'sppu exam time table', 'sppu passing marks',
+     'sppu sgpa to percentage calculator', 'sppu decote', 'sppu question paper format'].forEach(kw => {
+       urls.add(`https://sppupyq.vercel.app/${kw.replace(/\s+/g, '-')}`);
+    });
+
+    // Add branch specific terms
+    const seoBranches = [
+      'computer engineering', 'it engineering', 'artificial intelligence and data science', 
+      'electronics and telecommunication', 'mechanical engineering', 'civil engineering', 
+      'electrical engineering', 'robotics and automation'
+    ];
+    seoBranches.forEach(branch => {
+      seoPatterns.forEach(pattern => {
+        urls.add(`https://sppupyq.vercel.app/${('sppu ' + branch + ' pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`https://sppupyq.vercel.app/${('sppu ' + pattern + ' ' + branch + ' question papers').replace(/\s+/g, '-')}`);
+      });
+    });
+
+    // Add subject specific terms with long-tail variations
+    seoPatterns.forEach(pattern => {
+      seoSubjects.forEach(sub => {
+        // Basic subject + pattern
+        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`https://sppupyq.vercel.app/${('sppu ' + pattern + ' ' + sub + ' pyq').replace(/\s+/g, '-')}`);
+        // Insem & Endsem specific
+        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu insem pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu endsem pyq ' + pattern).replace(/\s+/g, '-')}`);
+        // PDF & Download specific
+        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu question paper pdf download ' + pattern).replace(/\s+/g, '-')}`);
+      });
+    });
+    // ----------------------------------------------------------------------------------
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${Array.from(urls).map(url => `  <url>
