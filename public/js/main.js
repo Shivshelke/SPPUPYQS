@@ -59,6 +59,35 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
+function getSeoUrl(year, branch, subject) {
+  const urlYear = year === 'fourth' ? 'final' : year;
+  let newUrl = '/';
+  
+  if (year === 'first' || (branch && branch.toLowerCase() === 'fe')) {
+    newUrl = `/${urlYear}-year-fe-engineering`;
+    if (subject) {
+      newUrl += `/${slugify(subject)}`;
+    } else if (branch && branch.toLowerCase() !== 'fe') {
+      newUrl += `/${slugify(branch)}`;
+    }
+  } else {
+    newUrl = `/${urlYear}-year`;
+    if (branch) {
+      let branchSlug = slugify(branch);
+      if (!branchSlug.endsWith('-engineering') && branchSlug !== 'fe') {
+        branchSlug += '-engineering';
+      }
+      newUrl += `-${branchSlug}`;
+    } else {
+      newUrl += '-engineering';
+    }
+    if (subject) {
+      newUrl += `/${slugify(subject)}`;
+    }
+  }
+  return newUrl;
+}
+
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
   const seoCrawler = document.getElementById('seo-crawler-content');
@@ -124,24 +153,41 @@ async function handleUrlRouting() {
   isRouting = true;
 
   try {
-    const path = window.location.pathname;
-    const parts = path.split('/').filter(Boolean); // e.g. ["catalog", "second", "computer-engineering", "discrete-mathematics"]
+    const path = window.location.pathname.substring(1);
+    if (!path) {
+      isRouting = false;
+      return;
+    }
     
-    if (parts[0] === 'catalog') {
-      const year = parts[1];
-      const validYears = ['first', 'second', 'third', 'fourth'];
-      if (!validYears.includes(year)) {
-        isRouting = false;
-        return;
+    const parts = path.split('/').filter(Boolean);
+    const yearSlug = parts[0];
+    const subjectSlug = parts[1];
+    
+    const match = yearSlug.match(/^(first|second|third|fourth|final)-year-(.+)$/);
+    
+    if (yearSlug === 'catalog') {
+      window.location.reload(); 
+      return;
+    }
+
+    if (match) {
+      let year = match[1];
+      if (year === 'final') year = 'fourth';
+      
+      let branchSlug = match[2];
+      if (branchSlug === 'fe-engineering') {
+        branchSlug = 'fe';
+      } else if (branchSlug === 'engineering') {
+        branchSlug = null;
+      } else if (branchSlug.endsWith('-engineering')) {
+        branchSlug = branchSlug.replace(/-engineering$/, '');
       }
 
-      // Load Year
       selectYear(year);
 
-      if (year === 'first') {
-        const subjectSlug = parts[2];
+      if (year === 'first' || branchSlug === 'fe') {
         if (subjectSlug) {
-          let resolvedSubject = CONFIG.first.subjects.find(s => slugify(s) === subjectSlug);
+          let resolvedSubject = CONFIG.first?.subjects?.find(s => slugify(s) === subjectSlug);
           if (!resolvedSubject) {
             try {
               const res = await fetch(`/api/files?year=first`);
@@ -151,44 +197,41 @@ async function handleUrlRouting() {
           }
           await selectSubject(resolvedSubject || decodeURIComponent(subjectSlug));
         }
-      } else {
-        const branchSlug = parts[2];
-        const subjectSlug = parts[3];
-        if (branchSlug) {
-          const resolvedBranch = CONFIG[year].branches.find(b => slugify(b) === branchSlug) || decodeURIComponent(branchSlug);
-          await selectBranch(resolvedBranch, CONFIG[year]);
-          if (subjectSlug) {
-            let resolvedSubject = null;
-            let configSubjects = [];
-            if (CONFIG[year].subjects) {
-              if (Array.isArray(CONFIG[year].subjects)) {
-                configSubjects = CONFIG[year].subjects;
-              } else if (typeof CONFIG[year].subjects === 'object') {
-                configSubjects = CONFIG[year].subjects[resolvedBranch] || [];
-              }
+      } else if (branchSlug) {
+        const resolvedBranch = CONFIG[year]?.branches?.find(b => slugify(b) === branchSlug) || decodeURIComponent(branchSlug);
+        await selectBranch(resolvedBranch, CONFIG[year] || {});
+        
+        if (subjectSlug) {
+          let resolvedSubject = null;
+          let configSubjects = [];
+          if (CONFIG[year]?.subjects) {
+            if (Array.isArray(CONFIG[year].subjects)) {
+              configSubjects = CONFIG[year].subjects;
+            } else if (typeof CONFIG[year].subjects === 'object') {
+              configSubjects = CONFIG[year].subjects[resolvedBranch] || [];
             }
-
-            let flatConfigSubjects = [];
-            if (Array.isArray(configSubjects)) {
-              flatConfigSubjects = configSubjects;
-            } else if (typeof configSubjects === 'object' && configSubjects !== null) {
-              flatConfigSubjects = [
-                ...(configSubjects["2024 Pattern"] || []),
-                ...(configSubjects["2019 Pattern"] || [])
-              ];
-            }
-
-            resolvedSubject = flatConfigSubjects.find(s => slugify(s) === subjectSlug);
-
-            if (!resolvedSubject) {
-              try {
-                const res = await fetch(`/api/files?year=${year}&branch=${encodeURIComponent(resolvedBranch)}`);
-                const files = await res.json();
-                resolvedSubject = files.map(f => f.subject).find(s => slugify(s) === subjectSlug);
-              } catch (e) { console.error(e); }
-            }
-            await selectSubject(resolvedSubject || decodeURIComponent(subjectSlug));
           }
+
+          let flatConfigSubjects = [];
+          if (Array.isArray(configSubjects)) {
+            flatConfigSubjects = configSubjects;
+          } else if (typeof configSubjects === 'object' && configSubjects !== null) {
+            flatConfigSubjects = [
+              ...(configSubjects["2024 Pattern"] || []),
+              ...(configSubjects["2019 Pattern"] || [])
+            ];
+          }
+
+          resolvedSubject = flatConfigSubjects.find(s => slugify(s) === subjectSlug);
+
+          if (!resolvedSubject) {
+            try {
+              const res = await fetch(`/api/files?year=${year}&branch=${encodeURIComponent(resolvedBranch)}`);
+              const files = await res.json();
+              resolvedSubject = files.map(f => f.subject).find(s => slugify(s) === subjectSlug);
+            } catch (e) { console.error(e); }
+          }
+          await selectSubject(resolvedSubject || decodeURIComponent(subjectSlug));
         }
       }
     }
@@ -231,7 +274,7 @@ function selectYear(year) {
   currentBranch = null;
 
   if (!isRouting) {
-    history.pushState(null, '', `/catalog/${year}`);
+    history.pushState(null, '', getSeoUrl(year, null, null));
   }
 
   const yearData = CONFIG[year];
@@ -274,7 +317,7 @@ async function selectBranch(branch, yearData) {
   currentBranch = branch;
 
   if (!isRouting) {
-    history.pushState(null, '', `/catalog/${currentYear}/${slugify(branch)}`);
+    history.pushState(null, '', getSeoUrl(currentYear, branch, null));
   }
 
   // Highlight selected
@@ -452,9 +495,9 @@ function buildSubjectTags(subjects, isGrouped = false) {
 async function selectSubject(subject, pattern) {
   if (!isRouting) {
     if (currentYear === 'first') {
-      history.pushState(null, '', `/catalog/${currentYear}/${slugify(subject)}`);
+      history.pushState(null, '', getSeoUrl(currentYear, 'FE', subject));
     } else {
-      history.pushState(null, '', `/catalog/${currentYear}/${slugify(currentBranch)}/${slugify(subject)}`);
+      history.pushState(null, '', getSeoUrl(currentYear, currentBranch, subject));
     }
   }
 
@@ -623,9 +666,9 @@ function goBack() {
     document.querySelectorAll('#subjectGrid .tag').forEach(t => t.classList.remove('active'));
     if (!isRouting) {
       if (currentYear === 'first') {
-        history.pushState(null, '', `/catalog/${currentYear}`);
+        history.pushState(null, '', getSeoUrl(currentYear, null, null));
       } else {
-        history.pushState(null, '', `/catalog/${currentYear}/${slugify(currentBranch)}`);
+        history.pushState(null, '', getSeoUrl(currentYear, currentBranch, null));
       }
     }
     return;
@@ -634,7 +677,7 @@ function goBack() {
     document.getElementById('subjectStep').style.display = 'none';
     document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
     if (!isRouting) {
-      history.pushState(null, '', `/catalog/${currentYear}`);
+      history.pushState(null, '', getSeoUrl(currentYear, null, null));
     }
     return;
   }

@@ -92,6 +92,35 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
+function getSeoUrl(year, branch, subject) {
+  const urlYear = year === 'fourth' ? 'final' : year;
+  let newUrl = '/';
+  
+  if (year === 'first' || (branch && branch.toLowerCase() === 'fe')) {
+    newUrl = `/${urlYear}-year-fe-engineering`;
+    if (subject) {
+      newUrl += `/${slugify(subject)}`;
+    } else if (branch && branch.toLowerCase() !== 'fe') {
+      newUrl += `/${slugify(branch)}`;
+    }
+  } else {
+    newUrl = `/${urlYear}-year`;
+    if (branch) {
+      let branchSlug = slugify(branch);
+      if (!branchSlug.endsWith('-engineering') && branchSlug !== 'fe') {
+        branchSlug += '-engineering';
+      }
+      newUrl += `-${branchSlug}`;
+    } else {
+      newUrl += '-engineering';
+    }
+    if (subject) {
+      newUrl += `/${slugify(subject)}`;
+    }
+  }
+  return newUrl;
+}
+
 async function resolveBranchAndSubject(year, branchSlug, subjectSlug) {
   const File = require('./models/File');
   const CategoryConfig = require('./models/CategoryConfig');
@@ -186,9 +215,7 @@ async function generateSeoDirectory() {
 `;
 
       for (const [brKey, subjectsSet] of Object.entries(yearVal.branches)) {
-        const branchUrl = brKey === 'FE'
-          ? `/catalog/${yearKey}`
-          : `/catalog/${yearKey}/${slugify(brKey)}`;
+        const branchUrl = getSeoUrl(yearKey, brKey, null);
 
         directoryHtml += `
         <details style="border: none; margin-bottom: 0.5rem;" class="directory-branch-details">
@@ -199,9 +226,7 @@ async function generateSeoDirectory() {
 `;
 
         Array.from(subjectsSet).sort().forEach(sub => {
-          const subUrl = brKey === 'FE'
-            ? `/catalog/${yearKey}/${slugify(sub)}`
-            : `/catalog/${yearKey}/${slugify(brKey)}/${slugify(sub)}`;
+          const subUrl = getSeoUrl(yearKey, brKey, sub);
           directoryHtml += `
             <li style="margin: 0; padding: 0;">
               <a href="${subUrl}" style="display: flex; align-items: flex-start; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; padding: 0.2rem 0.4rem; border-radius: 4px;" class="directory-subject-link">
@@ -276,7 +301,7 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     // Add Year page catalogs
     const yearOrder = ['first', 'second', 'third', 'fourth'];
     yearOrder.forEach(y => {
-      urls.add(`https://sppupyq.vercel.app/catalog/${y}`);
+      urls.add(`https://sppupyq.vercel.app${getSeoUrl(y, null, null)}`);
     });
 
     // Populate URLs from CategoryConfig
@@ -286,12 +311,12 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       if (yearKey === 'first') {
         const subjects = yearVal.subjects || [];
         subjects.forEach(sub => {
-          urls.add(`https://sppupyq.vercel.app/catalog/first/${slugify(sub)}`);
+          urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, 'FE', sub)}`);
         });
       } else {
         const branches = yearVal.branches || [];
         branches.forEach(br => {
-          urls.add(`https://sppupyq.vercel.app/catalog/${yearKey}/${slugify(br)}`);
+          urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, br, null)}`);
 
           let branchSubjects = [];
           if (yearVal.subjects) {
@@ -303,7 +328,7 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
             }
           }
           branchSubjects.forEach(sub => {
-            urls.add(`https://sppupyq.vercel.app/catalog/${yearKey}/${slugify(br)}/${slugify(sub)}`);
+            urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, br, sub)}`);
           });
         });
       }
@@ -315,12 +340,12 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       if (f.year) {
         if (f.year === 'first') {
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app/catalog/first/${slugify(f.subject)}`);
+            urls.add(`https://sppupyq.vercel.app${getSeoUrl('first', 'FE', f.subject)}`);
           }
         } else if (f.branch) {
-          urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${slugify(f.branch)}`);
+          urls.add(`https://sppupyq.vercel.app${getSeoUrl(f.year, f.branch, null)}`);
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app/catalog/${f.year}/${slugify(f.branch)}/${slugify(f.subject)}`);
+            urls.add(`https://sppupyq.vercel.app${getSeoUrl(f.year, f.branch, f.subject)}`);
           }
         }
       }
@@ -400,7 +425,7 @@ ${Array.from(urls).map(url => `  <url>
     <loc>${url.replace(/&/g, '&amp;')}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>${url.includes('catalog') ? '0.8' : '1.0'}</priority>
+    <priority>${url.includes('-year') ? '0.8' : '1.0'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 
@@ -431,9 +456,34 @@ app.use('/student', ensureDbConnected, require('./routes/student'));
 
 
 
+// ── 301 Redirect for legacy Catalog URLs ──────────────────────────────────────
+app.get('/catalog/:year/:branch?/:subject?', (req, res) => {
+  const { year, branch, subject } = req.params;
+  const newUrl = getSeoUrl(year, branch, subject);
+  return res.redirect(301, newUrl);
+});
+
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
-app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res) => {
-  const { year, branch: branchSlug, subject: subjectSlug } = req.params;
+app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) => {
+  const { yearSlug, subjectSlug } = req.params;
+  
+  // Regex to match the new SEO-friendly year slugs e.g., first-year-fe-engineering
+  const match = yearSlug.match(/^(first|second|third|fourth|final)-year-(.+)$/);
+  if (!match) {
+    return next(); // Not a catalog route, pass to the next handler
+  }
+  
+  let year = match[1];
+  if (year === 'final') year = 'fourth';
+  
+  let branchSlug = match[2];
+  if (branchSlug === 'fe-engineering') {
+    branchSlug = 'fe';
+  } else if (branchSlug === 'engineering') {
+    branchSlug = null; // Bare year page
+  } else if (branchSlug.endsWith('-engineering')) {
+    branchSlug = branchSlug.replace(/-engineering$/, '');
+  }
 
   const { resolvedBranch, resolvedSubject } = await resolveBranchAndSubject(year, branchSlug, subjectSlug);
 
@@ -470,7 +520,7 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
       "@type": "ListItem",
       "position": 2,
       "name": `${formattedYear} Year`,
-      "item": `https://sppupyq.vercel.app/catalog/${year}`
+      "item": `https://sppupyq.vercel.app${getSeoUrl(year, null, null)}`
     });
   }
 
@@ -479,15 +529,13 @@ app.get('/catalog/:year/:branch?/:subject?', ensureDbConnected, async (req, res)
       "@type": "ListItem",
       "position": 3,
       "name": formattedBranch,
-      "item": `https://sppupyq.vercel.app/catalog/${year}/${slugify(branchSlug)}`
+      "item": `https://sppupyq.vercel.app${getSeoUrl(year, branchSlug, null)}`
     });
   }
 
   if (subjectSlug) {
     const pos = branchSlug ? 4 : 3;
-    const urlPath = branchSlug
-      ? `https://sppupyq.vercel.app/catalog/${year}/${slugify(branchSlug)}/${slugify(subjectSlug)}`
-      : `https://sppupyq.vercel.app/catalog/${year}/${slugify(subjectSlug)}`;
+    const urlPath = `https://sppupyq.vercel.app${getSeoUrl(year, branchSlug || 'FE', subjectSlug)}`;
     breadcrumbList.push({
       "@type": "ListItem",
       "position": pos,
