@@ -178,6 +178,15 @@ router.post('/config/subject', async (req, res) => {
     return res.status(400).json({ error: 'Year and Subject are required.' });
   }
 
+  if (year !== 'first') {
+    if (!branch) {
+      return res.status(400).json({ error: 'Branch is required for 2nd, 3rd, and 4th Year.' });
+    }
+    if (!pattern) {
+      return res.status(400).json({ error: 'Pattern is required for 2nd, 3rd, and 4th Year.' });
+    }
+  }
+
   try {
     let doc = await CategoryConfig.findOne({ key: 'years_config' });
     if (!doc) {
@@ -187,49 +196,45 @@ router.post('/config/subject', async (req, res) => {
     const yearData = doc.years[year];
     if (!yearData) return res.status(400).json({ error: 'Invalid year.' });
 
-    const cleanSubject = subject.trim();
+    const cleanBranch = branch ? branch.trim() : '';
+    const cleanPattern = pattern ? pattern.trim() : '';
 
-    if (year === 'first') {
-      if (!Array.isArray(yearData.subjects)) {
-        yearData.subjects = [];
-      }
-      if (!yearData.subjects.includes(cleanSubject)) {
-        yearData.subjects.push(cleanSubject);
-      }
-    } else {
-      if (!branch) {
-        return res.status(400).json({ error: 'Branch is required for 2nd, 3rd, and 4th Year.' });
-      }
-      if (!pattern) {
-        return res.status(400).json({ error: 'Pattern is required for 2nd, 3rd, and 4th Year.' });
-      }
-      const cleanBranch = branch.trim();
-      const cleanPattern = pattern.trim(); // e.g. "2019 Pattern" or "2024 Pattern"
+    const subjectsArray = subject.split(',').map(s => s.trim()).filter(Boolean);
 
-      if (!yearData.subjects || typeof yearData.subjects !== 'object' || Array.isArray(yearData.subjects)) {
-        yearData.subjects = {};
-      }
-      if (!yearData.subjects[cleanBranch]) {
-        yearData.subjects[cleanBranch] = {};
-      }
-      if (Array.isArray(yearData.subjects[cleanBranch])) {
-        const oldSubjects = yearData.subjects[cleanBranch];
-        yearData.subjects[cleanBranch] = {
-          "2024 Pattern": oldSubjects,
-          "2019 Pattern": []
-        };
-      }
-      if (!yearData.subjects[cleanBranch][cleanPattern]) {
-        yearData.subjects[cleanBranch][cleanPattern] = [];
-      }
-      if (!yearData.subjects[cleanBranch][cleanPattern].includes(cleanSubject)) {
-        yearData.subjects[cleanBranch][cleanPattern].push(cleanSubject);
+    for (const cleanSubject of subjectsArray) {
+      if (year === 'first') {
+        if (!Array.isArray(yearData.subjects)) {
+          yearData.subjects = [];
+        }
+        if (!yearData.subjects.includes(cleanSubject)) {
+          yearData.subjects.push(cleanSubject);
+        }
+      } else {
+        if (!yearData.subjects || typeof yearData.subjects !== 'object' || Array.isArray(yearData.subjects)) {
+          yearData.subjects = {};
+        }
+        if (!yearData.subjects[cleanBranch]) {
+          yearData.subjects[cleanBranch] = {};
+        }
+        if (Array.isArray(yearData.subjects[cleanBranch])) {
+          const oldSubjects = yearData.subjects[cleanBranch];
+          yearData.subjects[cleanBranch] = {
+            "2024 Pattern": oldSubjects,
+            "2019 Pattern": []
+          };
+        }
+        if (!yearData.subjects[cleanBranch][cleanPattern]) {
+          yearData.subjects[cleanBranch][cleanPattern] = [];
+        }
+        if (!yearData.subjects[cleanBranch][cleanPattern].includes(cleanSubject)) {
+          yearData.subjects[cleanBranch][cleanPattern].push(cleanSubject);
+        }
       }
     }
 
     doc.markModified('years');
     await doc.save();
-    res.json({ success: true });
+    res.json({ success: true, count: subjectsArray.length });
   } catch (e) {
     console.error('Error saving subject config:', e);
     res.status(500).json({ error: 'Database save error.' });
