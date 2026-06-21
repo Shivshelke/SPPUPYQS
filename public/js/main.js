@@ -283,6 +283,7 @@ async function selectBranch(branch, yearData) {
   );
 
   document.getElementById('subjectStep').style.display = 'block';
+  document.getElementById('fileStep').style.display = 'none';
 
   // Show skeletons for subjects while loading
   const subjectGrid = document.getElementById('subjectGrid');
@@ -384,24 +385,26 @@ function buildSubjectTags(subjects, isGrouped = false) {
       return;
     }
 
-    patterns.forEach(([patternName, list]) => {
-      if (!list || !list.length) return;
+    const availablePatterns = patterns.filter(([_, list]) => list && list.length > 0);
 
-      const groupDiv = document.createElement('div');
-      groupDiv.className = 'pattern-group';
-      groupDiv.style.width = '100%';
-      groupDiv.style.marginBottom = '1.5rem';
+    const tabContainer = document.createElement('div');
+    tabContainer.style.display = 'flex';
+    tabContainer.style.gap = '1rem';
+    tabContainer.style.marginBottom = '1.5rem';
+    grid.appendChild(tabContainer);
 
-      const header = document.createElement('h4');
-      header.textContent = patternName;
-      header.className = 'pattern-header';
-      header.style.fontSize = '1.1rem';
-      header.style.color = 'var(--accent)';
-      header.style.marginBottom = '0.8rem';
-      header.style.fontWeight = '700';
-      header.style.borderBottom = '1px solid var(--border)';
-      header.style.paddingBottom = '0.3rem';
-      groupDiv.appendChild(header);
+    const contentContainer = document.createElement('div');
+    grid.appendChild(contentContainer);
+
+    const renderPattern = (patternName, list) => {
+      contentContainer.innerHTML = '';
+      
+      const fileStep = document.getElementById('fileStep');
+      if (fileStep) fileStep.style.display = 'none';
+
+      Array.from(tabContainer.children).forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === patternName);
+      });
 
       const tagsContainer = document.createElement('div');
       tagsContainer.style.display = 'flex';
@@ -416,9 +419,32 @@ function buildSubjectTags(subjects, isGrouped = false) {
         tagsContainer.appendChild(tag);
       });
 
-      groupDiv.appendChild(tagsContainer);
-      grid.appendChild(groupDiv);
+      contentContainer.appendChild(tagsContainer);
+
+      if (patternName === '2019 Pattern') {
+        const disclaimer = document.createElement('div');
+        disclaimer.style.fontSize = '0.85rem';
+        disclaimer.style.opacity = '0.8';
+        disclaimer.style.marginTop = '1rem';
+        disclaimer.textContent = "Disclaimer: Previous Year Question Papers belong to Savitribai Phule Pune University (SPPU) and are accessed through publicly available Google Drive links. This website does not host, own, or claim ownership of these files. If any institution or copyright owner requests removal, the links will be removed promptly.";
+        contentContainer.appendChild(disclaimer);
+      }
+    };
+
+    availablePatterns.forEach(([patternName, list]) => {
+      const tabBtn = document.createElement('div');
+      tabBtn.textContent = patternName;
+      tabBtn.className = 'tag pattern-tab';
+      tabBtn.style.cursor = 'pointer';
+      tabBtn.style.fontWeight = '600';
+      tabBtn.onclick = () => renderPattern(patternName, list);
+      tabContainer.appendChild(tabBtn);
     });
+
+    if (availablePatterns.length > 0) {
+      const defaultPattern = availablePatterns.find(([name]) => name === '2024 Pattern') || availablePatterns[0];
+      renderPattern(defaultPattern[0], defaultPattern[1]);
+    }
   }
 }
 
@@ -432,9 +458,11 @@ async function selectSubject(subject, pattern) {
     }
   }
 
-  document.querySelectorAll('#subjectGrid .tag').forEach(t =>
-    t.classList.toggle('active', t.textContent === subject)
-  );
+  document.querySelectorAll('#subjectGrid .tag').forEach(t => {
+    if (!t.classList.contains('pattern-tab')) {
+      t.classList.toggle('active', t.textContent === subject);
+    }
+  });
 
   document.getElementById('fileStep').style.display = 'block';
   document.getElementById('fileStepLabel').textContent = `Papers for: ${subject}`;
