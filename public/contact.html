@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6906861946957043" crossorigin="anonymous"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/img/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>Contact Us — SYNAPSE SPPU PYQ Portal</title>
+  <meta name="description" content="Contact SYNAPSE SPPU PYQ Portal. Report missing papers, give feedback, or get in touch with our team.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://sppupyq.vercel.app/contact.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/theme.js" defer></script>
+  <style>
+    :root{--bg:#030712;--text:#f9fafb;--accent:#8b5cf6;--surface:#0f172a;--border:rgba(255,255,255,0.08);--text-secondary:#9ca3af;}
+    [data-theme="light"]{--bg:#f9fafb;--text:#111827;--accent:#6d28d9;--surface:#f3f4f6;--border:rgba(0,0,0,0.08);--text-secondary:#6b7280;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.7;transition:background .3s,color .3s;}
+    .nav{position:fixed;top:0;width:100%;z-index:1000;background:var(--bg);backdrop-filter:blur(10px);height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;box-sizing:border-box;border-bottom:1px solid var(--border);}
+    .nav-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--accent);text-decoration:none;}
+    .nav-links{display:flex;gap:1.5rem;align-items:center;}
+    .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem;transition:color .2s;}
+    .nav-links a:hover{color:var(--accent);}
+    .page-hero{padding:8rem 5% 3rem;text-align:center;background:linear-gradient(180deg,rgba(139,92,246,.08) 0%,transparent 100%);border-bottom:1px solid var(--border);}
+    .badge{display:inline-block;background:rgba(139,92,246,.15);color:var(--accent);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:.35rem 1rem;font-size:.8rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1rem;}
+    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;margin-bottom:.75rem;}
+    .page-hero p{color:var(--text-secondary);font-size:1rem;max-width:500px;margin:0 auto;}
+    .content-wrap{max-width:900px;margin:0 auto;padding:4rem 5% 5rem;display:grid;grid-template-columns:1fr 1.4fr;gap:3rem;align-items:start;}
+    @media(max-width:700px){.content-wrap{grid-template-columns:1fr;}}
+    .info-col h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;}
+    .contact-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s;}
+    .contact-card:hover{border-color:var(--accent);}
+    .contact-icon{font-size:1.5rem;flex-shrink:0;}
+    .contact-card h3{font-size:.95rem;font-weight:700;margin-bottom:.25rem;}
+    .contact-card p,.contact-card a{color:var(--text-secondary);font-size:.88rem;text-decoration:none;}
+    .contact-card a:hover{color:var(--accent);}
+    .form-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;}
+    .form-card h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;}
+    .form-group{margin-bottom:1.25rem;}
+    .form-group label{display:block;font-size:.88rem;font-weight:600;margin-bottom:.5rem;color:var(--text-secondary);}
+    .form-group input,.form-group textarea,.form-group select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);}
+    .form-group textarea{resize:vertical;min-height:120px;}
+    .btn-submit{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:.875rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;}
+    .btn-submit:hover{opacity:.88;transform:translateY(-1px);}
+    .alert{padding:.75rem 1rem;border-radius:10px;font-size:.9rem;margin-top:1rem;display:none;}
+    .alert.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    .alert.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;}
+    footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem 5%;text-align:center;}
+    .footer-links{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+    .footer-links a{color:var(--text-secondary);text-decoration:none;font-size:.88rem;transition:color .2s;}
+    .footer-links a:hover{color:var(--accent);}
+    .footer-copy{color:var(--text-secondary);font-size:.82rem;}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-brand">⬡ SYNAPSE</a>
+  <div class="nav-links"><a href="/">Home</a><a href="/about.html">About</a><a href="/contact.html">Contact</a></div>
+</nav>
+
+<div class="page-hero">
+  <div class="badge">Contact</div>
+  <h1>Get In Touch</h1>
+  <p>Missing a paper? Have feedback? We'd love to hear from you.</p>
+</div>
+
+<div class="content-wrap">
+  <div class="info-col">
+    <h2>Contact Info</h2>
+    <div class="contact-card">
+      <span class="contact-icon">📧</span>
+      <div>
+        <h3>Email</h3>
+        <a href="mailto:synapsesppu@gmail.com">synapsesppu@gmail.com</a>
+      </div>
+    </div>
+    <div class="contact-card">
+      <span class="contact-icon">🌐</span>
+      <div>
+        <h3>Website</h3>
+        <a href="https://sppupyq.vercel.app" target="_blank">sppupyq.vercel.app</a>
+      </div>
+    </div>
+    <div class="contact-card">
+      <span class="contact-icon">🎓</span>
+      <div>
+        <h3>University</h3>
+        <p>Savitribai Phule Pune University (SPPU)</p>
+      </div>
+    </div>
+    <div class="contact-card">
+      <span class="contact-icon">⏱️</span>
+      <div>
+        <h3>Response Time</h3>
+        <p>We typically respond within 24–48 hours.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h2>Send a Message</h2>
+    <div class="form-group">
+      <label for="contactName">Your Name (Optional)</label>
+      <input type="text" id="contactName" placeholder="e.g. Rahul Sharma" />
+    </div>
+    <div class="form-group">
+      <label for="contactEmail">Email (Optional)</label>
+      <input type="email" id="contactEmail" placeholder="your@email.com" />
+    </div>
+    <div class="form-group">
+      <label for="contactType">Subject</label>
+      <select id="contactType">
+        <option value="missing-paper">Missing Question Paper</option>
+        <option value="feedback">General Feedback</option>
+        <option value="bug">Bug / Issue Report</option>
+        <option value="suggestion">Suggestion</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="contactMsg">Message <span style="color:var(--accent)">*</span></label>
+      <textarea id="contactMsg" placeholder="Describe your issue or feedback in detail..."></textarea>
+    </div>
+    <button class="btn-submit" id="contactBtn" onclick="submitContact()">Send Message</button>
+    <div class="alert" id="contactAlert"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="/">Home</a><a href="/about.html">About</a><a href="/contact.html">Contact</a>
+    <a href="/privacy-policy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="/disclaimer.html">Disclaimer</a>
+  </div>
+  <div class="footer-copy">© <span id="yr"></span> SYNAPSE SPPU PYQ Portal. All rights reserved.</div>
+</footer>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+async function submitContact(){
+  const msg=document.getElementById('contactMsg').value.trim();
+  const alert=document.getElementById('contactAlert');
+  const btn=document.getElementById('contactBtn');
+  if(!msg){alert.className='alert error';alert.style.display='block';alert.textContent='Please enter a message.';return;}
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    const res=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('contactName').value||'Anonymous',message:`[${document.getElementById('contactType').value}] ${msg}`})});
+    if(res.ok){alert.className='alert success';alert.style.display='block';alert.textContent='✅ Message sent! We will get back to you soon.';document.getElementById('contactMsg').value='';}
+    else{throw new Error('Server error');}
+  }catch(e){alert.className='alert error';alert.style.display='block';alert.textContent='❌ Something went wrong. Please try again.';}
+  btn.disabled=false;btn.textContent='Send Message';
+}
+</script>
+</body>
+</html>
