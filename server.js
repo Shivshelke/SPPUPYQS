@@ -287,7 +287,7 @@ Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
 // ── Google AdSense ads.txt ────────────────────────────────────────────────────
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain');
-  res.send('google.com, pub-8906861946957043, DIRECT, f08c47fec0942fa0');
+  res.send('google.com, pub-6906861946957043, DIRECT, f08c47fec0942fa0');
 });
 
 app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
