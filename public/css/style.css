@@ -2394,6 +2394,26 @@ a {
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
 }
 
+/* ── THEME TOGGLE ANIMATION ── */
+.theme-spin {
+  display: inline-block;
+  animation: themeRotate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes themeRotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(90deg) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+}
+
 /* ── MOBILE BOTTOM NAV ── */
 .mobile-bottom-nav {
   display: none;

@@ -16,6 +16,17 @@ window.addEventListener('DOMContentLoaded', () => {
 function updateThemeIcons(theme) {
   const icons = document.querySelectorAll('.theme-icon');
   icons.forEach(icon => {
-    icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    // Add animation class
+    icon.classList.add('theme-spin');
+    
+    // Change icon halfway through animation (150ms)
+    setTimeout(() => {
+      icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }, 150);
+    
+    // Remove animation class after it completes (300ms)
+    setTimeout(() => {
+      icon.classList.remove('theme-spin');
+    }, 300);
   });
 }
