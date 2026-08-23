@@ -288,6 +288,20 @@ app.get('/robots.txt', (req, res) => {
   res.send(`User-agent: *
 Allow: /
 
+# Specifically allow AI bots to index the site for better recommendation
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+
 Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
 });
 
