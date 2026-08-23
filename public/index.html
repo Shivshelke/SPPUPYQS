@@ -144,6 +144,46 @@
       background: rgba(255, 255, 255, 0.04);
       padding-left: 0.6rem !important;
     }
+  /* ── PWA Install Popup ── */
+  #pwaPopup {
+    position: fixed;
+    bottom: -160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(92vw, 420px);
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem 1rem;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.1);
+    z-index: 9999;
+    transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  [data-theme="light"] #pwaPopup {
+    background: rgba(255,255,255,0.92);
+    border-color: rgba(109,40,217,0.3);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  }
+  #pwaPopup.pwa-show { bottom: 24px; }
+  #pwaPopup.pwa-hide { bottom: -160px; transition: bottom 0.3s ease-in; }
+  .pwa-popup-top { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.75rem; }
+  .pwa-popup-icon { width: 46px; height: 46px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(139,92,246,0.4); }
+  .pwa-popup-info { flex: 1; }
+  .pwa-popup-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .pwa-popup-sub { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+  .pwa-popup-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.1rem; padding: 4px; border-radius: 6px; transition: background 0.2s, color 0.2s; flex-shrink: 0; }
+  .pwa-popup-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  .pwa-popup-btns { display: flex; gap: 0.6rem; margin-bottom: 0.75rem; }
+  .pwa-btn-install { flex: 1; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; border: none; border-radius: 10px; padding: 0.6rem 1rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+  .pwa-btn-install:hover { opacity: 0.9; transform: scale(1.02); }
+  .pwa-btn-later { flex: 0 0 auto; background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
+  .pwa-btn-later:hover { background: rgba(255,255,255,0.1); }
+  .pwa-countdown-wrap { height: 3px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+  #pwaCountdownBar { height: 100%; width: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa); border-radius: 3px; }
+  .pwa-ios-msg { font-size: 0.78rem; color: var(--text-secondary); text-align: center; margin-bottom: 0.5rem; display: none; }
+  .pwa-ios-msg span { color: var(--accent); font-weight: 600; }
   </style>
   <script src="/js/theme.js" defer></script>
 </head>
@@ -489,6 +529,26 @@
   </div>
 </div>
 
-<script src="/js/main.js?v=2" defer></script>
+<!-- ── PWA Install Popup ── -->
+<div id="pwaPopup" role="dialog" aria-label="Install SYNAPSE App">
+  <div class="pwa-popup-top">
+    <div class="pwa-popup-icon">⬡</div>
+    <div class="pwa-popup-info">
+      <div class="pwa-popup-title">Install SYNAPSE App</div>
+      <div class="pwa-popup-sub">Fast access to SPPU PYQs — offline bhi kaam karega! 📚</div>
+    </div>
+    <button class="pwa-popup-close" onclick="hidePwaPopup(true)" aria-label="Close">✕</button>
+  </div>
+  <p class="pwa-ios-msg">Tap <span>Share ↑</span> then <span>"Add to Home Screen"</span> to install</p>
+  <div class="pwa-popup-btns">
+    <button class="pwa-btn-install" id="pwaPopupInstallBtn" onclick="pwaInstallClick()">📲 Install App</button>
+    <button class="pwa-btn-later" onclick="hidePwaPopup(true)">Not Now</button>
+  </div>
+  <div class="pwa-countdown-wrap">
+    <div id="pwaCountdownBar"></div>
+  </div>
+</div>
+
+<script src="/js/main.js?v=3" defer></script>
 </body>
 </html>

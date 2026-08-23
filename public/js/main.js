@@ -13,21 +13,92 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Handle PWA Install Prompt
+// ── PWA Install Popup ─────────────────────────────────────────────────────────
+const PWA_DISMISSED_KEY = 'synapse_pwa_dismissed';
+const PWA_DISMISS_DAYS  = 7;   // show again after 7 days
+const PWA_SHOW_DELAY    = 3000; // 3 sec after page load
+const PWA_AUTO_HIDE     = 8000; // auto-hide after 8 sec
+
+let pwaAutoHideTimer = null;
+let pwaCountdownTimer = null;
+
+function canShowPwaPopup() {
+  const dismissed = localStorage.getItem(PWA_DISMISSED_KEY);
+  if (!dismissed) return true;
+  const daysSince = (Date.now() - parseInt(dismissed)) / (1000 * 60 * 60 * 24);
+  return daysSince >= PWA_DISMISS_DAYS;
+}
+
+function showPwaPopup() {
+  if (!canShowPwaPopup()) return;
+  const popup = document.getElementById('pwaPopup');
+  if (!popup) return;
+
+  // iOS detection — show custom instructions
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const iosMsg = document.getElementById('pwaIosMsg');
+  const installBtn = document.getElementById('pwaPopupInstallBtn');
+  if (isIOS) {
+    if (iosMsg) iosMsg.style.display = 'block';
+    if (installBtn) installBtn.style.display = 'none';
+  }
+
+  popup.classList.add('pwa-show');
+
+  // Countdown bar animation
+  const bar = document.getElementById('pwaCountdownBar');
+  if (bar) {
+    bar.style.transition = `width ${PWA_AUTO_HIDE}ms linear`;
+    bar.style.width = '0%';
+  }
+
+  // Auto hide after PWA_AUTO_HIDE ms
+  pwaAutoHideTimer = setTimeout(() => hidePwaPopup(false), PWA_AUTO_HIDE);
+}
+
+function hidePwaPopup(dismissed = true) {
+  const popup = document.getElementById('pwaPopup');
+  if (!popup) return;
+  clearTimeout(pwaAutoHideTimer);
+  popup.classList.remove('pwa-show');
+  popup.classList.add('pwa-hide');
+  if (dismissed) {
+    localStorage.setItem(PWA_DISMISSED_KEY, Date.now().toString());
+  }
+  setTimeout(() => { popup.classList.remove('pwa-hide'); }, 400);
+}
+
+async function pwaInstallClick() {
+  if (deferredPrompt) {
+    hidePwaPopup(true);
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('PWA install outcome:', outcome);
+    deferredPrompt = null;
+  }
+}
+
+// Capture the beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const installBtn = document.getElementById('pwaInstallBtn');
-  if (installBtn) {
-    installBtn.style.display = 'block';
-    installBtn.addEventListener('click', async () => {
-      installBtn.style.display = 'none';
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to install prompt: ${outcome}`);
-      deferredPrompt = null;
-    });
+  // Show popup after delay
+  setTimeout(showPwaPopup, PWA_SHOW_DELAY);
+});
+
+// For iOS — still show the popup after delay
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isIOS && !isInStandaloneMode) {
+    setTimeout(showPwaPopup, PWA_SHOW_DELAY);
   }
+});
+
+// Already installed
+window.addEventListener('appinstalled', () => {
+  hidePwaPopup(true);
+  deferredPrompt = null;
 });
 
 // ── Mobile Menu ──────────────────────────────────────────────────────────────
