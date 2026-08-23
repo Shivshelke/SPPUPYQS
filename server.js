@@ -748,7 +748,12 @@ app.get('*', async (req, res) => {
     }
 
     // Default fallback for any other routes
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    let fallbackHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    try {
+      const directoryHtml = await generateSeoDirectory();
+      fallbackHtml = fallbackHtml.replace('<div id="seo-links-directory"></div>', directoryHtml);
+    } catch(e) {}
+    return res.send(fallbackHtml);
   } catch (err) {
     console.error('Catch-all SEO generation error:', err);
     return res.sendFile(path.join(__dirname, 'public', 'index.html'));
