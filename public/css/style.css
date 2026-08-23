@@ -2457,8 +2457,8 @@ a {
   #pwaPopup.pwa-show { 
     bottom: calc(85px + env(safe-area-inset-bottom)); 
   }
-  .chat-widget {
-    bottom: calc(85px + env(safe-area-inset-bottom)) !important;
+  .chat-widget:not(.open) {
+    display: none !important;
   }
 
   /* Make chatbot full screen on mobile */
