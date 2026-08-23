@@ -3,44 +3,44 @@
    ═══════════════════════════════════════ */
 
 :root {
-  --bg: #030712;
-  --surface: #0b0f19;
-  --surface2: #111827;
-  --border: #1f2937;
-  --border-light: #374151;
-  --accent: #8b5cf6;
-  --accent-secondary: #ec4899;
-  --accent-hover: #7c3aed;
-  --accent-glow: rgba(139, 92, 246, 0.2);
-  --text: #f9fafb;
-  --text-secondary: #d1d5db;
-  --muted: #9ca3af;
+  --bg: #09090b;
+  --surface: #121214;
+  --surface2: #18181b;
+  --border: #27272a;
+  --border-light: #3f3f46;
+  --accent: #3b82f6; /* Clean Blue */
+  --accent-secondary: #60a5fa; /* Light Blue */
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --text: #fafafa;
+  --text-secondary: #a1a1aa;
+  --muted: #71717a;
   --success: #10b981;
   --danger: #ef4444;
-  --card-hover: #1e1b4b;
-  --nav-bg: rgba(3, 7, 18, 0.85);
-  --mobile-nav-bg: rgba(3, 7, 18, 0.98);
+  --card-hover: #1f1f22;
+  --nav-bg: rgba(9, 9, 11, 0.8);
+  --mobile-nav-bg: rgba(9, 9, 11, 0.98);
 }
 
 [data-theme="light"] {
-  --bg: #eef0f5;
-  --surface: #ffffff;
-  --surface2: #e8eaf2;
-  --border: #c8ccd8;
-  --border-light: #d8dce8;
-  --accent: #6d28d9;
-  --accent-secondary: #db2777;
-  --accent-hover: #5b21b6;
-  --accent-glow: rgba(109, 40, 217, 0.18);
-  --text: #0d1117;
-  --text-secondary: #374151;
-  --muted: #6b7280;
-  --card-hover: #f5f3ff;
-  --nav-bg: rgba(238, 240, 245, 0.92);
-  --mobile-nav-bg: rgba(238, 240, 245, 0.99);
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.07);
-  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.10), 0 3px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.13), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --bg: #ffffff;
+  --surface: #f4f4f5;
+  --surface2: #e4e4e7;
+  --border: #d4d4d8;
+  --border-light: #e4e4e7;
+  --accent: #2563eb;
+  --accent-secondary: #3b82f6;
+  --accent-hover: #1d4ed8;
+  --accent-glow: rgba(37, 99, 235, 0.1);
+  --text: #09090b;
+  --text-secondary: #52525b;
+  --muted: #71717a;
+  --card-hover: #fdfdfd;
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --mobile-nav-bg: rgba(255, 255, 255, 0.98);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 *,
@@ -183,7 +183,7 @@ a {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(99, 102, 241, .12), transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(59, 130, 246, 0.08), transparent 70%);
 }
 
 .hero-content {
@@ -195,19 +195,19 @@ a {
 .hero-badge {
   display: inline-block;
   padding: .4rem 1.2rem;
-  background: rgba(99, 102, 241, 0.10);
+  background: var(--accent-glow);
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(139, 92, 246, 0.30);
+  border: 1px solid var(--accent);
   border-radius: 100px;
   font-size: .75rem;
   font-weight: 600;
-  color: #a5b4fc;
+  color: var(--accent);
   margin-bottom: 1.5rem;
   letter-spacing: .1em;
   text-transform: uppercase;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="light"] .hero-badge {
@@ -218,10 +218,11 @@ a {
 }
 
 .hero-badge:hover {
-  background: rgba(99, 102, 241, 0.18);
+  background: var(--accent);
+  color: #fff;
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.20);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .hero h1 {
@@ -229,7 +230,8 @@ a {
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 1.5rem;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .accent {
@@ -496,7 +498,7 @@ a {
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  border-radius: 24px;
   padding: 2rem 1.5rem;
   cursor: pointer;
   transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -690,7 +692,7 @@ a {
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 1.2rem;
   display: flex;
   align-items: flex-start;
