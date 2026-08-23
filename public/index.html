@@ -528,6 +528,34 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- ── Scroll to Top ── -->
+<button id="scrollTopBtn" onclick="scrollToTop()" aria-label="Scroll to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<!-- ── Mobile Bottom Nav ── -->
+<nav class="mobile-bottom-nav">
+  <a href="#" onclick="window.scrollTo(0,0); return false;" class="bottom-nav-item active">
+    <div class="bottom-nav-icon">🏠</div>
+    <span>Home</span>
+  </a>
+  <a href="#years" onclick="document.getElementById('globalSearch').focus(); return false;" class="bottom-nav-item">
+    <div class="bottom-nav-icon">🔍</div>
+    <span>Search</span>
+  </a>
+  <a href="#years" class="bottom-nav-item">
+    <div class="bottom-nav-icon">📚</div>
+    <span>Browse</span>
+  </a>
+  <a href="/student-login.html" class="bottom-nav-item">
+    <div class="bottom-nav-icon">👤</div>
+    <span>Login</span>
+  </a>
+</nav>
 
 <!-- ── PWA Install Popup ── -->
 <div id="pwaPopup" role="dialog" aria-label="Install SYNAPSE App">
