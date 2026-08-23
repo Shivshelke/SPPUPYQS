@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+
+# Specifically allow AI bots to index the site for better recommendation
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: OmgiliBot
+Allow: /
+
+User-agent: Omgili
+Allow: /
+
+Sitemap: https://sppupyq.vercel.app/sitemap.xml
