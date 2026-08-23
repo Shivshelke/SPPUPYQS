@@ -195,12 +195,17 @@ async function generateSeoDirectory() {
     });
 
     let directoryHtml = `
-<div class="seo-directory-section" style="margin-top: 5rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4rem; text-align: left;">
-  <h2 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; text-align: center;">SPPU PYQ Catalog Directory</h2>
-  <p style="color: var(--text-secondary); text-align: center; font-size: 0.95rem; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.8; line-height: 1.5;">
-    Quickly navigate to Savitribai Phule Pune University previous year question papers by choosing your branch and subject catalog.
-  </p>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+<div class="seo-directory-section" style="margin-top: 5rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4rem;">
+  <details class="directory-section-collapse" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;">
+    <summary style="padding: 1.5rem; font-size: 1.2rem; font-weight: 600; cursor: pointer; color: var(--accent); display: flex; justify-content: space-between; align-items: center; user-select: none; list-style: none;">
+      <span style="font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700;">View SPPU PYQ Catalog Directory</span>
+      <span style="font-size: 1.2rem;">▼</span>
+    </summary>
+    <div style="padding: 0 1.5rem 1.5rem 1.5rem;">
+      <p style="color: var(--text-secondary); text-align: left; font-size: 0.95rem; margin-top: 0.5rem; margin-bottom: 2rem; opacity: 0.8; line-height: 1.5;">
+        Quickly navigate to Savitribai Phule Pune University previous year question papers by choosing your branch and subject catalog.
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
 `;
 
     const yearOrder = ['first', 'second', 'third', 'fourth'];
@@ -250,7 +255,9 @@ async function generateSeoDirectory() {
     });
 
     directoryHtml += `
-  </div>
+      </div>
+    </div>
+  </details>
 </div>
 `;
     return directoryHtml;
