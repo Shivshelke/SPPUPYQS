@@ -466,6 +466,41 @@
     </div>
   </div>
 
+  <!-- ── DOWNLOAD GATE SETTINGS MODAL ── -->
+  <div class="modal-overlay" id="gateModal" style="display:none">
+    <div class="modal" style="max-width: 500px; text-align: left;">
+      <h3 style="margin-top: 0;">Download Gate Settings</h3>
+      <p id="gateModalText" style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;"></p>
+      
+      <div class="form-group">
+        <label>Gate Type</label>
+        <select id="gateType" class="input-field" onchange="toggleGateFields()">
+          <option value="none">Direct Download (No Gate)</option>
+          <option value="whatsapp">WhatsApp Required</option>
+          <option value="telegram">Telegram Required</option>
+          <option value="both">WhatsApp + Telegram Required</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="gateWaGroup" style="display:none">
+        <label>WhatsApp Group Link</label>
+        <input type="url" id="gateWaUrl" class="input-field" placeholder="https://chat.whatsapp.com/...">
+      </div>
+
+      <div class="form-group" id="gateTgGroup" style="display:none">
+        <label>Telegram Group Link</label>
+        <input type="url" id="gateTgUrl" class="input-field" placeholder="https://t.me/...">
+      </div>
+
+      <div id="gateAlert" class="alert" style="display:none; margin-top: 1rem;"></div>
+
+      <div class="modal-actions" style="margin-top: 1.5rem; justify-content: flex-end;">
+        <button class="btn-ghost" onclick="closeGateModal()">Cancel</button>
+        <button class="btn-primary" id="saveGateBtn" onclick="saveGateSettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/dashboard.js"></script>
 </body>
 

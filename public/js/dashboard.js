@@ -480,6 +480,7 @@ async function loadAdminFiles() {
               <td>${formatSize(f.size)}</td>
               <td>${formatDate(f.uploadDate)}</td>
               <td>
+                <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.5rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}', '${f.downloadGate ? escHtml(f.downloadGate.telegramUrl || '') : ''}')">Gate</button>
                 <button class="btn-del" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
               </td>
             </tr>
@@ -523,6 +524,83 @@ async function doDelete() {
     alert('Network error. Please try again.');
   } finally {
     btn.disabled = false; btn.textContent = 'Delete';
+  }
+}
+
+// ── Download Gate modal ───────────────────────────────────────────────────────
+let gateTargetId = null;
+
+function openGateModal(id, name, type, waUrl, tgUrl) {
+  gateTargetId = id;
+  document.getElementById('gateModalText').textContent = `Settings for: ${name}`;
+  document.getElementById('gateType').value = type || 'none';
+  document.getElementById('gateWaUrl').value = waUrl || '';
+  document.getElementById('gateTgUrl').value = tgUrl || '';
+  document.getElementById('gateAlert').style.display = 'none';
+  
+  toggleGateFields();
+  document.getElementById('gateModal').style.display = 'flex';
+}
+
+function closeGateModal() {
+  document.getElementById('gateModal').style.display = 'none';
+  gateTargetId = null;
+}
+
+function toggleGateFields() {
+  const type = document.getElementById('gateType').value;
+  document.getElementById('gateWaGroup').style.display = (type === 'whatsapp' || type === 'both') ? 'block' : 'none';
+  document.getElementById('gateTgGroup').style.display = (type === 'telegram' || type === 'both') ? 'block' : 'none';
+}
+
+async function saveGateSettings() {
+  if (!gateTargetId) return;
+  const btn = document.getElementById('saveGateBtn');
+  const alertEl = document.getElementById('gateAlert');
+  
+  const type = document.getElementById('gateType').value;
+  const whatsappUrl = document.getElementById('gateWaUrl').value.trim();
+  const telegramUrl = document.getElementById('gateTgUrl').value.trim();
+  const enabled = type !== 'none';
+
+  if ((type === 'whatsapp' || type === 'both') && !whatsappUrl) {
+    alertEl.textContent = 'WhatsApp Group Link is required.';
+    alertEl.className = 'alert error';
+    alertEl.style.display = 'block';
+    return;
+  }
+
+  if ((type === 'telegram' || type === 'both') && !telegramUrl) {
+    alertEl.textContent = 'Telegram Group Link is required.';
+    alertEl.className = 'alert error';
+    alertEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Saving...';
+  alertEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`/admin/files/${gateTargetId}/gate`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled, type, whatsappUrl, telegramUrl })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeGateModal();
+      await loadAdminFiles(); // Refresh list to reflect changes
+    } else {
+      alertEl.textContent = data.error || 'Failed to save settings.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+  } catch (e) {
+    alertEl.textContent = 'Network error. Please try again.';
+    alertEl.className = 'alert error';
+    alertEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Settings';
   }
 }
 

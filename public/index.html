@@ -895,6 +895,34 @@
     </div>
   </div>
 
+  <!-- ── Join to Download Modal ── -->
+  <div id="gateModal" class="modal-overlay" onclick="closeGateModal(event)">
+    <div class="modal gate-modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeGateModal()">&times;</button>
+      <div class="modal-header">
+        <div class="gate-icon" style="font-size:3rem; margin-bottom:0.5rem">🔒</div>
+        <h3 id="gateTitle">Unlock PDF</h3>
+        <p style="color:var(--muted); font-size:0.9rem;" id="gateSubTitle">Join our groups to unlock this download.</p>
+      </div>
+      <div class="modal-body">
+        
+        <div id="gateStepWa" class="gate-step" style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0;">1. WhatsApp Group</h4>
+          <a href="#" target="_blank" id="gateWaBtn" class="btn-primary" style="display:block; margin-bottom: 0.5rem; background: #25D366; color: white;" onclick="startGateCountdown('whatsapp')">Join WhatsApp</a>
+          <div id="gateWaStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
+        </div>
+
+        <div id="gateStepTg" class="gate-step" style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0;">2. Telegram Group</h4>
+          <a href="#" target="_blank" id="gateTgBtn" class="btn-primary" style="display:block; margin-bottom: 0.5rem; background: #0088cc; color: white;" onclick="startGateCountdown('telegram')">Join Telegram</a>
+          <div id="gateTgStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
+        </div>
+
+        <button id="gateDownloadBtn" class="btn-primary" style="width: 100%; display: none;" onclick="executeGatedDownload()">Download PDF Now</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Chatbot Widget ── -->
   <div id="chatWidget" class="chat-widget">
     <div class="chat-header" onclick="toggleChat()">

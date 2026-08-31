@@ -650,9 +650,14 @@ function renderFileGrid(files, gridId) {
 
   grid.innerHTML = files.map((f, i) => {
     const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
-    const downloadBtn = isGdLink 
-      ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
-      : `<a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>`;
+    let downloadBtn;
+    if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
+       downloadBtn = `<button class="btn-download" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')" title="Unlock PDF">🔒 Unlock</button>`;
+    } else {
+       downloadBtn = isGdLink 
+         ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
+         : `<a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>`;
+    }
 
     const shareText = encodeURIComponent(`Check out ${f.originalName} on SYNAPSE SPPU PYQ Portal! \nhttps://sppupyq.vercel.app/api/download/${f._id}`);
     const shareBtn = `<a class="btn-view" style="flex:0 0 auto; padding: 0.6rem; display:flex; align-items:center; justify-content:center; background: rgba(37, 211, 102, 0.1); border-color: rgba(37, 211, 102, 0.3); color: #25D366;" href="https://api.whatsapp.com/send?text=${shareText}" target="_blank" title="Share on WhatsApp">
@@ -974,11 +979,17 @@ async function openPremiumModal(type) {
     } else {
       list.innerHTML = files.map(f => {
         const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
+        let downloadAction = '';
+        if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
+           downloadAction = `<button class="modal-list-btn" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')">🔒 Unlock</button>`;
+        } else {
+           downloadAction = isGdLink
+             ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
+             : `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`;
+        }
+
         const actionBtn = isPremiumUser
-          ? (isGdLink
-              ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
-              : `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
-            )
+          ? downloadAction
           : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
 
         return `
@@ -1140,5 +1151,103 @@ async function sendChatMessage() {
   } finally {
     input.disabled = false;
     input.focus();
+  }
+}
+
+// ── Download Gate Logic ───────────────────────────────────────────────────────
+let activeGateFileId = null;
+let gateConfig = { type: 'none', waUrl: '', tgUrl: '' };
+let gateState = { wa: false, tg: false };
+
+function handleGatedDownload(fileId, type, waUrl, tgUrl) {
+  activeGateFileId = fileId;
+  gateConfig = { type, waUrl, tgUrl };
+  gateState = { wa: false, tg: false };
+
+  document.getElementById('gateStepWa').style.display = (type === 'whatsapp' || type === 'both') ? 'block' : 'none';
+  document.getElementById('gateStepTg').style.display = (type === 'telegram' || type === 'both') ? 'block' : 'none';
+  
+  if (type === 'whatsapp' || type === 'both') {
+    document.getElementById('gateWaBtn').href = waUrl;
+    document.getElementById('gateWaBtn').style.pointerEvents = 'auto';
+    document.getElementById('gateWaStatus').textContent = "";
+    document.getElementById('gateWaStatus').style.color = "var(--muted)";
+  }
+  
+  if (type === 'telegram' || type === 'both') {
+    document.getElementById('gateTgBtn').href = tgUrl;
+    document.getElementById('gateTgBtn').style.pointerEvents = 'auto';
+    document.getElementById('gateTgStatus').textContent = "";
+    document.getElementById('gateTgStatus').style.color = "var(--muted)";
+  }
+
+  document.getElementById('gateDownloadBtn').style.display = 'none';
+  document.getElementById('gateModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGateModal() {
+  document.getElementById('gateModal').classList.remove('show');
+  activeGateFileId = null;
+  document.body.style.overflow = '';
+}
+
+function startGateCountdown(platform) {
+  if (gateState[platform === 'whatsapp' ? 'wa' : 'tg']) return;
+
+  const btn = document.getElementById(platform === 'whatsapp' ? 'gateWaBtn' : 'gateTgBtn');
+  const status = document.getElementById(platform === 'whatsapp' ? 'gateWaStatus' : 'gateTgStatus');
+  
+  btn.style.pointerEvents = 'none';
+  
+  let count = 7;
+  status.textContent = `⏳ Unlocking in ${count}s`;
+  status.style.whiteSpace = 'normal';
+
+  const timer = setInterval(() => {
+    count--;
+    if (count > 0) {
+      status.textContent = `⏳ Unlocking in ${count}s`;
+    } else {
+      clearInterval(timer);
+      gateState[platform === 'whatsapp' ? 'wa' : 'tg'] = true;
+      status.textContent = 'Download Unlocked ✓';
+      status.style.color = 'var(--accent)';
+      checkGateCompletion();
+    }
+  }, 1000);
+}
+
+function checkGateCompletion() {
+  let complete = false;
+  if (gateConfig.type === 'whatsapp' && gateState.wa) complete = true;
+  if (gateConfig.type === 'telegram' && gateState.tg) complete = true;
+  if (gateConfig.type === 'both' && gateState.wa && gateState.tg) complete = true;
+
+  if (complete) {
+    document.getElementById('gateDownloadBtn').style.display = 'block';
+  }
+}
+
+async function executeGatedDownload() {
+  if (!activeGateFileId) return;
+  const btn = document.getElementById('gateDownloadBtn');
+  btn.textContent = 'Generating Secure Link...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`/api/verify-gate/${activeGateFileId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success && data.token) {
+      window.location.href = `/api/download/${activeGateFileId}?token=${data.token}`;
+      setTimeout(() => { closeGateModal(); }, 1000);
+    } else {
+      alert('Failed to verify access. Please try again.');
+    }
+  } catch (e) {
+    alert('Network error. Please try again.');
+  } finally {
+    btn.textContent = 'Download PDF Now';
+    btn.disabled = false;
   }
 }

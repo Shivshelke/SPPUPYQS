@@ -16,6 +16,30 @@ const router = express.Router();
 const File = require('../models/File');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
+const crypto = require('crypto');
+
+const GATE_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-gates-2026';
+
+function generateGateToken(fileId) {
+  const expires = Date.now() + 1000 * 60 * 15; // 15 minutes
+  const data = `${fileId}:${expires}`;
+  const signature = crypto.createHmac('sha256', GATE_SECRET).update(data).digest('hex');
+  return Buffer.from(`${data}:${signature}`).toString('base64');
+}
+
+function verifyGateToken(fileId, token) {
+  if (!token) return false;
+  try {
+    const decoded = Buffer.from(token, 'base64').toString('utf8');
+    const [id, exp, sig] = decoded.split(':');
+    if (id !== fileId) return false;
+    if (Date.now() > parseInt(exp, 10)) return false;
+    const expectedSig = crypto.createHmac('sha256', GATE_SECRET).update(`${id}:${exp}`).digest('hex');
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig));
+  } catch (e) {
+    return false;
+  }
+}
 
 // Helper to proxy Cloudinary files with redirect support and header forwarding
 function proxySecure(url, res, filename, disposition = 'attachment') {
@@ -76,11 +100,33 @@ function proxySecure(url, res, filename, disposition = 'attachment') {
   });
 }
 
+// POST /api/verify-gate/:id — verify user joined groups and issue token
+router.post('/verify-gate/:id', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: 'File not found' });
+    
+    // In the MVP, we just trust the frontend that the user completed the steps.
+    // Future: verify with Telegram Bot API if required.
+    const token = generateGateToken(file._id.toString());
+    res.json({ success: true, token });
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /api/download/:id — proxy PDF with correct content-type
 router.get('/download/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    if (file.downloadGate && file.downloadGate.enabled && file.downloadGate.type !== 'none') {
+      const token = req.query.token;
+      if (!verifyGateToken(file._id.toString(), token)) {
+        return res.status(403).send('Forbidden: Download Gate verification required. Please go back and complete the required steps.');
+      }
+    }
 
     if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
       return res.redirect(file.url);
@@ -102,6 +148,13 @@ router.get('/view/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    if (file.downloadGate && file.downloadGate.enabled && file.downloadGate.type !== 'none') {
+      const token = req.query.token;
+      if (!verifyGateToken(file._id.toString(), token)) {
+        return res.status(403).send('Forbidden: Download Gate verification required. Please go back and complete the required steps.');
+      }
+    }
 
     if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
       return res.redirect(file.url);
