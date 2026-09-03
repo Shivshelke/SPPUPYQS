@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Purchases | SYNAPSE</title>
+  <link rel="icon" type="image/png" href="/img/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/theme.js"></script>
+  <style>
+    :root {
+      --surface-glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --blur: blur(12px);
+    }
+    [data-theme="light"] {
+      --surface-glass: rgba(0, 0, 0, 0.02);
+      --glass-border: rgba(0, 0, 0, 0.08);
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(9, 9, 11, 0.7);
+      backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--glass-border);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      box-sizing: border-box;
+    }
+    [data-theme="light"] .nav { background: rgba(255, 255, 255, 0.7); }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .library-container {
+      max-width: 1000px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .library-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 1.5rem;
+    }
+    .library-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .search-box {
+      position: relative;
+      width: 300px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.5rem;
+      background: var(--surface-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text);
+      box-sizing: border-box;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+
+    .purchase-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .purchase-item {
+      display: flex;
+      align-items: center;
+      background: var(--surface-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      gap: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .purchase-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    [data-theme="light"] .purchase-item:hover { border-color: rgba(0, 0, 0, 0.15); }
+
+    .purchase-icon {
+      width: 60px;
+      height: 75px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .purchase-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .purchase-details {
+      flex: 1;
+    }
+    .purchase-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+    .purchase-meta {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    
+    .btn-open {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-open:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .library-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .search-box { width: 100%; }
+      .purchase-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .btn-open { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/marketplace.html" class="nav-brand">
+      <span style="color:var(--accent);">⬡</span> SYNAPSE
+    </a>
+    <a href="/marketplace.html" style="color:var(--text-secondary); text-decoration:none;">&larr; Marketplace</a>
+  </nav>
+
+  <main class="library-container">
+    <div class="library-header">
+      <h1 class="library-title">My Purchases</h1>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search your library...">
+      </div>
+    </div>
+
+    <div class="purchase-list" id="purchaseList">
+      <div style="text-align:center; padding: 3rem; color: var(--text-secondary);">Loading your library...</div>
+    </div>
+  </main>
+
+  <script>
+    async function loadPurchases() {
+      const container = document.getElementById('purchaseList');
+      try {
+        const res = await fetch('/api/payment/my-purchases');
+        if (res.status === 401) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const purchases = await res.json();
+        
+        if (!purchases || purchases.length === 0) {
+          container.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-secondary);">You have not purchased any premium content yet.</div>';
+          return;
+        }
+        
+        container.innerHTML = purchases.map(purchase => {
+          const product = purchase.product;
+          if (!product) return '';
+          
+          const date = new Date(purchase.purchasedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          const streamUrl = `/api/payment/stream/${product._id}`;
+          
+          return `
+          <div class="purchase-item">
+            <div class="purchase-icon">
+              <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=200&q=80" alt="Cover">
+            </div>
+            <div class="purchase-details">
+              <h2 class="purchase-title">${product.title}</h2>
+              <p class="purchase-meta">Purchased on ${date} • ₹${purchase.pricePaid || product.price}</p>
+            </div>
+            <a href="${streamUrl}" target="_blank" class="btn-open">Open PDF</a>
+          </div>
+          `;
+        }).join('');
+        
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-secondary);">Error loading purchases. Please try again.</div>';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadPurchases);
+  </script>
+
+</body>
+</html>

@@ -93,6 +93,7 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
       window.loadPremiumRequests();
     }
     if (panelId === 'premium') window.loadPremiumAdminFiles();
+    if (panelId === 'earnings') window.loadEarningsAnalytics();
     if (panelId === 'categories') loadCatStructure();
     if (panelId === 'feedback') {
       loadFeedback();
@@ -436,6 +437,99 @@ async function loadRecentFiles() {
 }
 
 // ── Manage files panel ────────────────────────────────────────────────────────
+window.currentFileTab = 'free';
+
+window.switchFileTab = function(tab) {
+  window.currentFileTab = tab;
+  const freeBtn = document.getElementById('subTabFree');
+  const premiumBtn = document.getElementById('subTabPremium');
+  const freeList = document.getElementById('adminFileList');
+  const premiumList = document.getElementById('adminPremiumFileList');
+
+  if (tab === 'free') {
+    freeBtn.style.color = 'var(--accent)';
+    freeBtn.style.borderBottom = '2px solid var(--accent)';
+    freeBtn.style.fontWeight = '600';
+    premiumBtn.style.color = 'var(--text-secondary)';
+    premiumBtn.style.borderBottom = '2px solid transparent';
+    premiumBtn.style.fontWeight = '500';
+    
+    freeList.style.display = 'block';
+    premiumList.style.display = 'none';
+    
+    loadAdminFiles();
+  } else {
+    premiumBtn.style.color = 'var(--accent)';
+    premiumBtn.style.borderBottom = '2px solid var(--accent)';
+    premiumBtn.style.fontWeight = '600';
+    freeBtn.style.color = 'var(--text-secondary)';
+    freeBtn.style.borderBottom = '2px solid transparent';
+    freeBtn.style.fontWeight = '500';
+    
+    freeList.style.display = 'none';
+    premiumList.style.display = 'block';
+    
+    window.loadPremiumAdminFilesForTab();
+  }
+};
+
+window.loadPremiumAdminFilesForTab = async function () {
+  const el = document.getElementById('adminPremiumFileList');
+  if (!el) return;
+  const year = document.getElementById('filterYear').value;
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+
+  try {
+    const res = await fetch('/admin/premium-files?t=' + Date.now());
+    let files = await res.json();
+
+    if (year) files = files.filter(f => f.year === year);
+    if (search) files = files.filter(f => f.title.toLowerCase().includes(search) || (f.subject && f.subject.toLowerCase().includes(search)));
+
+    if (!files || !files.length) {
+      el.innerHTML = '<div class="empty-state small">No premium files found.</div>';
+      return;
+    }
+
+    el.innerHTML = `
+    <div class="file-table-wrap">
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Year/Branch</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${files.map(f => {
+      let badge = '';
+      if (f.contentType === 'pyq') badge = '<span class="badge" style="background:#f59e0b;color:#111">PYQ</span>';
+      else if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
+      else badge = `<span class="badge" style="background:#ec4899;color:#fff">${f.contentType || 'Other'}</span>`;
+
+      return `
+            <tr>
+              <td>${badge}</td>
+              <td><a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a></td>
+              <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
+              <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
+              <td>
+                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
+              </td>
+            </tr>
+            `;
+    }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  } catch (e) {
+    el.innerHTML = '<div class="empty-state small" style="color:var(--danger)">Failed to load premium files</div>';
+  }
+};
+
 async function loadAdminFiles() {
   const year = document.getElementById('filterYear').value;
   const search = document.getElementById('filterSearch').value;
@@ -492,16 +586,18 @@ async function loadAdminFiles() {
 }
 
 // ── Delete modal ──────────────────────────────────────────────────────────────
-function openDeleteModal(id, name) {
+function openDeleteModal(id, name, type = 'free') {
   deleteTargetId = id;
+  deleteTargetType = type;
   document.getElementById('deleteModalText').textContent = `Delete "${name}"? This cannot be undone.`;
   document.getElementById('deleteModal').style.display = 'flex';
-  document.getElementById('confirmDeleteBtn').onclick = doDelete;
+  document.getElementById('confirmDeleteBtn').onclick = type === 'premium' ? doPremiumDelete : doDelete;
 }
 
 function closeDeleteModal() {
   document.getElementById('deleteModal').style.display = 'none';
   deleteTargetId = null;
+  deleteTargetType = 'free';
 }
 
 async function doDelete() {
@@ -514,14 +610,38 @@ async function doDelete() {
     const data = await res.json();
     closeDeleteModal();
     if (data.success) {
-      await loadStats();
-      await loadAdminFiles();
-      await loadRecentFiles();
+      if (typeof loadStats === 'function') await loadStats();
+      if (typeof loadAdminFiles === 'function') await loadAdminFiles();
+      if (typeof loadRecentFiles === 'function') await loadRecentFiles();
     } else {
       alert(data.error || 'Delete failed.');
     }
   } catch (e) {
     alert('Network error. Please try again.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Delete';
+  }
+}
+
+async function doPremiumDelete() {
+  if (!deleteTargetId) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+
+  try {
+    const res = await fetch(`/admin/product/${deleteTargetId}`, { method: 'DELETE' });
+    const data = await res.json();
+    closeDeleteModal();
+
+    if (data.success) {
+      if (typeof window.loadPremiumAdminFiles === 'function') window.loadPremiumAdminFiles();
+      if (typeof window.loadPremiumAdminFilesForTab === 'function') window.loadPremiumAdminFilesForTab();
+    } else {
+      alert(data.error || 'Delete failed.');
+    }
+  } catch (e) {
+    closeDeleteModal();
+    alert('Network error');
   } finally {
     btn.disabled = false; btn.textContent = 'Delete';
   }
@@ -893,10 +1013,12 @@ window.onPremiumFileSelect = function (input) {
 }
 
 window.clearPremiumFile = function () {
-  document.getElementById('prmPdfInput').value = '';
-  document.getElementById('prmDropzone').style.display = 'block';
-  document.getElementById('prmFilePreview').style.display = 'none';
-  document.getElementById('prmCustomName').value = '';
+  const prmPdfInput = document.getElementById('prmPdfInput');
+  if (prmPdfInput) prmPdfInput.value = '';
+  const dropzone = document.getElementById('prmDropzone');
+  if (dropzone) dropzone.style.display = 'block';
+  const filePreview = document.getElementById('prmFilePreview');
+  if (filePreview) filePreview.style.display = 'none';
 }
 
 window.onPrmYearChange = function () {
@@ -905,18 +1027,22 @@ window.onPrmYearChange = function () {
   const branchPatternRow = document.getElementById('prmBranchPatternRow');
   const patternGroup = document.getElementById('prmPatternGroup');
 
-  branch.innerHTML = '<option value="">— Select Branch —</option>';
-  branch.disabled = true;
+  if (branch) {
+    branch.innerHTML = '<option value="">— Select Branch —</option>';
+    branch.disabled = true;
+  }
 
-  if (year && year !== 'first') {
-    branchPatternRow.style.display = 'flex';
-    patternGroup.style.display = 'block';
-  } else if (year === 'first') {
-    branchPatternRow.style.display = 'flex';
-    patternGroup.style.display = 'none';
-  } else {
-    branchPatternRow.style.display = 'none';
-    patternGroup.style.display = 'none';
+  if (branchPatternRow && patternGroup) {
+    if (year && year !== 'first') {
+      branchPatternRow.style.display = 'flex';
+      patternGroup.style.display = 'block';
+    } else if (year === 'first') {
+      branchPatternRow.style.display = 'flex';
+      patternGroup.style.display = 'none';
+    } else {
+      branchPatternRow.style.display = 'none';
+      patternGroup.style.display = 'none';
+    }
   }
 
   if (!year || !CONFIG[year]) {
@@ -942,19 +1068,16 @@ window.doPremiumUpload = async function () {
   const type = document.getElementById('prmType').value;
   const year = document.getElementById('prmYear').value;
   const branch = document.getElementById('prmBranch').value;
-  const semesterEl = document.getElementById('prmSemester');
-  const semester = semesterEl ? semesterEl.value : '';
-  const subject = document.getElementById('prmSubject').value.trim();
-  const custom = document.getElementById('prmCustomName').value.trim();
+  const title = document.getElementById('prmSubject').value.trim();
+  const price = document.getElementById('prmPrice').value;
   const file = document.getElementById('prmPdfInput').files[0];
   const linkUrl = document.getElementById('prmLink').value.trim();
-  const patternVal = document.getElementById('prmPattern').value;
 
-  if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
+  if (!type) { showPrmAlert('Please select a content type.', 'error'); return; }
   if (!year) { showPrmAlert('Please select a year.', 'error'); return; }
   if (!branch) { showPrmAlert('Please select a branch.', 'error'); return; }
-  if (semesterEl && !semester) { showPrmAlert('Please select a semester.', 'error'); return; }
-  if (!subject) { showPrmAlert('Please enter a subject name.', 'error'); return; }
+  if (!title) { showPrmAlert('Please enter a product title.', 'error'); return; }
+  if (!price) { showPrmAlert('Please enter a price.', 'error'); return; }
 
   if (currentPrmUploadMethod === 'file') {
     if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
@@ -985,17 +1108,19 @@ window.doPremiumUpload = async function () {
     progressText.textContent = `Uploading… ${prog}%`;
   }, 150);
 
+  const desc = document.getElementById('prmDesc').value.trim();
+  const thumbnail = document.getElementById('prmThumbnail').value.trim();
+  const originalPrice = document.getElementById('prmOriginalPrice') ? document.getElementById('prmOriginalPrice').value.trim() : '';
+
   const fd = new FormData();
   fd.append('contentType', type);
   fd.append('year', year);
   fd.append('branch', branch);
-  fd.append('semester', semester);
-  fd.append('subject', subject);
-  if (custom) fd.append('customFileName', custom);
-  if (year !== 'first') {
-    const patternYear = patternVal.split(' ')[0];
-    fd.append('pattern', patternYear);
-  }
+  fd.append('title', title);
+  fd.append('price', price);
+  if (originalPrice) fd.append('originalPrice', originalPrice);
+  if (desc) fd.append('description', desc);
+  if (thumbnail) fd.append('thumbnailUrl', thumbnail);
   
   if (currentPrmUploadMethod === 'file') {
     fd.append('pdf', file);
@@ -1005,7 +1130,7 @@ window.doPremiumUpload = async function () {
   }
 
   try {
-    const res = await fetch('/admin/upload', { method: 'POST', body: fd });
+    const res = await fetch('/admin/product', { method: 'POST', body: fd });
     const data = await res.json();
     clearInterval(interval);
 
@@ -1018,10 +1143,13 @@ window.doPremiumUpload = async function () {
       document.getElementById('prmType').value = '';
       document.getElementById('prmYear').value = '';
       document.getElementById('prmBranch').value = '';
-      if (semesterEl) semesterEl.value = '';
+      if (typeof semesterEl !== 'undefined' && semesterEl) semesterEl.value = '';
       document.getElementById('prmSubject').value = '';
-      document.getElementById('prmBranch').disabled = true;
-      document.getElementById('prmBranchPatternRow').style.display = 'none';
+      document.getElementById('prmPrice').value = '';
+      if (document.getElementById('prmOriginalPrice')) document.getElementById('prmOriginalPrice').value = '';
+
+      // Don't disable branch, let user upload another quickly
+      // document.getElementById('prmBranch').disabled = true;
 
       await window.loadPremiumAdminFiles();
     } else {
@@ -1030,7 +1158,8 @@ window.doPremiumUpload = async function () {
     }
   } catch (e) {
     clearInterval(interval);
-    showPrmAlert('Network error. Please try again.', 'error');
+    console.error("Dashboard upload error:", e);
+    showPrmAlert(e.message || 'Network error. Please try again.', 'error');
     progressFill.style.width = '0%';
   } finally {
     btn.disabled = false; btn.textContent = 'Upload Premium File ✨';
@@ -1049,16 +1178,10 @@ window.loadPremiumAdminFiles = async function () {
   if (!el) return;
 
   try {
-    const p1 = fetch('/admin/files?contentType=solved-pyq').then(r => r.json());
-    const p2 = fetch('/admin/files?contentType=notes').then(r => r.json());
-    const p3 = fetch('/admin/files?contentType=practice').then(r => r.json());
+    const res = await fetch('/admin/premium-files?t=' + Date.now());
+    const files = await res.json();
 
-    // We get them separately so we can render them grouped if needed, or just combine
-    const [d1, d2, d3] = await Promise.all([p1, p2, p3]);
-    const files = [...d1, ...d2, ...d3];
-    files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
-
-    if (!files.length) {
+    if (!files || !files.length) {
       el.innerHTML = '<div class="empty-state small">No premium files found.</div>';
       return;
     }
@@ -1069,31 +1192,27 @@ window.loadPremiumAdminFiles = async function () {
         <thead>
           <tr>
             <th>Type</th>
-            <th>File Name</th>
+            <th>Title</th>
             <th>Year/Branch</th>
-            <th>Sem</th>
-            <th>Subject</th>
-            <th>Size</th>
+            <th>Price</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
           ${files.map(f => {
       let badge = '';
-      if (f.contentType === 'solved-pyq') badge = '<span class="badge" style="background:#f59e0b;color:#111">Solved PYQ</span>';
-      if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
-      if (f.contentType === 'practice') badge = '<span class="badge" style="background:#ec4899;color:#fff">Practice</span>';
+      if (f.contentType === 'pyq') badge = '<span class="badge" style="background:#f59e0b;color:#111">PYQ</span>';
+      else if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
+      else badge = `<span class="badge" style="background:#ec4899;color:#fff">${f.contentType || 'Other'}</span>`;
 
       return `
             <tr>
               <td>${badge}</td>
-              <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
+              <td><a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a></td>
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
-              <td><span class="badge" style="background:var(--card-bg); color:var(--text); border:1px solid var(--border); font-size:0.7rem">${escHtml(f.semester || '—')}</span></td>
-              <td>${escHtml(f.subject)}</td>
-              <td>${formatSize(f.size)}</td>
+              <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
               <td>
-                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
+                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
               </td>
             </tr>
             `;
@@ -1102,7 +1221,7 @@ window.loadPremiumAdminFiles = async function () {
       </table>
     </div>`;
   } catch (e) {
-    el.innerHTML = '<div class="empty-state">Error loading premium files.</div>';
+    el.innerHTML = '<div class="empty-state small">Error loading premium files.</div>';
   }
 }
 
@@ -1259,3 +1378,74 @@ window.revokePremium = async function (id) {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);
+
+
+window.deleteProduct = async function (id) {
+  if (!confirm('Are you sure you want to delete this premium product?')) return;
+  try {
+    const res = await fetch('/admin/product/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      alert('Product deleted successfully');
+      if (typeof window.loadPremiumAdminFiles === 'function') window.loadPremiumAdminFiles();
+      if (typeof window.loadPremiumAdminFilesForTab === 'function') window.loadPremiumAdminFilesForTab();
+    } else {
+      alert(data.error || 'Failed to delete product');
+    }
+  } catch (e) {
+    alert('Network error during deletion');
+  }
+};
+
+window.loadEarningsAnalytics = async function () {
+  const el = document.getElementById('earningsList');
+  if (!el) return;
+  
+  try {
+    const res = await fetch('/admin/analytics');
+    const data = await res.json();
+    
+    if (data.success) {
+      document.getElementById('totalEarningsVal').textContent = `₹${data.totalEarnings || 0}`;
+      document.getElementById('totalSalesVal').textContent = data.totalSales || 0;
+      
+      const purchases = data.recentPurchases;
+      if (!purchases || !purchases.length) {
+        el.innerHTML = '<div class="empty-state small">No sales yet. Keep going!</div>';
+        return;
+      }
+      
+      el.innerHTML = `
+      <div class="file-table-wrap">
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Product</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${purchases.map(p => {
+              const date = new Date(p.purchasedAt).toLocaleDateString();
+              const studentName = p.user ? escHtml(p.user.username) : 'Unknown';
+              const productTitle = p.product ? escHtml(p.product.title) : 'Unknown Product';
+              return `
+                <tr>
+                  <td><span class="badge" style="background:var(--surface2); color:var(--text);">${date}</span></td>
+                  <td>${studentName}</td>
+                  <td style="color:var(--accent); font-weight:500;">${productTitle}</td>
+                  <td style="color:#10b981; font-weight:600;">₹${p.pricePaid}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }
+  } catch (err) {
+    console.error('Failed to load earnings', err);
+    el.innerHTML = '<div class="empty-state small">Error loading analytics data.</div>';
+  }
+};

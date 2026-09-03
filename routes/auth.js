@@ -5,6 +5,13 @@ require('dotenv').config();
 const express = require('express');
 const bcrypt  = require('bcryptjs');
 const router  = express.Router();
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login requests per windowMs
+  message: { error: 'Too many login attempts from this IP, please try again after 15 minutes' }
+});
 
 // Hash is computed once at startup from ADMIN_PASSWORD env var
 // This avoids $ sign corruption in Railway environment variables
@@ -30,7 +37,7 @@ async function getAdminHash() {
 }
 
 // POST /auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ error: 'Username and password required.' });

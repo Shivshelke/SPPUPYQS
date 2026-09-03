@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details | SYNAPSE Marketplace</title>
+  <link rel="icon" type="image/png" href="/img/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/theme.js"></script>
+  <style>
+    :root {
+      --surface-glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --blur: blur(12px);
+    }
+    [data-theme="light"] {
+      --surface-glass: rgba(0, 0, 0, 0.02);
+      --glass-border: rgba(0, 0, 0, 0.08);
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modern Navbar */
+    .nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(9, 9, 11, 0.7);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--glass-border);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      box-sizing: border-box;
+    }
+    [data-theme="light"] .nav {
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    
+    .product-container {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+      gap: 4rem;
+    }
+    
+    /* Left: PDF Preview */
+    .product-left {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+    }
+    .main-preview-card {
+      background: var(--surface-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      padding: 1rem;
+      position: relative;
+    }
+    .main-preview-img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: zoom-in;
+    }
+    .preview-hint {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Right: Details */
+    .product-right {
+      flex: 1.5;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .p-meta {
+      display: flex;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .p-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin: 0 0 1rem 0;
+      letter-spacing: -0.02em;
+    }
+    .p-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+    
+    .p-desc {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 2rem;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 3rem 0;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+      font-size: 1.05rem;
+    }
+    .feature-list li svg {
+      width: 20px;
+      height: 20px;
+      color: #10b981;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-buy-lg {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 2;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-buy-lg:hover { background: #2563eb; }
+    .btn-buy-lg:active { transform: scale(0.98); }
+    
+    .btn-preview-lg {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      transition: background 0.2s;
+    }
+    .btn-preview-lg:hover { background: var(--surface-glass); }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: var(--bg);
+      width: 90%;
+      max-width: 800px;
+      height: 90vh;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-glass);
+    }
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #e2e8f0;
+    }
+    .modal-body img {
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: flex-end;
+      background: var(--surface-glass);
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/marketplace.html" class="nav-brand">
+      <span style="color:var(--accent);">⬡</span> SYNAPSE
+    </a>
+    <a href="/marketplace.html" style="color:var(--text-secondary); text-decoration:none;">&larr; Back to Marketplace</a>
+  </nav>
+
+  <main class="product-container">
+    <!-- Left Column: PDF Preview -->
+    <div class="product-left">
+      <div class="main-preview-card" onclick="openPreviewModal()">
+        <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" alt="PDF Preview" class="main-preview-img" id="productImg">
+        <div class="preview-hint">Click to enlarge preview</div>
+      </div>
+    </div>
+
+    <!-- Right Column: Details -->
+    <div class="product-right">
+      <div class="p-meta">
+        <span id="pCategory" style="color: #f59e0b;">PYQ</span>
+        <span style="color: var(--text-secondary);">•</span>
+        <span id="pSem" style="color: var(--text-secondary);">Semester 3</span>
+        <span style="color: var(--text-secondary);">•</span>
+        <span id="pBranch" style="color: var(--text-secondary);">AI & ML</span>
+      </div>
+      
+      <h1 class="p-title" id="pTitle">Loading...</h1>
+      <div class="p-price" id="pPrice">₹--</div>
+      
+      <p class="p-desc" id="pDesc">
+        Loading product details...
+      </p>
+      
+      <ul class="feature-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Original SPPU paper
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          High Resolution PDF Format
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Instant access after payment
+        </li>
+      </ul>
+      
+      <div class="action-buttons">
+        <button class="btn-buy-lg" id="buyBtn" onclick="checkout()">Buy Now</button>
+        <button class="btn-preview-lg" onclick="openPreviewModal()">Preview</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- PDF Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="font-weight:600;">Preview</div>
+        <button class="close-modal" onclick="closePreviewModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" alt="Large Preview" id="modalImg">
+      </div>
+      <div class="modal-footer">
+        <span style="margin-right:auto; color:var(--text-secondary); font-size:0.9rem; display:flex; align-items:center;">
+          Rest of the document is locked.
+        </span>
+        <button class="btn-buy-lg" id="modalUnlockBtn" style="padding: 0.6rem 1.5rem; font-size:1rem;" onclick="checkout()">Unlock Full PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentProductId = null;
+    let currentPrice = null;
+
+    async function loadProductDetails() {
+      const params = new URLSearchParams(window.location.search);
+      currentProductId = params.get('id');
+      if (!currentProductId) {
+        alert('Product not found');
+        window.location.href = '/marketplace.html';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/marketplace/product/${currentProductId}`);
+        const data = await res.json();
+        
+        if (!res.ok) {
+          alert(data.error || 'Failed to load product details');
+          return;
+        }
+
+        const p = data;
+        currentPrice = p.price;
+
+        document.getElementById('pTitle').textContent = p.title;
+        
+        let priceHTML = `₹${p.price}`;
+        if (p.originalPrice && p.originalPrice > p.price) {
+          const offPercent = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+          priceHTML = `
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="color:var(--text-secondary); text-decoration:line-through; font-size:1.2rem; font-weight:500;">₹${p.originalPrice}</span>
+              <span>₹${p.price}</span>
+              <span style="background:rgba(16,185,129,0.1); color:#10b981; padding:4px 8px; border-radius:6px; font-size:0.9rem; font-weight:700; transform:translateY(-2px); display:inline-block;">${offPercent}% OFF</span>
+            </div>
+          `;
+        }
+        document.getElementById('pPrice').innerHTML = priceHTML;
+        document.getElementById('pDesc').textContent = p.description || 'Premium material for SPPU students.';
+        
+        document.getElementById('pCategory').textContent = (p.contentType || 'Material').toUpperCase();
+        document.getElementById('pSem').textContent = `Semester ${p.semester || 'Any'}`;
+        document.getElementById('pBranch').textContent = p.branch || 'Any';
+        
+        const buyBtn = document.getElementById('buyBtn');
+        buyBtn.textContent = p.price === 0 ? 'Get for Free' : `Buy Now — ₹${p.price}`;
+        
+        // Update images with placeholder since we secure actual PDFs
+        document.getElementById('productImg').src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        document.getElementById('modalImg').src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        document.getElementById('modalUnlockBtn').textContent = `Unlock Full PDF for ₹${p.price}`;
+
+      } catch (err) {
+        console.error(err);
+        alert('Network error loading details');
+      }
+    }
+
+    function openPreviewModal() {
+      document.getElementById('previewModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closePreviewModal() {
+      document.getElementById('previewModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    
+    async function checkout() {
+      if (!currentProductId) return;
+      try {
+        const res = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: currentProductId })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+           if (res.status === 401) {
+             alert('Please log in as a student to buy premium content.');
+             window.location.href = '/student-login.html?redirect=/product.html?id=' + currentProductId;
+           } else {
+             alert(data.error || 'Failed to initiate checkout');
+           }
+           return;
+        }
+
+        if (data.isFree) {
+          alert('Added to your purchases for free! Redirecting to My Purchases...');
+          window.location.href = '/my-purchases.html';
+          return;
+        }
+
+        const options = {
+          key: data.key,
+          amount: data.amount,
+          currency: data.currency,
+          name: 'SYNAPSE Premium',
+          description: 'Purchase Premium Material',
+          order_id: data.orderId,
+          handler: async function (response) {
+            const verifyRes = await fetch('/api/payment/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('Payment successful! Redirecting to My Purchases...');
+              window.location.href = '/my-purchases.html';
+            } else {
+              alert('Payment verification failed.');
+            }
+          },
+          theme: { color: '#6366f1' }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response){
+          alert('Payment failed: ' + response.error.description);
+        });
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        alert('Network error during checkout');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProductDetails);
+  </script>
+  <!-- Razorpay SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>

@@ -6,6 +6,9 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +64,25 @@ const ensureDbConnected = async (req, res, next) => {
 };
 
 // ── Middleware ────────────────────────────────────────────────────────────────
+// Security headers
+app.use(helmet({ 
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } 
+}));
+
+// Prevent NoSQL Injection
+app.use(mongoSanitize());
+
+// Global API rate limiting
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 500 requests per windowMs
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+app.use('/api', globalLimiter);
+// Webhook must be parsed as raw body for signature verification
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -279,6 +301,39 @@ app.get('/', ensureDbConnected, async (req, res) => {
   }
 });
 
+// ── Product SEO Route ─────────────────────────────────────────────────────────
+app.get('/product.html', ensureDbConnected, async (req, res, next) => {
+  const productId = req.query.id;
+  if (!productId) return next();
+
+  try {
+    const Product = require('./models/Product');
+    let p;
+    if (require('mongoose').Types.ObjectId.isValid(productId)) {
+      p = await Product.findById(productId);
+    }
+    if (!p) {
+      p = await Product.findOne({ slug: productId });
+    }
+    if (!p) return next();
+
+    let html = fs.readFileSync(path.join(__dirname, 'public', 'product.html'), 'utf8');
+    
+    const ogTags = `
+    <meta property="og:title" content="${p.title.replace(/"/g, '&quot;')} | Synapse SPPU">
+    <meta property="og:description" content="${(p.description || 'Premium SPPU Study Material for ' + p.branch).replace(/"/g, '&quot;')}">
+    <meta property="og:image" content="${p.thumbnailUrl || p.previewUrl || ''}">
+    <meta name="twitter:card" content="summary_large_image">
+    `;
+    
+    html = html.replace('</head>', `${ogTags}\n</head>`);
+    res.send(html);
+  } catch (err) {
+    console.error('SEO Product Error:', err);
+    next(); // Fallback to static serving
+  }
+});
+
 // ── Static files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -480,6 +535,8 @@ app.use('/auth', require('./routes/auth'));
 app.use('/api', ensureDbConnected, require('./routes/api'));
 app.use('/admin', ensureDbConnected, require('./routes/admin'));
 app.use('/student', ensureDbConnected, require('./routes/student'));
+app.use('/api/marketplace', ensureDbConnected, require('./routes/marketplace'));
+app.use('/api/payment', ensureDbConnected, require('./routes/payment'));
 
 
 

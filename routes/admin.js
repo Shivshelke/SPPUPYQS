@@ -10,6 +10,8 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 const File = require('../models/File');
+const Product = require('../models/Product');
+const Purchase = require('../models/Purchase');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
 
@@ -24,22 +26,38 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const { year, branch, subject, contentType, semester } = req.body;
+    const { year, branch, subject, title, contentType, semester } = req.body;
+    
+    // Sanitize function to remove invalid characters for Cloudinary (spaces, &, etc.)
+    const sanitize = (str) => {
+      if (!str) return '';
+      return str.toString().replace(/[^a-zA-Z0-9_-]/g, '_');
+    };
+
+    const sYear = sanitize(year);
+    const sBranch = sanitize(branch);
+    const sSemester = sanitize(semester);
+    const sContent = sanitize(contentType);
+    
+    // Fallback to subject if title is not present (for old upload form)
+    const fileTitle = title || subject || 'document';
+    const sTitle = sanitize(fileTitle);
+
     let folder = 'synapse/misc';
 
     if (contentType && contentType !== 'regular') {
-      folder = `synapse/premium/${contentType}/${year}/${branch}`;
-      if (semester) folder += `/${semester}`;
+      folder = `synapse/premium/${sContent}/${sYear}/${sBranch}`;
+      if (semester) folder += `/${sSemester}`;
     } else {
-      folder = `synapse/${year}/${branch}`;
-      if (semester) folder += `/${semester}`;
+      folder = `synapse/${sYear}/${sBranch}`;
+      if (semester) folder += `/${sSemester}`;
     }
 
     return {
       folder,
       resource_type: 'image',
       format: 'pdf',
-      public_id: `${subject}_${Date.now()}`
+      public_id: `${sTitle}_${Date.now()}`
     };
   }
 });
@@ -127,6 +145,62 @@ router.post('/upload', (req, res) => {
   });
 });
 
+// POST /admin/product (Marketplace upload)
+router.post('/product', (req, res) => {
+  try {
+    upload.single('pdf')(req, res, async (err) => {
+      if (err) {
+        console.error("Multer error:", err);
+        return res.status(400).json({ error: err.message });
+      }
+      try {
+        const { year, branch, title, contentType, price, originalPrice, isLink, linkUrl, description, thumbnailUrl: customThumb } = req.body;
+        
+        // Generate unique SEO slug
+        const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+        
+        let pdfUrl, previewUrl, thumbnailUrl;
+        
+        if (isLink === 'true') {
+          if (!linkUrl) return res.status(400).json({ error: 'Link URL required.' });
+          pdfUrl = linkUrl;
+          previewUrl = customThumb || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+          thumbnailUrl = customThumb || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80';
+        } else {
+          if (!req.file) return res.status(400).json({ error: 'File required.' });
+          pdfUrl = req.file.path;
+          const publicId = req.file.filename || req.file.public_id;
+          previewUrl = customThumb || cloudinary.url(`${publicId}.jpg`, { page: 1, secure: true });
+          thumbnailUrl = customThumb || cloudinary.url(`${publicId}.jpg`, { page: 1, width: 400, crop: 'scale', secure: true });
+        }
+
+        const product = await Product.create({
+          title,
+          slug,
+          description: description || 'Premium material for SPPU students.',
+          price: Number(price),
+          originalPrice: originalPrice ? Number(originalPrice) : null,
+          contentType: contentType,
+          year: year,
+          branch: branch,
+          pdfUrl: pdfUrl,
+          previewUrl: previewUrl,
+          thumbnailUrl: thumbnailUrl,
+          isPublished: true
+        });
+        res.json({ success: true, product });
+      } catch (e) {
+        console.error("Product create error:", e);
+        res.status(500).json({ error: 'Failed to create product: ' + e.message });
+      }
+    });
+  } catch (outerErr) {
+    console.error("Outer error in /admin/product:", outerErr);
+    res.status(500).json({ error: 'Server crashed: ' + outerErr.message });
+  }
+});
+
 // DELETE /admin/files/:id
 router.delete('/files/:id', async (req, res) => {
   const file = await File.findById(req.params.id);
@@ -179,10 +253,25 @@ router.delete('/feedback/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// GET /admin/students
-router.get('/students', async (req, res) => {
-  const students = await Student.find({}, '-password').sort({ registeredAt: -1 });
-  res.json(students);
+// GET /admin/premium-files
+router.get('/premium-files', async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to load products' });
+  }
+});
+
+// DELETE /admin/product/:id
+router.delete('/product/:id', async (req, res) => {
+  try {
+    await Product.deleteOne({ _id: req.params.id });
+    res.json({ success: true });
+  } catch (e) {
+    console.error("Failed to delete product:", e);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
 });
 
 const CategoryConfig = require('../models/CategoryConfig');
@@ -423,6 +512,16 @@ router.post('/reject-premium/:id', async (req, res) => {
   }
 });
 
+// GET /admin/students
+router.get('/students', async (req, res) => {
+  try {
+    const students = await Student.find({}, '-password').sort({ registeredAt: -1 });
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch students' });
+  }
+});
+
 // POST /admin/revoke-premium/:id
 router.post('/revoke-premium/:id', async (req, res) => {
   try {
@@ -436,6 +535,36 @@ router.post('/revoke-premium/:id', async (req, res) => {
     res.json({ success: true, message: 'Premium access revoked successfully.' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to revoke premium access.' });
+  }
+});
+
+// GET /admin/analytics
+router.get('/analytics', async (req, res) => {
+  try {
+    // Total Earnings
+    const earningsAgg = await Purchase.aggregate([
+      { $group: { _id: null, total: { $sum: "$pricePaid" }, count: { $sum: 1 } } }
+    ]);
+    
+    const totalEarnings = earningsAgg.length > 0 ? earningsAgg[0].total : 0;
+    const totalSales = earningsAgg.length > 0 ? earningsAgg[0].count : 0;
+    
+    // Recent Purchases
+    const recentPurchases = await Purchase.find()
+      .sort({ purchasedAt: -1 })
+      .limit(50)
+      .populate('user', 'username email')
+      .populate('product', 'title price');
+
+    res.json({
+      success: true,
+      totalEarnings,
+      totalSales,
+      recentPurchases
+    });
+  } catch (err) {
+    console.error('Analytics Error:', err);
+    res.status(500).json({ error: 'Failed to fetch analytics' });
   }
 });
 

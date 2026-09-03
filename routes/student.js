@@ -6,6 +6,13 @@ const bcrypt   = require('bcryptjs');
 const admin    = require('firebase-admin');
 const router   = express.Router();
 const Student  = require('../models/Student');
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login/register requests per windowMs
+  message: { error: 'Too many login attempts from this IP, please try again after 15 minutes' }
+});
 
 // Initialize Firebase Admin safely
 if (process.env.FIREBASE_PROJECT_ID && !admin.apps.length) {
@@ -26,7 +33,7 @@ if (process.env.FIREBASE_PROJECT_ID && !admin.apps.length) {
 }
 
 // POST /student/google-login
-router.post('/google-login', async (req, res) => {
+router.post('/google-login', loginLimiter, async (req, res) => {
   const { idToken } = req.body;
   if (!idToken) return res.status(400).json({ error: 'ID Token required.' });
 
@@ -62,7 +69,7 @@ router.post('/google-login', async (req, res) => {
 
 
 // POST /student/register
-router.post('/register', async (req, res) => {
+router.post('/register', loginLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password)
@@ -85,7 +92,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /student/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password)

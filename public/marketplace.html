@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Study Materials | SYNAPSE Marketplace</title>
+  <link rel="icon" type="image/png" href="/img/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/theme.js"></script>
+  <style>
+    /* Premium Apple-like SaaS Design */
+    :root {
+      --surface-glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --blur: blur(12px);
+    }
+    [data-theme="light"] {
+      --surface-glass: rgba(0, 0, 0, 0.02);
+      --glass-border: rgba(0, 0, 0, 0.08);
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modern Navbar */
+    .nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(9, 9, 11, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      box-sizing: border-box;
+    }
+    [data-theme="light"] .nav {
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* Hero Section */
+    .market-hero {
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .market-hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+    .market-hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    .search-bar {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 1.2rem 1.5rem 1.2rem 3rem;
+      font-size: 1rem;
+      background: var(--surface-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      color: var(--text);
+      backdrop-filter: var(--blur);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+
+    /* Year Tabs */
+    .year-tabs {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 5%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .year-tabs::-webkit-scrollbar { display: none; }
+    .year-tab {
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s;
+    }
+    .year-tab:hover {
+      border-color: var(--text-secondary);
+    }
+    .year-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Smart Filters */
+    .filters-section {
+      padding: 1rem 5%;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--surface-glass);
+      position: sticky;
+      top: 70px;
+      z-index: 99;
+      backdrop-filter: var(--blur);
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      align-items: center;
+      scrollbar-width: none;
+    }
+    .filters-section::-webkit-scrollbar {
+      display: none;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .filter-select {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      padding: 0.6rem 2rem 0.6rem 1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      background-size: 1em;
+      transition: border-color 0.2s;
+    }
+    .filter-select:hover {
+      border-color: var(--text-secondary);
+    }
+    .filter-select option {
+      background: var(--bg);
+      color: var(--text);
+    }
+    @media (max-width: 768px) {
+      .filters-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 1rem 1rem;
+        gap: 0.6rem;
+      }
+      .filter-select {
+        width: 100%;
+        padding: 0.5rem 1.8rem 0.5rem 0.6rem;
+        font-size: 0.8rem;
+        background-position: right 0.4rem center;
+      }
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 4rem 5%;
+      flex-grow: 1;
+    }
+
+    /* Product Card */
+    .product-card {
+      background: var(--surface-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    [data-theme="light"] .product-card:hover {
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Actual PDF Visual Preview (Thumbnail) */
+    .product-thumbnail {
+      width: 100%;
+      height: 220px;
+      background: #e2e8f0;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .product-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.5s;
+    }
+    .product-card:hover .product-thumbnail img {
+      transform: scale(1.05);
+    }
+    .preview-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .product-info {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tag-pyq { color: #f59e0b; }
+    .tag-notes { color: #10b981; }
+    .tag-imp { color: #ec4899; }
+    
+    .product-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.3;
+    }
+    .product-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    
+    .product-stats {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass-border);
+    }
+    .product-price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn-view {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-view:hover {
+      background: var(--surface-glass);
+    }
+    .btn-buy {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-buy:hover {
+      background: #2563eb;
+    }
+    .btn-buy:active {
+      transform: scale(0.96);
+    }
+
+    /* Bundle Card */
+    .bundle-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    .bundle-card .preview-badge {
+      background: rgba(139, 92, 246, 0.8);
+    }
+
+    /* Badges */
+    .card-badge {
+      position: absolute;
+      top: -12px;
+      left: 1.5rem;
+      background: linear-gradient(90deg, #ec4899, #f43f5e);
+      color: white;
+      padding: 0.2rem 0.8rem;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+      z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <nav class="nav">
+    <a href="/" class="nav-brand">
+      <span style="color:var(--accent);">⬡</span> SYNAPSE
+    </a>
+    <div class="nav-links">
+      <a href="/#years">Browse</a>
+      <a href="/marketplace.html?content=pyq">PYQs</a>
+      <a href="/marketplace.html?content=notes">Notes</a>
+      <a href="/marketplace.html?content=imp">IMP Questions</a>
+      <a href="/my-purchases.html">My Purchases</a>
+      <a href="/profile.html" class="btn-view" style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Profile</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="market-hero">
+    <h1>Premium Study Materials</h1>
+    <p>High-quality PYQs, handwritten notes, IMP questions and solved papers for SPPU students.</p>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search subjects, PYQs, notes..." id="searchInput">
+    </div>
+  </section>
+
+  <!-- Year Tabs -->
+  <div class="year-tabs" id="yearTabs">
+    <button class="year-tab active" data-year="all">All Years</button>
+    <button class="year-tab" data-year="first">First Year</button>
+    <button class="year-tab" data-year="second">Second Year</button>
+    <button class="year-tab" data-year="third">Third Year</button>
+    <button class="year-tab" data-year="fourth">Fourth Year</button>
+  </div>
+
+  <!-- Smart Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <select class="filter-select" id="filterSem">
+        <option value="all">Semester: All</option>
+        <option value="1">Sem 1</option>
+        <option value="2">Sem 2</option>
+        <option value="3">Sem 3</option>
+        <option value="4">Sem 4</option>
+        <option value="5">Sem 5</option>
+        <option value="6">Sem 6</option>
+        <option value="7">Sem 7</option>
+        <option value="8">Sem 8</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <select class="filter-select" id="filterContent">
+        <option value="all">Content: All</option>
+        <option value="pyq">PYQ</option>
+        <option value="notes">Notes</option>
+        <option value="imp">IMP Questions</option>
+        <option value="solved">Solved Papers</option>
+        <option value="micro">Micro Project</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <select class="filter-select" id="filterBranch">
+        <option value="all">Branch: All</option>
+        <option value="AI & ML">AI & ML</option>
+        <option value="Computer">Computer</option>
+        <option value="IT">IT</option>
+        <option value="ENTC">ENTC</option>
+        <option value="Mechanical">Mechanical</option>
+        <option value="Civil">Civil</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Product Grid -->
+  <main class="product-grid" id="productGrid">
+    <div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">
+      Loading products...
+    </div>
+  </main>
+
+  <script>
+    let allProducts = [];
+    let currentFilters = {
+      year: 'all',
+      sem: 'all',
+      content: 'all',
+      branch: 'all',
+      search: ''
+    };
+
+    // Fetch and render marketplace products dynamically
+    async function loadProducts() {
+      const grid = document.getElementById('productGrid');
+      try {
+        const res = await fetch('/api/marketplace/products');
+        allProducts = await res.json();
+        
+        if (!allProducts || allProducts.length === 0) {
+          grid.innerHTML = '<div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">No premium materials available right now.</div>';
+          return;
+        }
+
+        renderProducts();
+      } catch (err) {
+        grid.innerHTML = '<div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: #ef4444;">Failed to load products.</div>';
+        console.error(err);
+      }
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      
+      const filtered = allProducts.filter(p => {
+        if (currentFilters.year !== 'all' && String(p.year) !== currentFilters.year) return false;
+        if (currentFilters.sem !== 'all' && String(p.semester) !== currentFilters.sem) return false;
+        if (currentFilters.content !== 'all' && p.contentType !== currentFilters.content) return false;
+        if (currentFilters.branch !== 'all' && p.branch !== currentFilters.branch) return false;
+        if (currentFilters.search) {
+          const s = currentFilters.search.toLowerCase();
+          if (!p.title.toLowerCase().includes(s) && !(p.subject || '').toLowerCase().includes(s)) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">No materials match your filters.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        // Format specific elements
+        let badgeHTML = '';
+        if (p.isBestSeller) {
+          badgeHTML = '<div class="card-badge">BEST SELLER</div>';
+        } else if (p.isFeatured) {
+          badgeHTML = '<div class="card-badge" style="background: linear-gradient(90deg, #8b5cf6, #a855f7);">FEATURED</div>';
+        }
+
+        let tagClass = 'tag-pyq';
+        let tagText = 'PYQ';
+        if (p.contentType === 'notes') { tagClass = 'tag-notes'; tagText = 'NOTES'; }
+        else if (p.contentType === 'imp') { tagClass = 'tag-notes'; tagText = 'IMP'; }
+        else if (p.contentType === 'solved') { tagClass = 'tag-pyq'; tagText = 'SOLVED'; }
+        else if (p.contentType === 'micro') { tagClass = 'tag-notes'; tagText = 'MICRO'; }
+
+        // Use Unsplash placeholders if thumbnail doesn't exist
+        const thumb = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+
+        // Price display logic
+        let priceHTML = `<span class="product-price">₹${p.price}</span>`;
+        if (p.originalPrice && p.originalPrice > p.price) {
+          const offPercent = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+          priceHTML = `
+            <div style="display:flex; flex-direction:column; line-height:1.2;">
+              <span style="color:var(--text-secondary); text-decoration:line-through; font-size:0.85rem;">₹${p.originalPrice}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="product-price">₹${p.price}</span>
+                <span style="background:rgba(16,185,129,0.1); color:#10b981; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:700;">${offPercent}% OFF</span>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <article class="product-card" style="position: relative;">
+            <button class="btn-share" title="Copy Link" onclick="shareProduct('${p.slug || p._id}', '${p.title.replace(/'/g, "\\'")}')" style="position:absolute; top: 12px; right: 12px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
+            ${badgeHTML}
+            <div class="product-thumbnail">
+              <div class="preview-badge">PREVIEW</div>
+              <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';">
+            </div>
+            <div class="product-info">
+              <div class="product-meta">
+                <span class="${tagClass}">${tagText}</span>
+                <span style="color:var(--glass-border);">•</span>
+                <span style="text-transform:capitalize">${p.year || 'All'} Year</span>
+              </div>
+              <h3 class="product-title">${p.title}</h3>
+              <p class="product-subtitle">${p.branch || 'Common'} | ${p.subject || 'Various'}</p>
+              <div class="product-stats">
+                <span>⭐ 4.8</span>
+                <span>👁 1.2k views</span>
+              </div>
+              <div class="product-footer">
+                ${priceHTML}
+                <div class="btn-group">
+                  <button class="btn-view" onclick="window.location.href='/product.html?id=${p.slug || p._id}'">Details</button>
+                  <button class="btn-buy" onclick="buyProduct('${p._id}')">${p.price === 0 ? 'Get Free' : 'Buy Now'}</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Event Listeners for Filters
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProducts();
+
+      // Year Tabs
+      document.querySelectorAll('.year-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          document.querySelectorAll('.year-tab').forEach(t => t.classList.remove('active'));
+          e.target.classList.add('active');
+          currentFilters.year = e.target.getAttribute('data-year');
+          renderProducts();
+        });
+      });
+
+      // Dropdowns
+      ['filterSem', 'filterContent', 'filterBranch'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+          el.addEventListener('change', (e) => {
+            const key = id.replace('filter', '').toLowerCase();
+            currentFilters[key] = e.target.value;
+            renderProducts();
+          });
+        }
+      });
+
+      // Search
+      const searchEl = document.getElementById('searchInput');
+      if(searchEl) {
+        searchEl.addEventListener('input', (e) => {
+          currentFilters.search = e.target.value;
+          renderProducts();
+        });
+      }
+    });
+
+    // Logic for marketplace filtering and buy buttons (mock for now)ons (mock for now)
+    async function buyProduct(id) {
+      try {
+        const res = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: id })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+           if (res.status === 401) {
+             alert('Please log in as a student to buy premium content.');
+             window.location.href = '/student-login.html?redirect=/marketplace.html';
+           } else {
+             alert(data.error || 'Failed to initiate checkout');
+           }
+           return;
+        }
+
+        if (data.isFree) {
+          alert('Added to your purchases for free! Redirecting to My Purchases...');
+          window.location.href = '/my-purchases.html';
+          return;
+        }
+
+        const options = {
+          key: data.key,
+          amount: data.amount,
+          currency: data.currency,
+          name: 'SYNAPSE Premium',
+          description: 'Purchase Premium Material',
+          order_id: data.orderId,
+          handler: async function (response) {
+            // Verify payment on backend
+            const verifyRes = await fetch('/api/payment/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('Payment successful! Redirecting to My Purchases...');
+              window.location.href = '/my-purchases.html';
+            } else {
+              alert('Payment verification failed.');
+            }
+          },
+          theme: {
+            color: '#6366f1' // Synapse theme color
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response){
+          alert('Payment failed: ' + response.error.description);
+        });
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        alert('Network error during checkout');
+      }
+    }
+
+
+    function shareProduct(id, title) {
+        event.stopPropagation(); // prevent card click if any
+        const url = window.location.origin + '/product.html?id=' + id;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(url).then(() => {
+            alert('Link copied! You can now share "' + title + '"');
+          }).catch(err => {
+            console.error('Copy failed', err);
+            prompt('Copy this link:', url);
+          });
+        } else {
+          prompt('Copy this link:', url);
+        }
+      }
+  </script>
+  <!-- Razorpay SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>

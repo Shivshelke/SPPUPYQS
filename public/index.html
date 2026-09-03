@@ -494,7 +494,7 @@
       <a href="#feedback" onclick="closeMobileMenu()">Feedback</a>
       <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
         <a href="/student-login.html" class="btn-ghost"
-          style="color:var(--accent)!important; border-color:var(--accent)">Login / Register</a>
+          style="color:var(--accent)!important; border-color:var(--accent)">Profile</a>
       </div>
       <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span
           class="theme-icon">☀️</span></button>
@@ -536,18 +536,27 @@
       <div class="stat-div"></div>
       <div class="stat">
         <span class="stat-num" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span style="width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; display: inline-block; animation: pulse-green 2s infinite;"></span>
+          <span
+            style="width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; display: inline-block; animation: pulse-green 2s infinite;"></span>
           <span id="liveStudentsCount">18</span>
         </span>
         <span class="stat-label">Online</span>
       </div>
     </div>
-    
+
     <style>
       @keyframes pulse-green {
-        0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        0% {
+          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+        }
+
+        70% {
+          box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+        }
+
+        100% {
+          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+        }
       }
     </style>
     <script>
@@ -667,53 +676,23 @@
   <section id="premium" class="section premium-section">
     <div class="container relative">
       <div class="premium-header">
-        <h2>Premium Content <span class="premium-badge">PRO</span></h2>
-        <p>Unlock exclusive learning materials curated for top performance.</p>
+        <h2>Premium Study Materials <span class="premium-badge">PRO</span></h2>
+        <p>Unlock high-quality PYQs, handwritten notes, and solved papers curated for SPPU students.</p>
       </div>
 
-      <div class="premium-card" id="premiumCard">
-        <!-- Logged Out State -->
-        <div class="premium-state locked-state active show" id="loggedOutState">
-          <div class="lock-icon">🔒</div>
-          <h3>Premium Access</h3>
-          <p>Login to your account to view or buy Premium features.</p>
-          <button class="btn-premium" onclick="checkPremiumLogin()">Login / Register ✨</button>
-        </div>
-
-        <!-- Free State (Logged In, Not Premium) -->
-        <div class="premium-state locked-state" id="freeState">
-          <div class="lock-icon">🛍️</div>
-          <h3>Unlock Premium for Free (₹0)</h3>
-          <p>Get unlimited access to solved PYQs, handwritten notes, and topic-wise practice questions.</p>
-          <button class="btn-premium" id="buyPremiumBtn" onclick="buyPremium()">Buy Premium Now ✨</button>
-        </div>
-
-        <!-- Unlocked State -->
-        <div class="premium-state unlocked-state" id="unlockedState">
-          <div class="unlocked-header">
-            <div class="unlock-icon">🔓</div>
-            <h3 id="premiumWelcomeText">Welcome to Premium, Student!</h3>
-          </div>
-          <div class="premium-content-grid">
-            <div class="premium-item">
-              <div class="premium-item-icon">📄</div>
-              <h4>Solved PYQs</h4>
-              <p>Detailed step-by-step solutions for past 5 years.</p>
-              <button class="btn-outline" onclick="openPremiumModal('solved-pyq')">Access</button>
-            </div>
-            <div class="premium-item">
-              <div class="premium-item-icon">📝</div>
-              <h4>Handwritten Notes</h4>
-              <p>Topper's notes organized by units and chapters.</p>
-              <button class="btn-outline" onclick="openPremiumModal('notes')">Access</button>
-            </div>
-            <div class="premium-item">
-              <div class="premium-item-icon">🎯</div>
-              <h4>Practice Bank</h4>
-              <p>Topic-wise expected questions for exams.</p>
-              <button class="btn-outline" onclick="openPremiumModal('practice')">Access</button>
-            </div>
-          </div>
+      <div class="premium-card" style="text-align: center; padding: 4rem 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🛍️</div>
+        <h3 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 1rem;">Digital Marketplace</h3>
+        <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem; line-height: 1.6;">
+          Access free study material or unlock verified solved PYQs, handwritten notes, and IMP questions.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/marketplace.html" class="btn-premium" style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
+            Enter Premium Content 🚀
+          </a>
+          <a href="/my-purchases.html" style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; border: 1px solid var(--border); border-radius: 12px; color: var(--text); background: rgba(255,255,255,0.05);">
+            My Purchases 📚
+          </a>
         </div>
       </div>
     </div>
@@ -906,20 +885,27 @@
         <p style="color:var(--muted); font-size:0.9rem;" id="gateSubTitle">Join our groups to unlock this download.</p>
       </div>
       <div class="modal-body">
-        
-        <div id="gateStepWa" class="gate-step" style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
+
+        <div id="gateStepWa" class="gate-step"
+          style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
           <h4 style="margin: 0 0 0.5rem 0;">1. WhatsApp Group</h4>
-          <a href="#" target="_blank" id="gateWaBtn" class="btn-primary" style="display:block; margin-bottom: 0.5rem; background: #25D366; color: white;" onclick="startGateCountdown('whatsapp')">Join WhatsApp</a>
+          <a href="#" target="_blank" id="gateWaBtn" class="btn-primary"
+            style="display:block; margin-bottom: 0.5rem; background: #25D366; color: white;"
+            onclick="startGateCountdown('whatsapp')">Join WhatsApp</a>
           <div id="gateWaStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
         </div>
 
-        <div id="gateStepTg" class="gate-step" style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
+        <div id="gateStepTg" class="gate-step"
+          style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
           <h4 style="margin: 0 0 0.5rem 0;">2. Telegram Group</h4>
-          <a href="#" target="_blank" id="gateTgBtn" class="btn-primary" style="display:block; margin-bottom: 0.5rem; background: #0088cc; color: white;" onclick="startGateCountdown('telegram')">Join Telegram</a>
+          <a href="#" target="_blank" id="gateTgBtn" class="btn-primary"
+            style="display:block; margin-bottom: 0.5rem; background: #0088cc; color: white;"
+            onclick="startGateCountdown('telegram')">Join Telegram</a>
           <div id="gateTgStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
         </div>
 
-        <button id="gateDownloadBtn" class="btn-primary" style="width: 100%; display: none;" onclick="executeGatedDownload()">Download PDF Now</button>
+        <button id="gateDownloadBtn" class="btn-primary" style="width: 100%; display: none;"
+          onclick="executeGatedDownload()">Download PDF Now</button>
       </div>
     </div>
   </div>

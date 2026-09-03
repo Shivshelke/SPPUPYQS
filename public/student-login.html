@@ -604,7 +604,9 @@
         const data = await res.json();
         if(data.success) {
           showMsg('loginSuccess', 'Success! Redirecting...', 'success');
-          setTimeout(() => window.location.href='/', 800);
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect') || '/';
+          setTimeout(() => window.location.href = redirect, 800);
         } else {
           showMsg('loginError', data.error || 'Invalid credentials.');
           btn.disabled = false; btn.textContent = 'Sign In';
@@ -634,7 +636,9 @@
         const data = await res.json();
         if(data.success) {
           showMsg('regSuccess', 'Welcome to Synapse! Redirecting...', 'success');
-          setTimeout(() => window.location.href='/', 1000);
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect') || '/';
+          setTimeout(() => window.location.href = redirect, 1000);
         } else {
           showMsg('regError', data.error || 'Registration failed.');
           btn.disabled = false; btn.textContent = 'Create Account';
@@ -696,7 +700,9 @@
         const data = await res.json();
         if (data.success) {
           showMsg('loginSuccess', 'Google login successful!', 'success');
-          setTimeout(() => window.location.href = '/', 800);
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect') || '/';
+          setTimeout(() => window.location.href = redirect, 800);
         } else {
           showMsg('loginError', data.error || 'Google login failed.');
           if (btn) {

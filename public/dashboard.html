@@ -40,7 +40,10 @@
         <span class="nav-icon">👥</span> Students
       </a>
       <a href="#" class="nav-item" data-panel="premium">
-        <span class="nav-icon">✨</span> Premium
+        <span class="nav-icon">✨</span> Premium Files
+      </a>
+      <a href="#" class="nav-item" data-panel="earnings">
+        <span class="nav-icon">💰</span> Earnings
       </a>
       <a href="#" class="nav-item" data-panel="feedback">
         <span class="nav-icon">💬</span> Feedback <span class="nav-badge" id="badge-feedback"
@@ -211,20 +214,27 @@
 
     <!-- ══ PANEL: FILES ══ -->
     <section class="panel" id="panel-files">
-      <div class="panel-header">
-        <h2>Manage Files</h2>
-        <div class="filter-bar">
-          <select id="filterYear" onchange="loadAdminFiles()">
-            <option value="">All Years</option>
-            <option value="first">1st Year</option>
-            <option value="second">2nd Year</option>
-            <option value="third">3rd Year</option>
-            <option value="fourth">4th Year</option>
-          </select>
-          <input type="text" id="filterSearch" placeholder="Search files…" oninput="loadAdminFiles()" />
+      <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <h2>Manage Files</h2>
+          <div class="filter-bar">
+            <select id="filterYear" onchange="window.currentFileTab === 'premium' ? window.loadPremiumAdminFilesForTab() : loadAdminFiles()">
+              <option value="">All Years</option>
+              <option value="first">1st Year</option>
+              <option value="second">2nd Year</option>
+              <option value="third">3rd Year</option>
+              <option value="fourth">4th Year</option>
+            </select>
+            <input type="text" id="filterSearch" placeholder="Search files…" oninput="window.currentFileTab === 'premium' ? window.loadPremiumAdminFilesForTab() : loadAdminFiles()" />
+          </div>
+        </div>
+        <div class="sub-tabs" style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); width: 100%;">
+          <button id="subTabFree" onclick="window.switchFileTab('free')" style="background: none; border: none; color: var(--accent); font-size: 1rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid var(--accent);">Free Files</button>
+          <button id="subTabPremium" onclick="window.switchFileTab('premium')" style="background: none; border: none; color: var(--text-secondary); font-size: 1rem; font-weight: 500; cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; transition: 0.2s;">Premium Files <span style="background: linear-gradient(90deg, #8b5cf6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 0.8rem; margin-left: 4px;">PRO</span></button>
         </div>
       </div>
       <div id="adminFileList"></div>
+      <div id="adminPremiumFileList" style="display: none;"></div>
     </section>
 
     <!-- ══ PANEL: CATEGORIES ══ -->
@@ -302,47 +312,64 @@
           <div class="alert" id="premiumAlert" style="display:none"></div>
           <div class="form-row">
             <div class="form-group">
-              <label>Premium Type <span class="req">*</span></label>
+              <label>Product Title <span class="req">*</span></label>
+              <input type="text" id="prmSubject" placeholder="e.g., DSA Question Paper 2025" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label>Product Description</label>
+            <textarea id="prmDesc" rows="3" placeholder="Enter detailed product description..." style="width:100%; padding:.7rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:.9rem; outline:none; resize:vertical; margin-top:0.5rem;"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label>Thumbnail Image URL (Optional)</label>
+            <input type="text" id="prmThumbnail" placeholder="e.g., https://example.com/thumbnail.png" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Content Type <span class="req">*</span></label>
               <select id="prmType">
                 <option value="">— Select Type —</option>
-                <option value="solved-pyq">Solved PYQs</option>
+                <option value="pyq">PYQs</option>
                 <option value="notes">Handwritten Notes</option>
-                <option value="practice">Practice Bank</option>
+                <option value="imp">IMP Questions</option>
+                <option value="solved">Solved Papers</option>
+                <option value="micro">Micro Project</option>
               </select>
             </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Actual Price (MRP) ₹</label>
+              <input type="number" id="prmOriginalPrice" placeholder="e.g. 99" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Offer Price (Sell) ₹ <span class="req">*</span></label>
+              <input type="number" id="prmPrice" placeholder="e.g. 29" min="0" />
+            </div>
+          </div>
+          <div class="form-row">
             <div class="form-group">
               <label>Year</label>
-              <select id="prmYear" onchange="window.onPrmYearChange()">
-                <option value="">— Any Year —</option>
+              <select id="prmYear">
+                <option value="all">— Any Year —</option>
                 <option value="first">1st Year</option>
                 <option value="second">2nd Year</option>
                 <option value="third">3rd Year</option>
                 <option value="fourth">4th Year</option>
               </select>
             </div>
-          </div>
-          <div class="form-row" id="prmBranchPatternRow" style="display:none">
             <div class="form-group">
               <label>Branch</label>
-              <select id="prmBranch" disabled>
-                <option value="">— Select Branch —</option>
+              <select id="prmBranch">
+                <option value="all">— Any Branch —</option>
+                <option value="Computer">Computer</option>
+                <option value="IT">IT</option>
+                <option value="AI & ML">AI & ML</option>
+                <option value="ENTC">ENTC</option>
+                <option value="Mechanical">Mechanical</option>
+                <option value="Civil">Civil</option>
               </select>
             </div>
-            <div class="form-group" id="prmPatternGroup" style="display:none">
-              <label>Pattern</label>
-              <select id="prmPattern">
-                <option value="2024 Pattern">2024 Pattern</option>
-                <option value="2019 Pattern">2019 Pattern</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Subject / Topic Name <span class="req">*</span></label>
-            <input type="text" id="prmSubject" placeholder="e.g., Engineering Mathematics - I" />
-          </div>
-          <div class="form-group">
-            <label>Custom File Name (Optional)</label>
-            <input type="text" id="prmCustomName" placeholder="e.g., Topper_Notes_EM1.pdf" />
           </div>
           <div class="form-group">
             <label>Upload Method</label>
@@ -389,6 +416,32 @@
           <div id="premiumAdminFileList">
             <div class="empty-state small">No premium files yet</div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PANEL: EARNINGS ══ -->
+    <section class="panel" id="panel-earnings">
+      <div class="panel-header">
+        <h2>Sales & Earnings Analytics</h2>
+        <button class="btn-ghost" onclick="window.loadEarningsAnalytics()">↻ Refresh</button>
+      </div>
+      
+      <div class="stats-row" style="margin-bottom: 2rem;">
+        <div class="stat-card" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+          <div class="stat-val" id="totalEarningsVal" style="color: #10b981;">₹0</div>
+          <div class="stat-lbl">Total Revenue</div>
+        </div>
+        <div class="stat-card" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);">
+          <div class="stat-val" id="totalSalesVal" style="color: var(--accent);">0</div>
+          <div class="stat-lbl">Total Sales</div>
+        </div>
+      </div>
+
+      <div class="recent-card">
+        <div class="recent-header">Recent Purchases</div>
+        <div id="earningsList">
+          <div class="empty-state small">No sales yet. Keep going!</div>
         </div>
       </div>
     </section>
@@ -501,7 +554,7 @@
     </div>
   </div>
 
-  <script src="/js/dashboard.js"></script>
+  <script src="/js/dashboard.js?v=2.0.6"></script>
 </body>
 
 </html>
