@@ -565,7 +565,7 @@
         else if (p.contentType === 'micro') { tagClass = 'tag-notes'; tagText = 'MICRO'; }
 
         // Use Unsplash placeholders if thumbnail doesn't exist
-        const thumb = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        const thumb = p.thumbnailUrl || 'https://placehold.co/800x400/e2e8f0/64748b?text=Preview+Not+Available';
 
         // Price display logic
         let priceHTML = `<span class="product-price">₹${p.price}</span>`;
@@ -590,7 +590,7 @@
             ${badgeHTML}
             <div class="product-thumbnail">
               <div class="preview-badge">PREVIEW</div>
-              <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';">
+              <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://placehold.co/800x400/e2e8f0/64748b?text=Preview+Not+Available';">
             </div>
             <div class="product-info">
               <div class="product-meta">
