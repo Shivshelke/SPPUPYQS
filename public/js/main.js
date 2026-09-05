@@ -15,9 +15,9 @@ if ('serviceWorker' in navigator) {
 
 // ── PWA Install Popup ─────────────────────────────────────────────────────────
 const PWA_DISMISSED_KEY = 'synapse_pwa_dismissed';
-const PWA_DISMISS_DAYS  = 7;   // show again after 7 days
-const PWA_SHOW_DELAY    = 3000; // 3 sec after page load
-const PWA_AUTO_HIDE     = 8000; // auto-hide after 8 sec
+const PWA_DISMISS_DAYS = 7;   // show again after 7 days
+const PWA_SHOW_DELAY = 3000; // 3 sec after page load
+const PWA_AUTO_HIDE = 8000; // auto-hide after 8 sec
 
 let pwaAutoHideTimer = null;
 let pwaCountdownTimer = null;
@@ -149,7 +149,7 @@ function slugify(text) {
 function getSeoUrl(year, branch, subject) {
   const urlYear = year === 'fourth' ? 'final' : year;
   let newUrl = '/';
-  
+
   if (year === 'first' || (branch && branch.toLowerCase() === 'fe')) {
     newUrl = `/${urlYear}-year-fe-engineering`;
     if (subject) {
@@ -245,22 +245,22 @@ async function handleUrlRouting() {
       isRouting = false;
       return;
     }
-    
+
     const parts = path.split('/').filter(Boolean);
     const yearSlug = parts[0];
     const subjectSlug = parts[1];
-    
+
     const match = yearSlug.match(/^(first|second|third|fourth|final)-year-(.+)$/);
-    
+
     if (yearSlug === 'catalog') {
-      window.location.reload(); 
+      window.location.reload();
       return;
     }
 
     if (match) {
       let year = match[1];
       if (year === 'final') year = 'fourth';
-      
+
       let branchSlug = match[2];
       if (branchSlug === 'fe-engineering') {
         branchSlug = 'fe';
@@ -287,7 +287,7 @@ async function handleUrlRouting() {
       } else if (branchSlug) {
         const resolvedBranch = CONFIG[year]?.branches?.find(b => slugify(b) === branchSlug) || decodeURIComponent(branchSlug);
         await selectBranch(resolvedBranch, CONFIG[year] || {});
-        
+
         if (subjectSlug) {
           let resolvedSubject = null;
           let configSubjects = [];
@@ -528,7 +528,7 @@ function buildSubjectTags(subjects, isGrouped = false) {
 
     const renderPattern = (patternName, list) => {
       contentContainer.innerHTML = '';
-      
+
       const fileStep = document.getElementById('fileStep');
       if (fileStep) fileStep.style.display = 'none';
 
@@ -594,7 +594,16 @@ async function selectSubject(subject, pattern) {
     }
   });
 
-  document.getElementById('fileStep').style.display = 'block';
+  const fileStep = document.getElementById('fileStep');
+  fileStep.style.display = 'block';
+  
+  // Scroll to the PDFs on mobile so the user sees them
+  if (window.innerWidth <= 768) {
+    setTimeout(() => {
+      fileStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100); // small delay to allow DOM to render
+  }
+
   document.getElementById('fileStepLabel').textContent = `Papers for: ${subject}`;
 
   const params = new URLSearchParams({ year: currentYear, subject });
@@ -652,11 +661,11 @@ function renderFileGrid(files, gridId) {
     const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
     let downloadBtn;
     if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
-       downloadBtn = `<button class="btn-download" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')" title="Unlock PDF">🔒 Unlock</button>`;
+      downloadBtn = `<button class="btn-download" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')" title="Unlock PDF">🔒 Unlock</button>`;
     } else {
-       downloadBtn = isGdLink 
-         ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
-         : `<a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>`;
+      downloadBtn = isGdLink
+        ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
+        : `<a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>`;
     }
 
     const shareText = encodeURIComponent(`Check out ${f.originalName} on SYNAPSE SPPU PYQ Portal! \nhttps://sppupyq.vercel.app/api/download/${f._id}`);
@@ -981,11 +990,11 @@ async function openPremiumModal(type) {
         const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
         let downloadAction = '';
         if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
-           downloadAction = `<button class="modal-list-btn" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')">🔒 Unlock</button>`;
+          downloadAction = `<button class="modal-list-btn" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')">🔒 Unlock</button>`;
         } else {
-           downloadAction = isGdLink
-             ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
-             : `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`;
+          downloadAction = isGdLink
+            ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
+            : `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`;
         }
 
         const actionBtn = isPremiumUser
@@ -1166,14 +1175,14 @@ function handleGatedDownload(fileId, type, waUrl, tgUrl) {
 
   document.getElementById('gateStepWa').style.display = (type === 'whatsapp' || type === 'both') ? 'block' : 'none';
   document.getElementById('gateStepTg').style.display = (type === 'telegram' || type === 'both') ? 'block' : 'none';
-  
+
   if (type === 'whatsapp' || type === 'both') {
     document.getElementById('gateWaBtn').href = waUrl;
     document.getElementById('gateWaBtn').style.pointerEvents = 'auto';
     document.getElementById('gateWaStatus').textContent = "";
     document.getElementById('gateWaStatus').style.color = "var(--muted)";
   }
-  
+
   if (type === 'telegram' || type === 'both') {
     document.getElementById('gateTgBtn').href = tgUrl;
     document.getElementById('gateTgBtn').style.pointerEvents = 'auto';
@@ -1197,9 +1206,9 @@ function startGateCountdown(platform) {
 
   const btn = document.getElementById(platform === 'whatsapp' ? 'gateWaBtn' : 'gateTgBtn');
   const status = document.getElementById(platform === 'whatsapp' ? 'gateWaStatus' : 'gateTgStatus');
-  
+
   btn.style.pointerEvents = 'none';
-  
+
   let count = 7;
   status.textContent = `⏳ Unlocking in ${count}s`;
   status.style.whiteSpace = 'normal';
