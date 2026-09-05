@@ -220,7 +220,7 @@
       try {
         const res = await fetch('/api/payment/my-purchases');
         if (res.status === 401) {
-          window.location.href = '/login.html';
+          window.location.href = '/student-login.html?redirect=/my-purchases.html';
           return;
         }
         const purchases = await res.json();
@@ -240,7 +240,7 @@
           return `
           <div class="purchase-item">
             <div class="purchase-icon">
-              <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=200&q=80" alt="Cover">
+              <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=200&q=80" alt="Document Cover Preview" loading="lazy">
             </div>
             <div class="purchase-details">
               <h2 class="purchase-title">${product.title}</h2>

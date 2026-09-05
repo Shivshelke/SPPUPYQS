@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium Study Materials | SYNAPSE Marketplace</title>
   <link rel="icon" type="image/png" href="/img/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
   <script src="/js/theme.js"></script>
   <style>
@@ -16,11 +19,12 @@
       --glass-border: rgba(255, 255, 255, 0.08);
       --blur: blur(12px);
     }
+
     [data-theme="light"] {
       --surface-glass: rgba(0, 0, 0, 0.02);
       --glass-border: rgba(0, 0, 0, 0.08);
     }
-    
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -49,9 +53,11 @@
       padding: 0 5%;
       box-sizing: border-box;
     }
+
     [data-theme="light"] .nav {
       background: rgba(255, 255, 255, 0.7);
     }
+
     .nav-brand {
       display: flex;
       align-items: center;
@@ -62,11 +68,13 @@
       color: var(--text);
       text-decoration: none;
     }
+
     .nav-links {
       display: flex;
       gap: 1.5rem;
       align-items: center;
     }
+
     .nav-links a {
       color: var(--text-secondary);
       text-decoration: none;
@@ -74,6 +82,7 @@
       font-size: 0.95rem;
       transition: color 0.2s;
     }
+
     .nav-links a:hover {
       color: var(--text);
     }
@@ -85,6 +94,7 @@
       max-width: 800px;
       margin: 0 auto;
     }
+
     .market-hero h1 {
       font-family: 'Syne', sans-serif;
       font-size: clamp(2.5rem, 5vw, 4rem);
@@ -93,17 +103,20 @@
       margin-bottom: 1.2rem;
       letter-spacing: -0.03em;
     }
+
     .market-hero p {
       font-size: 1.1rem;
       color: var(--text-secondary);
       margin-bottom: 2.5rem;
       line-height: 1.6;
     }
+
     .search-bar {
       position: relative;
       max-width: 600px;
       margin: 0 auto;
     }
+
     .search-bar input {
       width: 100%;
       padding: 1.2rem 1.5rem 1.2rem 3rem;
@@ -116,10 +129,12 @@
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
+
     .search-bar input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
+
     .search-icon {
       position: absolute;
       left: 1.2rem;
@@ -138,7 +153,11 @@
       background: var(--bg);
       border-bottom: 1px solid var(--border);
     }
-    .year-tabs::-webkit-scrollbar { display: none; }
+
+    .year-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
     .year-tab {
       padding: 0.6rem 1.5rem;
       border-radius: 30px;
@@ -151,9 +170,11 @@
       white-space: nowrap;
       transition: all 0.3s;
     }
+
     .year-tab:hover {
       border-color: var(--text-secondary);
     }
+
     .year-tab.active {
       background: var(--accent);
       color: #fff;
@@ -176,14 +197,17 @@
       align-items: center;
       scrollbar-width: none;
     }
+
     .filters-section::-webkit-scrollbar {
       display: none;
     }
+
     .filter-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
+
     .filter-select {
       appearance: none;
       background: transparent;
@@ -201,13 +225,16 @@
       background-size: 1em;
       transition: border-color 0.2s;
     }
+
     .filter-select:hover {
       border-color: var(--text-secondary);
     }
+
     .filter-select option {
       background: var(--bg);
       color: var(--text);
     }
+
     @media (max-width: 768px) {
       .filters-section {
         display: grid;
@@ -215,6 +242,7 @@
         padding: 1rem 1rem;
         gap: 0.6rem;
       }
+
       .filter-select {
         width: 100%;
         padding: 0.5rem 1.8rem 0.5rem 0.6rem;
@@ -243,11 +271,13 @@
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
       position: relative;
     }
+
     .product-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
       border-color: rgba(255, 255, 255, 0.15);
     }
+
     [data-theme="light"] .product-card:hover {
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
       border-color: rgba(0, 0, 0, 0.15);
@@ -265,6 +295,7 @@
       justify-content: center;
       border-bottom: 1px solid var(--glass-border);
     }
+
     .product-thumbnail img {
       width: 100%;
       height: 100%;
@@ -272,9 +303,11 @@
       object-position: top center;
       transition: transform 0.5s;
     }
+
     .product-card:hover .product-thumbnail img {
       transform: scale(1.05);
     }
+
     .preview-badge {
       position: absolute;
       top: 1rem;
@@ -287,15 +320,16 @@
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.05em;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
+
     .product-info {
       padding: 1.5rem;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
     }
+
     .product-meta {
       display: flex;
       align-items: center;
@@ -306,10 +340,19 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .tag-pyq { color: #f59e0b; }
-    .tag-notes { color: #10b981; }
-    .tag-imp { color: #ec4899; }
-    
+
+    .tag-pyq {
+      color: #f59e0b;
+    }
+
+    .tag-notes {
+      color: #10b981;
+    }
+
+    .tag-imp {
+      color: #ec4899;
+    }
+
     .product-title {
       font-family: 'Syne', sans-serif;
       font-size: 1.25rem;
@@ -317,13 +360,14 @@
       margin: 0 0 0.5rem 0;
       line-height: 1.3;
     }
+
     .product-subtitle {
       font-size: 0.9rem;
       color: var(--text-secondary);
       margin-bottom: 1rem;
       line-height: 1.4;
     }
-    
+
     .product-stats {
       display: flex;
       align-items: center;
@@ -332,7 +376,7 @@
       color: var(--text-secondary);
       margin-bottom: 1.5rem;
     }
-    
+
     .product-footer {
       display: flex;
       align-items: center;
@@ -341,16 +385,18 @@
       padding-top: 1rem;
       border-top: 1px solid var(--glass-border);
     }
+
     .product-price {
       font-size: 1.25rem;
       font-weight: 700;
       font-family: 'Syne', sans-serif;
     }
-    
+
     .btn-group {
       display: flex;
       gap: 0.5rem;
     }
+
     .btn-view {
       background: transparent;
       color: var(--text);
@@ -363,9 +409,11 @@
       text-decoration: none;
       transition: background 0.2s;
     }
+
     .btn-view:hover {
       background: var(--surface-glass);
     }
+
     .btn-buy {
       background: var(--accent);
       color: white;
@@ -378,9 +426,11 @@
       text-decoration: none;
       transition: background 0.2s, transform 0.1s;
     }
+
     .btn-buy:hover {
       background: #2563eb;
     }
+
     .btn-buy:active {
       transform: scale(0.96);
     }
@@ -390,6 +440,7 @@
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
       border: 1px solid rgba(139, 92, 246, 0.2);
     }
+
     .bundle-card .preview-badge {
       background: rgba(139, 92, 246, 0.8);
     }
@@ -414,10 +465,51 @@
       .product-grid {
         grid-template-columns: 1fr;
       }
-      .nav-links { display: none; }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* Skeleton Loading */
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+    }
+    .skeleton-img {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: pulse-bg 1.5s infinite;
+    }
+    .skeleton-body {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .skeleton-line {
+      height: 16px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: pulse-bg 1.5s infinite;
+    }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 70%; }
+    @keyframes pulse-bg {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Header -->
@@ -431,7 +523,8 @@
       <a href="/marketplace.html?content=notes">Notes</a>
       <a href="/marketplace.html?content=imp">IMP Questions</a>
       <a href="/my-purchases.html">My Purchases</a>
-      <a href="/profile.html" class="btn-view" style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Profile</a>
+      <a href="/profile.html" class="btn-view"
+        style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Profile</a>
     </div>
   </nav>
 
@@ -494,9 +587,7 @@
 
   <!-- Product Grid -->
   <main class="product-grid" id="productGrid">
-    <div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">
-      Loading products...
-    </div>
+    <!-- Initial Skeleton Loaders -->
   </main>
 
   <script>
@@ -512,10 +603,27 @@
     // Fetch and render marketplace products dynamically
     async function loadProducts() {
       const grid = document.getElementById('productGrid');
+      
+      // Show skeletons
+      grid.innerHTML = Array(6).fill(0).map(() => `
+        <article class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line medium"></div>
+            <div style="margin-top:auto; display:flex; gap:1rem;">
+              <div class="skeleton-line short" style="flex:1;"></div>
+              <div class="skeleton-line short" style="flex:1;"></div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
       try {
         const res = await fetch('/api/marketplace/products');
         allProducts = await res.json();
-        
+
         if (!allProducts || allProducts.length === 0) {
           grid.innerHTML = '<div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">No premium materials available right now.</div>';
           return;
@@ -530,7 +638,7 @@
 
     function renderProducts() {
       const grid = document.getElementById('productGrid');
-      
+
       const filtered = allProducts.filter(p => {
         if (currentFilters.year !== 'all' && String(p.year) !== currentFilters.year) return false;
         if (currentFilters.sem !== 'all' && String(p.semester) !== currentFilters.sem) return false;
@@ -565,7 +673,7 @@
         else if (p.contentType === 'micro') { tagClass = 'tag-notes'; tagText = 'MICRO'; }
 
         // Use Unsplash placeholders if thumbnail doesn't exist
-        const thumb = p.thumbnailUrl || 'https://placehold.co/800x400/e2e8f0/64748b?text=Preview+Not+Available';
+        const thumb = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
 
         // Price display logic
         let priceHTML = `<span class="product-price">₹${p.price}</span>`;
@@ -590,7 +698,7 @@
             ${badgeHTML}
             <div class="product-thumbnail">
               <div class="preview-badge">PREVIEW</div>
-              <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://placehold.co/800x400/e2e8f0/64748b?text=Preview+Not+Available';">
+              <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';">
             </div>
             <div class="product-info">
               <div class="product-meta">
@@ -634,7 +742,7 @@
       // Dropdowns
       ['filterSem', 'filterContent', 'filterBranch'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el) {
           el.addEventListener('change', (e) => {
             const key = id.replace('filter', '').toLowerCase();
             currentFilters[key] = e.target.value;
@@ -645,7 +753,7 @@
 
       // Search
       const searchEl = document.getElementById('searchInput');
-      if(searchEl) {
+      if (searchEl) {
         searchEl.addEventListener('input', (e) => {
           currentFilters.search = e.target.value;
           renderProducts();
@@ -662,15 +770,15 @@
           body: JSON.stringify({ productId: id })
         });
         const data = await res.json();
-        
+
         if (!res.ok) {
-           if (res.status === 401) {
-             alert('Please log in as a student to buy premium content.');
-             window.location.href = '/student-login.html?redirect=/marketplace.html';
-           } else {
-             alert(data.error || 'Failed to initiate checkout');
-           }
-           return;
+          if (res.status === 401) {
+            alert('Please log in as a student to buy premium content.');
+            window.location.href = '/student-login.html?redirect=/marketplace.html';
+          } else {
+            alert(data.error || 'Failed to initiate checkout');
+          }
+          return;
         }
 
         if (data.isFree) {
@@ -711,7 +819,7 @@
         };
 
         const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function (response){
+        rzp.on('payment.failed', function (response) {
           alert('Payment failed: ' + response.error.description);
         });
         rzp.open();
@@ -723,21 +831,22 @@
 
 
     function shareProduct(id, title) {
-        event.stopPropagation(); // prevent card click if any
-        const url = window.location.origin + '/product.html?id=' + id;
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(url).then(() => {
-            alert('Link copied! You can now share "' + title + '"');
-          }).catch(err => {
-            console.error('Copy failed', err);
-            prompt('Copy this link:', url);
-          });
-        } else {
+      event.stopPropagation(); // prevent card click if any
+      const url = window.location.origin + '/product.html?id=' + id;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+          alert('Link copied! You can now share "' + title + '"');
+        }).catch(err => {
+          console.error('Copy failed', err);
           prompt('Copy this link:', url);
-        }
+        });
+      } else {
+        prompt('Copy this link:', url);
       }
+    }
   </script>
   <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
+
 </html>

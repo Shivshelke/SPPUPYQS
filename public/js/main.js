@@ -8,8 +8,7 @@ let deferredPrompt;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW Registered'))
-      .catch(err => console.log('SW Reg failed', err));
+      .catch(err => console.warn('SW Reg failed', err));
   });
 }
 
@@ -72,8 +71,8 @@ async function pwaInstallClick() {
   if (deferredPrompt) {
     hidePwaPopup(true);
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('PWA install outcome:', outcome);
+    // Handle install outcome if needed
+    // console.log('PWA install outcome:', outcome);
     deferredPrompt = null;
   }
 }
@@ -596,7 +595,7 @@ async function selectSubject(subject, pattern) {
 
   const fileStep = document.getElementById('fileStep');
   fileStep.style.display = 'block';
-  
+
   // Scroll to the PDFs on mobile so the user sees them
   if (window.innerWidth <= 768) {
     setTimeout(() => {
@@ -650,9 +649,15 @@ function renderFileGrid(files, gridId) {
   const grid = document.getElementById(gridId);
   if (!files.length) {
     grid.innerHTML = `
-      <div class="empty-state" style="grid-column:1/-1">
-        <span class="empty-icon">📭</span>
-        No papers available yet. Check back soon!
+      <div class="empty-state premium-empty" style="grid-column:1/-1; padding: 4rem 1rem; text-align: center; background: var(--surface-glass); border-radius: 20px; border: 1px dashed var(--glass-border); margin: 2rem 0; backdrop-filter: var(--blur);">
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1.5rem auto; animation: float 3s ease-in-out infinite; opacity: 0.6;">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <h3 style="font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text);">No Papers Found</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1rem; max-width: 300px; margin-left: auto; margin-right: auto;">We're constantly adding new study materials. Can't find what you need?</p>
+        <button class="btn-primary" onclick="document.getElementById('feedback').scrollIntoView({behavior: 'smooth'})" style="padding: 0.8rem 2rem; border-radius: 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">Request This Paper ✨</button>
       </div>`;
     return;
   }

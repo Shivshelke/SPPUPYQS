@@ -680,17 +680,20 @@
         <p>Unlock high-quality PYQs, handwritten notes, and solved papers curated for SPPU students.</p>
       </div>
 
-      <div class="premium-card" style="text-align: center; padding: 4rem 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;">
+      <div class="premium-card"
+        style="text-align: center; padding: 4rem 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🛍️</div>
         <h3 style="font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 1rem;">Digital Marketplace</h3>
         <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem; line-height: 1.6;">
           Access free study material or unlock verified solved PYQs, handwritten notes, and IMP questions.
         </p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="/marketplace.html" class="btn-premium" style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
+          <a href="/marketplace.html" class="btn-premium"
+            style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
             Enter Premium Content 🚀
           </a>
-          <a href="/my-purchases.html" style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; border: 1px solid var(--border); border-radius: 12px; color: var(--text); background: rgba(255,255,255,0.05);">
+          <a href="/my-purchases.html"
+            style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; border: 1px solid var(--border); border-radius: 12px; color: var(--text); background: rgba(255,255,255,0.05);">
             My Purchases 📚
           </a>
         </div>
@@ -860,7 +863,7 @@
   <!-- ── Premium Modal ── -->
   <div id="premiumModal" class="modal-overlay" onclick="closePremiumModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closePremiumModal()">&times;</button>
+      <button class="modal-close" onclick="closePremiumModal()" aria-label="Close Premium Modal">&times;</button>
       <div class="modal-header">
         <div id="prmModalIcon" class="premium-item-icon" style="font-size:3rem; margin-bottom:0.5rem">📄</div>
         <h3 id="prmModalTitle">Solved PYQs</h3>
@@ -878,7 +881,7 @@
   <!-- ── Join to Download Modal ── -->
   <div id="gateModal" class="modal-overlay" onclick="closeGateModal(event)">
     <div class="modal gate-modal" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeGateModal()">&times;</button>
+      <button class="modal-close" onclick="closeGateModal()" aria-label="Close Download Modal">&times;</button>
       <div class="modal-header">
         <div class="gate-icon" style="font-size:3rem; margin-bottom:0.5rem">🔒</div>
         <h3 id="gateTitle">Unlock PDF</h3>
@@ -975,7 +978,8 @@
     </a>
     <a href="/marketplace.html" class="bottom-nav-item">
       <div class="bottom-nav-icon">✨</div>
-      <span style="font-weight:800; background:linear-gradient(90deg, #8b5cf6, #ec4899); -webkit-background-clip:text; background-clip:text; color:transparent;">PRO</span>
+      <span
+        style="font-weight:800; background:linear-gradient(90deg, #8b5cf6, #ec4899); -webkit-background-clip:text; background-clip:text; color:transparent;">PRO</span>
     </a>
     <a href="#" onclick="toggleChat(); return false;" class="bottom-nav-item">
       <div class="bottom-nav-icon">🤖</div>

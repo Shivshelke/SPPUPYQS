@@ -71,7 +71,7 @@
 
     <!-- Top bar -->
     <header class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">☰</button>
       <div class="topbar-title" id="topbarTitle">Upload Paper</div>
       <div class="topbar-right" style="display:flex; align-items:center; gap:1rem;">
         <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"
@@ -183,7 +183,7 @@
             </div>
             <div class="file-preview" id="filePreview" style="display:none">
               <span id="fileName"></span>
-              <button onclick="clearFile()">✕</button>
+              <button onclick="clearFile()" aria-label="Clear File">✕</button>
             </div>
           </div>
 
@@ -389,7 +389,7 @@
             </div>
             <div class="file-preview" id="prmFilePreview" style="display:none">
               <span id="prmFileNameDisplay"></span>
-              <button onclick="window.clearPremiumFile()">✕</button>
+              <button onclick="window.clearPremiumFile()" aria-label="Clear Premium File">✕</button>
             </div>
           </div>
 
@@ -411,7 +411,7 @@
         <div class="recent-card" style="overflow-y:auto; max-height:800px;">
           <div class="recent-header" style="display:flex; justify-content:space-between; align-items:center;">
             Manage Premium Files
-            <button class="btn-ghost small" onclick="window.loadPremiumAdminFiles()">↻</button>
+            <button class="btn-ghost small" onclick="window.loadPremiumAdminFiles()" aria-label="Refresh Premium Files">↻</button>
           </div>
           <div id="premiumAdminFileList">
             <div class="empty-state small">No premium files yet</div>

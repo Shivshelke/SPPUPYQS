@@ -8,8 +8,10 @@
   --surface2: #18181b;
   --border: #27272a;
   --border-light: #3f3f46;
-  --accent: #3b82f6; /* Clean Blue */
-  --accent-secondary: #60a5fa; /* Light Blue */
+  --accent: #3b82f6;
+  /* Clean Blue */
+  --accent-secondary: #60a5fa;
+  /* Light Blue */
   --accent-hover: #2563eb;
   --accent-glow: rgba(59, 130, 246, 0.15);
   --text: #fafafa;
@@ -53,6 +55,8 @@
 
 html {
   scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
@@ -61,6 +65,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  max-width: 100vw;
 }
 
 h1,
@@ -978,6 +983,9 @@ a {
 @media (max-width: 768px) {
 
   /* Nav */
+  .nav {
+    padding: 1rem 1.2rem;
+  }
   .hamburger {
     display: flex;
   }
@@ -1078,9 +1086,9 @@ a {
   .hero-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.5rem;
     width: 100%;
-    max-width: 440px;
+    max-width: 100%;
     margin: 2rem auto 0;
   }
 
@@ -1224,7 +1232,7 @@ a {
   }
 
   .hero-stats {
-    max-width: 340px;
+    max-width: 100%;
   }
 
   .stat-num {
@@ -1233,6 +1241,7 @@ a {
 
   .file-actions {
     flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 
@@ -2550,6 +2559,7 @@ a {
     font-size: 0.95rem !important;
   }
 }
+
 /* ── Gate Modal Mobile Adjustments ── */
 @media (max-width: 767px) {
   .gate-modal {
@@ -2558,6 +2568,7 @@ a {
     max-height: 90vh;
     overflow-y: auto;
   }
+
   .gate-modal .btn-primary {
     width: 100%;
     min-height: 48px;
@@ -2566,10 +2577,12 @@ a {
     justify-content: center;
     font-size: 1rem;
   }
+
   #gateTitle {
     white-space: normal;
     word-break: break-word;
   }
+
   .gate-step {
     padding: 0.8rem;
   }

@@ -1,7 +1,8 @@
-const CACHE_NAME = 'synapse-cache-v2';
+const CACHE_NAME = 'synapse-cache-v3';
 const ASSETS = [
   '/',
   '/index.html',
+  '/offline.html',
   '/css/style.css',
   '/js/main.js',
   '/js/theme.js'
@@ -11,7 +12,7 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Pre-caching static assets');
+      // '[SW] Pre-caching static assets'
       return cache.addAll(ASSETS);
     }).then(() => self.skipWaiting())
   );
@@ -24,7 +25,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            console.log('[SW] Purging old cache:', cache);
+            // '[SW] Purging old cache:', cache
             return caches.delete(cache);
           }
         })
@@ -71,7 +72,15 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         // Fall back to cache on network failure
-        return caches.match(event.request);
+        return caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // If the request is for an HTML page and it's not in the cache, serve the offline page
+          if (event.request.headers.get('accept').includes('text/html')) {
+            return caches.match('/offline.html');
+          }
+        });
       })
   );
 });
