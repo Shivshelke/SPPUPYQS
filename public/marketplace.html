@@ -615,6 +615,8 @@
               <button class="btn-ghost" onclick="fetch('/student/logout', {method:'POST'}).then(()=>window.location.reload())" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
             `;
           }
+        } else {
+          window.location.href = '/student-login.html?redirect=/marketplace.html';
         }
       })
       .catch(e => console.error('Auth load error', e));
