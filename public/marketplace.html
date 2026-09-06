@@ -573,14 +573,13 @@
       </select>
     </div>
     <div class="filter-group">
-      <select class="filter-select" id="filterBranch">
+      <select class="filter-select" id="filterBranch" disabled>
         <option value="all">Branch: All</option>
-        <option value="AI & ML">AI & ML</option>
-        <option value="Computer">Computer</option>
-        <option value="IT">IT</option>
-        <option value="ENTC">ENTC</option>
-        <option value="Mechanical">Mechanical</option>
-        <option value="Civil">Civil</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <select class="filter-select" id="filterSubject" disabled>
+        <option value="all">Subject: All</option>
       </select>
     </div>
   </div>
@@ -591,12 +590,14 @@
   </main>
 
   <script>
+    let CONFIG = {};
     let allProducts = [];
     let currentFilters = {
       year: 'all',
       sem: 'all',
       content: 'all',
       branch: 'all',
+      subject: 'all',
       search: ''
     };
 
@@ -621,8 +622,12 @@
       `).join('');
 
       try {
-        const res = await fetch('/api/marketplace/products');
+        const [res, confRes] = await Promise.all([
+          fetch('/api/marketplace/products'),
+          fetch('/api/config')
+        ]);
         allProducts = await res.json();
+        CONFIG = await confRes.json();
 
         if (!allProducts || allProducts.length === 0) {
           grid.innerHTML = '<div style="text-align:center; grid-column: 1 / -1; padding: 3rem; color: var(--text-secondary);">No premium materials available right now.</div>';
@@ -644,6 +649,7 @@
         if (currentFilters.sem !== 'all' && String(p.semester) !== currentFilters.sem) return false;
         if (currentFilters.content !== 'all' && p.contentType !== currentFilters.content) return false;
         if (currentFilters.branch !== 'all' && p.branch !== currentFilters.branch) return false;
+        if (currentFilters.subject !== 'all' && p.subject !== currentFilters.subject) return false;
         if (currentFilters.search) {
           const s = currentFilters.search.toLowerCase();
           if (!p.title.toLowerCase().includes(s) && !(p.subject || '').toLowerCase().includes(s)) return false;
@@ -729,23 +735,100 @@
     document.addEventListener('DOMContentLoaded', () => {
       loadProducts();
 
+      // Helper to update subjects
+      function updateMarketplaceSubjects(year, branchVal) {
+        const subjectFilter = document.getElementById('filterSubject');
+        if (!subjectFilter) return;
+        subjectFilter.innerHTML = '<option value="all">Subject: All</option>';
+        subjectFilter.disabled = true;
+
+        if (!year || year === 'all' || !CONFIG[year]) return;
+
+        let subjects = new Set();
+        if (CONFIG[year].subjects) {
+          if (Array.isArray(CONFIG[year].subjects)) {
+            CONFIG[year].subjects.forEach(s => subjects.add(s));
+          } else if (typeof CONFIG[year].subjects === 'object') {
+            const branchData = CONFIG[year].subjects[branchVal];
+            if (branchData) {
+              if (Array.isArray(branchData)) {
+                branchData.forEach(s => subjects.add(s));
+              } else if (typeof branchData === 'object') {
+                Object.values(branchData).forEach(arr => {
+                  if (Array.isArray(arr)) arr.forEach(s => subjects.add(s));
+                });
+              }
+            }
+          }
+        }
+
+        const uniqueSubjects = Array.from(subjects).sort();
+        uniqueSubjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s; opt.textContent = s;
+          subjectFilter.appendChild(opt);
+        });
+
+        if (uniqueSubjects.length > 0) {
+          subjectFilter.disabled = false;
+        }
+      }
+
       // Year Tabs
       document.querySelectorAll('.year-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
           document.querySelectorAll('.year-tab').forEach(t => t.classList.remove('active'));
           e.target.classList.add('active');
-          currentFilters.year = e.target.getAttribute('data-year');
+          const year = e.target.getAttribute('data-year');
+          currentFilters.year = year;
+          
+          const branchFilter = document.getElementById('filterBranch');
+          const subjectFilter = document.getElementById('filterSubject');
+          
+          if (branchFilter) branchFilter.innerHTML = '<option value="all">Branch: All</option>';
+          if (subjectFilter) subjectFilter.innerHTML = '<option value="all">Subject: All</option>';
+          
+          if (year === 'all' || !CONFIG[year]) {
+            if (branchFilter) branchFilter.disabled = true;
+            if (subjectFilter) subjectFilter.disabled = true;
+            if (branchFilter) branchFilter.parentElement.style.display = 'block';
+          } else {
+            if (year === 'first') {
+              if (branchFilter) branchFilter.parentElement.style.display = 'none';
+              updateMarketplaceSubjects(year, 'FE');
+            } else {
+              if (branchFilter) {
+                branchFilter.parentElement.style.display = 'block';
+                branchFilter.disabled = false;
+                const branches = CONFIG[year].branches || [];
+                branches.forEach(b => {
+                  const opt = document.createElement('option');
+                  opt.value = b; opt.textContent = b;
+                  branchFilter.appendChild(opt);
+                });
+              }
+            }
+          }
+          currentFilters.branch = 'all';
+          currentFilters.subject = 'all';
           renderProducts();
         });
       });
 
       // Dropdowns
-      ['filterSem', 'filterContent', 'filterBranch'].forEach(id => {
+      ['filterSem', 'filterContent', 'filterBranch', 'filterSubject'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.addEventListener('change', (e) => {
             const key = id.replace('filter', '').toLowerCase();
             currentFilters[key] = e.target.value;
+            
+            // If branch changed, update subjects
+            if (key === 'branch') {
+              currentFilters.subject = 'all';
+              updateMarketplaceSubjects(currentFilters.year, currentFilters.branch);
+            }
+            
             renderProducts();
           });
         }

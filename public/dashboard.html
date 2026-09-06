@@ -349,9 +349,9 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Year</label>
-              <select id="prmYear">
-                <option value="all">— Any Year —</option>
+              <label>Year <span class="req">*</span></label>
+              <select id="prmYear" onchange="window.onPrmYearChange && window.onPrmYearChange()">
+                <option value="">— Select Year —</option>
                 <option value="first">1st Year</option>
                 <option value="second">2nd Year</option>
                 <option value="third">3rd Year</option>
@@ -359,17 +359,29 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Branch</label>
-              <select id="prmBranch">
-                <option value="all">— Any Branch —</option>
-                <option value="Computer">Computer</option>
-                <option value="IT">IT</option>
-                <option value="AI & ML">AI & ML</option>
-                <option value="ENTC">ENTC</option>
-                <option value="Mechanical">Mechanical</option>
-                <option value="Civil">Civil</option>
+              <label>Branch <span class="req">*</span></label>
+              <select id="prmBranch" disabled onchange="window.onPrmBranchChange && window.onPrmBranchChange()">
+                <option value="">— Select Branch —</option>
               </select>
             </div>
+          </div>
+          <div class="form-group" id="prmPatternGroup" style="display:none; margin-bottom: 1.5rem;">
+            <label>Pattern <span class="req">*</span></label>
+            <select id="prmPattern" onchange="window.onPrmPatternChange && window.onPrmPatternChange()">
+              <option value="2024 Pattern">2024 Pattern</option>
+              <option value="2019 Pattern">2019 Pattern</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Subject</label>
+            <select id="prmSubjectDropdown" disabled>
+              <option value="">— Select Subject —</option>
+              <option value="__custom__">+ Type custom subject…</option>
+            </select>
+          </div>
+          <div class="form-group" id="prmCustomSubjectGroup" style="display:none; margin-bottom: 1.5rem;">
+            <label>Custom Subject Name</label>
+            <input type="text" id="prmCustomSubject" placeholder="Enter subject name…" />
           </div>
           <div class="form-group">
             <label>Upload Method</label>
