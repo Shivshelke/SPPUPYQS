@@ -191,8 +191,8 @@
     }
     .btn-preview-lg:hover { background: var(--surface-glass); }
 
-    /* Modal Styles */
-    .modal-overlay {
+    /* PDF Viewer Styles */
+    .synapse-pdf-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.8);
@@ -264,7 +264,7 @@
   <main class="product-container">
     <!-- Left Column: PDF Preview -->
     <div class="product-left">
-      <div class="main-preview-card" onclick="openPreviewModal()">
+      <div class="main-preview-card" onclick="openPdfViewer()">
         <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" alt="PDF Document Preview for Engineering Studies" loading="lazy" class="main-preview-img" id="productImg">
         <div class="preview-hint">Click to enlarge preview</div>
       </div>
@@ -304,17 +304,17 @@
       
       <div class="action-buttons">
         <button class="btn-buy-lg" id="buyBtn" onclick="checkout()">Buy Now</button>
-        <button class="btn-preview-lg" onclick="openPreviewModal()">Preview</button>
+        <button class="btn-preview-lg" onclick="openPdfViewer()">Preview</button>
       </div>
     </div>
   </main>
 
-  <!-- PDF Preview Modal -->
-  <div class="modal-overlay" id="previewModal">
+  <!-- PDF Preview Viewer -->
+  <div class="synapse-pdf-overlay" id="synapsePdfViewer">
     <div class="modal-content">
       <div class="modal-header">
         <div style="font-weight:600;">Preview</div>
-        <button class="close-modal" onclick="closePreviewModal()">&times;</button>
+        <button class="close-modal" onclick="closePdfViewer()">&times;</button>
       </div>
       <div class="modal-body">
         <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80" alt="Expanded PDF Document Preview" loading="lazy" id="modalImg">
@@ -387,13 +387,13 @@
       }
     }
 
-    function openPreviewModal() {
-      document.getElementById('previewModal').style.display = 'flex';
+    function openPdfViewer() {
+      document.getElementById('synapsePdfViewer').style.setProperty('display', 'flex', 'important');
       document.body.style.overflow = 'hidden';
     }
     
-    function closePreviewModal() {
-      document.getElementById('previewModal').style.display = 'none';
+    function closePdfViewer() {
+      document.getElementById('synapsePdfViewer').style.setProperty('display', 'none', 'important');
       document.body.style.overflow = 'auto';
     }
     
