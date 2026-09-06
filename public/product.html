@@ -378,7 +378,7 @@
         
         // Update images with placeholder since we secure actual PDFs
         document.getElementById('productImg').src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
-        document.getElementById('modalImg').src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        document.getElementById('modalImg').src = p.previewUrl || p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
         document.getElementById('modalUnlockBtn').textContent = `Unlock Full PDF for ₹${p.price}`;
 
       } catch (err) {
