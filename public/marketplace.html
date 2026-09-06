@@ -90,7 +90,7 @@
     /* Hero Section */
     .market-hero {
       text-align: center;
-      padding: 6rem 1.5rem 4rem;
+      padding: 6rem 1.5rem 2.8rem;
       max-width: 800px;
       margin: 0 auto;
     }
@@ -463,11 +463,81 @@
 
     @media (max-width: 768px) {
       .product-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem 3%;
       }
-
       .nav-links {
         display: none;
+      }
+      .product-thumbnail {
+        height: 120px;
+      }
+      .product-info {
+        padding: 0.6rem;
+      }
+      .product-title {
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .product-subtitle {
+        font-size: 0.7rem;
+        margin-bottom: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .product-meta {
+        font-size: 0.6rem;
+        margin-bottom: 0.3rem;
+      }
+      .product-stats {
+        font-size: 0.7rem;
+        gap: 0.4rem;
+        margin-bottom: 0.5rem;
+      }
+      .product-price {
+        font-size: 1rem;
+      }
+      .product-footer {
+        padding-top: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.2rem;
+      }
+      .btn-group {
+        width: auto;
+      }
+      .btn-view {
+        display: none;
+      }
+      .btn-buy {
+        width: auto;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+        text-align: center;
+      }
+      .btn-share {
+        width: 28px !important;
+        height: 28px !important;
+        top: 6px !important;
+        right: 6px !important;
+      }
+      .btn-share svg {
+        width: 14px;
+        height: 14px;
+      }
+      .preview-badge {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
+        top: 0.5rem;
+        right: 0.5rem;
       }
     }
 
@@ -669,7 +739,13 @@
         if (currentFilters.sem !== 'all' && String(p.semester) !== currentFilters.sem) return false;
         if (currentFilters.content !== 'all' && p.contentType !== currentFilters.content) return false;
         if (currentFilters.branch !== 'all' && p.branch !== currentFilters.branch) return false;
-        if (currentFilters.subject !== 'all' && p.subject !== currentFilters.subject) return false;
+        if (currentFilters.subject !== 'all') {
+          if (p.subject && p.subject !== 'all') {
+            if (p.subject !== currentFilters.subject) return false;
+          } else {
+            if (!p.title.toLowerCase().includes(currentFilters.subject.toLowerCase())) return false;
+          }
+        }
         if (currentFilters.search) {
           const s = currentFilters.search.toLowerCase();
           if (!p.title.toLowerCase().includes(s) && !(p.subject || '').toLowerCase().includes(s)) return false;
@@ -722,7 +798,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
             </button>
             ${badgeHTML}
-            <div class="product-thumbnail">
+            <div class="product-thumbnail" onclick="window.location.href='/product.html?id=${p.slug || p._id}'" style="cursor: pointer;">
               <div class="preview-badge">PREVIEW</div>
               <img src="${thumb}" alt="${p.title}" style="filter: contrast(1.1) brightness(0.9);" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';">
             </div>
@@ -732,7 +808,7 @@
                 <span style="color:var(--glass-border);">•</span>
                 <span style="text-transform:capitalize">${p.year || 'All'} Year</span>
               </div>
-              <h3 class="product-title">${p.title}</h3>
+              <h3 class="product-title" onclick="window.location.href='/product.html?id=${p.slug || p._id}'" style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color=''"> ${p.title}</h3>
               <p class="product-subtitle">${p.branch || 'Common'} | ${p.subject || 'Various'}</p>
               <div class="product-stats">
                 <span>⭐ 4.8</span>
