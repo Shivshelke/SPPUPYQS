@@ -494,7 +494,7 @@
       <a href="#feedback" onclick="closeMobileMenu()">Feedback</a>
       <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
         <a href="/student-login.html" class="btn-ghost"
-          style="color:var(--accent)!important; border-color:var(--accent)">Profile</a>
+          style="color:var(--accent)!important; border-color:var(--accent)">Login / Sign Up</a>
       </div>
       <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span
           class="theme-icon">☀️</span></button>
@@ -688,7 +688,7 @@
           Access free study material or unlock verified solved PYQs, handwritten notes, and IMP questions.
         </p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="/marketplace.html" class="btn-premium"
+          <a href="/marketplace.html" class="btn-premium" onclick="if(typeof isLoggedIn !== 'undefined' && !isLoggedIn) { alert('Please Login / Sign Up first to access Premium Content!'); window.location.href='/student-login.html?redirect=/marketplace.html'; return false; }"
             style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
             Enter Premium Content 🚀
           </a>

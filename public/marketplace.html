@@ -523,8 +523,10 @@
       <a href="/marketplace.html?content=notes">Notes</a>
       <a href="/marketplace.html?content=imp">IMP Questions</a>
       <a href="/my-purchases.html">My Purchases</a>
-      <a href="/profile.html" class="btn-view"
-        style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Profile</a>
+      <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
+        <a href="/student-login.html" class="btn-view"
+          style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Login / Sign Up</a>
+      </div>
     </div>
   </nav>
 
@@ -600,6 +602,22 @@
       subject: 'all',
       search: ''
     };
+
+    // Check Auth Status independently
+    fetch('/student/status')
+      .then(r => r.json())
+      .then(authData => {
+        if (authData.loggedIn) {
+          const nav = document.getElementById('studentAuthNav');
+          if (nav) {
+            nav.innerHTML = `
+              <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${authData.username}</span>
+              <button class="btn-ghost" onclick="fetch('/student/logout', {method:'POST'}).then(()=>window.location.reload())" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
+            `;
+          }
+        }
+      })
+      .catch(e => console.error('Auth load error', e));
 
     // Fetch and render marketplace products dynamically
     async function loadProducts() {
