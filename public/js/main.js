@@ -1265,3 +1265,35 @@ async function executeGatedDownload() {
     btn.disabled = false;
   }
 }
+
+// ── Load Notice Banner ──────────────────────────────────────────────────
+async function loadNoticeBanner() {
+  try {
+    const res = await fetch('/api/banner');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.isActive && data.text) {
+        const banner = document.getElementById('notice-banner');
+        const textEl = document.getElementById('notice-banner-text');
+        const linkEl = document.getElementById('notice-banner-link');
+        
+        if (!banner || !textEl || !linkEl) return;
+        
+        textEl.textContent = data.text;
+        
+        if (data.link && data.link.trim() !== '') {
+          linkEl.href = data.link;
+          linkEl.style.display = 'inline';
+        } else {
+          linkEl.style.display = 'none';
+        }
+        
+        banner.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load banner config', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadNoticeBanner);

@@ -14,6 +14,7 @@ const Product = require('../models/Product');
 const Purchase = require('../models/Purchase');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
+const Banner = require('../models/Banner');
 
 // ── Cloudinary config ─────────────────────────────────────────────────────────
 cloudinary.config({
@@ -565,6 +566,38 @@ router.get('/analytics', async (req, res) => {
   } catch (err) {
     console.error('Analytics Error:', err);
     res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
+// ── GET Banner Config ─────────────────────────────────────────────────────────
+router.get('/banner', requireAdmin, async (req, res) => {
+  try {
+    let banner = await Banner.findOne({ key: 'main_banner' });
+    if (!banner) {
+      banner = new Banner({ key: 'main_banner', text: 'Welcome to SPPU PYQ Portal!', link: '', isActive: false });
+      await banner.save();
+    }
+    res.json(banner);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST Update Banner Config ─────────────────────────────────────────────────
+router.post('/banner', requireAdmin, async (req, res) => {
+  try {
+    const { text, link, isActive } = req.body;
+    let banner = await Banner.findOne({ key: 'main_banner' });
+    if (!banner) {
+      banner = new Banner({ key: 'main_banner' });
+    }
+    banner.text = text;
+    banner.link = link;
+    banner.isActive = isActive;
+    await banner.save();
+    res.json({ success: true, banner });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

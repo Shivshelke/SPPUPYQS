@@ -136,7 +136,7 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
-      padding: 8rem 1.5rem 4rem;
+      padding: 4rem 1.5rem 4rem; /* Adjusted from 8rem since nav is now sticky and in flow */
       text-align: center;
     }
 
@@ -151,7 +151,7 @@
     }
 
     .nav {
-      position: fixed;
+      position: sticky;
       top: 0;
       width: 100%;
       z-index: 1000;
@@ -453,6 +453,88 @@
       color: var(--accent);
       font-weight: 600;
     }
+    
+    .notice-banner {
+      display: none;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: var(--text);
+      padding: 12px 18px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 10;
+      letter-spacing: 0.015em;
+      max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 12px;
+      margin: 1.5rem auto 0;
+      backdrop-filter: blur(8px);
+    }
+    .notice-banner-inner {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px;
+    }
+    .notice-banner-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      color: white;
+      border-radius: 9999px;
+      padding: 3px 10px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+      flex-shrink: 0;
+    }
+    .notice-banner-text {
+      flex: 1;
+      opacity: 0.9;
+      text-align: left;
+    }
+    .notice-banner-link {
+      display: none;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.1);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .notice-banner-link:hover {
+      background: rgba(99, 102, 241, 0.2);
+    }
+    
+    @media (max-width: 600px) {
+      .notice-banner {
+        padding: 12px 14px;
+        margin: 1.2rem 1rem 0;
+        width: calc(100% - 2rem);
+      }
+      .notice-banner-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .notice-banner-text {
+        text-align: left;
+      }
+      .notice-banner-link {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+      }
+    }
   </style>
   <script src="/js/theme.js" defer></script>
 </head>
@@ -524,6 +606,16 @@
         <button onclick="doGlobalSearch()">Search</button>
         <div id="searchSuggestions" class="suggestions-dropdown" style="display:none;"></div>
       </div>
+      
+      <!-- ── DYNAMIC NOTICE BANNER ── -->
+      <div id="notice-banner" class="notice-banner">
+        <div class="notice-banner-inner">
+          <span class="notice-banner-badge">Notice</span>
+          <span id="notice-banner-text" class="notice-banner-text">Important Notice Goes Here</span>
+          <a id="notice-banner-link" href="#" class="notice-banner-link">Learn more &rarr;</a>
+        </div>
+      </div>
+
     </div>
     <div class="hero-stats" id="heroStats">
       <div class="stat"><span class="stat-num" id="statTotal"><span class="skeleton"
@@ -1011,7 +1103,7 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=3" defer></script>
+  <script src="/js/main.js?v=4" defer></script>
 </body>
 
 </html>

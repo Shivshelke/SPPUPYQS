@@ -99,6 +99,7 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
       loadFeedback();
       markFeedbackAsRead();
     }
+    if (panelId === 'banner') loadBannerConfig();
 
     // Close sidebar on mobile
     if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
@@ -1530,3 +1531,58 @@ window.onPrmBranchChange = function() {
     }
   };
 };
+
+// ── BANNER CONFIG ─────────────────────────────────────────────────────────────
+async function loadBannerConfig() {
+  try {
+    const res = await fetch('/admin/banner');
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('bannerIsActive').checked = data.isActive;
+      document.getElementById('bannerText').value = data.text || '';
+      document.getElementById('bannerLink').value = data.link || '';
+    }
+  } catch (err) {
+    console.error('Failed to load banner config', err);
+  }
+}
+
+async function saveBannerConfig() {
+  const alertBox = document.getElementById('bannerAlert');
+  alertBox.style.display = 'none';
+
+  const text = document.getElementById('bannerText').value.trim();
+  const link = document.getElementById('bannerLink').value.trim();
+  const isActive = document.getElementById('bannerIsActive').checked;
+
+  if (isActive && !text) {
+    alertBox.textContent = 'Banner text is required when banner is active.';
+    alertBox.className = 'alert error';
+    alertBox.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch('/admin/banner', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text, link, isActive })
+    });
+    
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alertBox.textContent = 'Banner settings saved successfully!';
+      alertBox.className = 'alert success';
+      alertBox.style.display = 'block';
+    } else {
+      throw new Error(data.error || 'Failed to save');
+    }
+  } catch (err) {
+    alertBox.textContent = err.message;
+    alertBox.className = 'alert error';
+    alertBox.style.display = 'block';
+  }
+}
+

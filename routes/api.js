@@ -16,6 +16,7 @@ const router = express.Router();
 const File = require('../models/File');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
+const Banner = require('../models/Banner');
 const crypto = require('crypto');
 
 const GATE_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-gates-2026';
@@ -433,4 +434,19 @@ User asked: ${message}` }] }]
   }
 });
 
+// ── GET Main Banner ───────────────────────────────────────────────────────────
+router.get('/banner', async (req, res) => {
+  try {
+    const banner = await Banner.findOne({ key: 'main_banner' });
+    if (banner) {
+      res.json(banner);
+    } else {
+      res.json({ isActive: false });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch banner' });
+  }
+});
+
 module.exports = router;
+

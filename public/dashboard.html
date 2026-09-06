@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=2" />
   <script src="/js/theme.js"></script>
 </head>
 
@@ -55,6 +55,9 @@
       </a>
       <a href="#" class="nav-item" data-panel="password">
         <span class="nav-icon">🔑</span> Change Password
+      </a>
+      <a href="#" class="nav-item" data-panel="banner">
+        <span class="nav-icon">📢</span> Notice Banner
       </a>
       <div class="nav-divider"></div>
       <a href="/" class="nav-item" target="_blank">
@@ -513,6 +516,40 @@
           <input type="password" id="pwConfirm" placeholder="Repeat new password" />
         </div>
         <button class="btn-primary" onclick="doChangePassword()">Update Password</button>
+      </div>
+    </section>
+
+    <!-- ══ PANEL: BANNER ══ -->
+    <section class="panel" id="panel-banner">
+      <div class="panel-header">
+        <h2>Notice Banner Configuration</h2>
+      </div>
+      <div class="narrow-form">
+        <div class="alert" id="bannerAlert" style="display:none"></div>
+        
+        <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: var(--surface2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+          <div>
+            <label style="margin-bottom: 0; font-size: 1.1rem;">Enable Banner</label>
+            <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem;">Show notice banner on top of the website.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="bannerIsActive">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label>Banner Text <span class="req">*</span></label>
+          <input type="text" id="bannerText" placeholder="e.g. Important Notice: Exams starting soon!" />
+        </div>
+        
+        <div class="form-group">
+          <label>Banner Link (Optional)</label>
+          <input type="url" id="bannerLink" placeholder="e.g. https://example.com/notice" />
+          <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem;">Make the banner clickable and redirect users to this URL.</div>
+        </div>
+
+        <button class="btn-primary" onclick="saveBannerConfig()">Save Banner Settings</button>
       </div>
     </section>
 

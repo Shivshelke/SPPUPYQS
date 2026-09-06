@@ -402,3 +402,44 @@ a { text-decoration:none; }
 .fb-name { font-weight: 600; color: var(--text); }
 .fb-date { font-size: 0.78rem; color: var(--muted); }
 .fb-msg { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; background: var(--surface2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-light); }
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border, #ccc);
+  transition: .4s;
+  border-radius: 24px;
+}
+.toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+.toggle-switch input:checked + .slider {
+  background-color: var(--accent, #4f46e5);
+}
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
