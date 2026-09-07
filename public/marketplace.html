@@ -741,10 +741,39 @@
         if (currentFilters.content !== 'all' && p.contentType !== currentFilters.content) return false;
         if (currentFilters.branch !== 'all' && p.branch !== currentFilters.branch) return false;
         if (currentFilters.subject !== 'all') {
-          if (p.subject && p.subject !== 'all') {
+          if (p.subject && p.subject !== 'all' && p.subject.trim() !== '') {
             if (p.subject !== currentFilters.subject) return false;
           } else {
-            if (!p.title.toLowerCase().includes(currentFilters.subject.toLowerCase())) return false;
+            const titleLower = p.title.toLowerCase();
+            const subjLower = currentFilters.subject.toLowerCase();
+            
+            let matched = titleLower.includes(subjLower) || subjLower.includes(titleLower);
+            
+            if (!matched) {
+              const acronym = subjLower.split(/[\s\-–]+/).map(w => w[0]).filter(c => /[a-z]/.test(c)).join('');
+              if (acronym.length > 1 && titleLower.includes(acronym)) matched = true;
+            }
+            
+            if (!matched) {
+              const aliases = {
+                "programming and problem solving": ["pps"],
+                "engineering mathematics": ["m1", "m2", "m3", "m-1", "m-2", "m-3", "maths"],
+                "basic electronics": ["bxe"],
+                "basic electrical": ["bee"],
+                "mechanics": ["em"],
+                "physics": ["ep"],
+                "chemistry": ["ec"],
+                "graphics": ["eg"]
+              };
+              for (const [key, vals] of Object.entries(aliases)) {
+                if (subjLower.includes(key) && vals.some(v => titleLower.includes(v))) {
+                  matched = true;
+                  break;
+                }
+              }
+            }
+            
+            if (!matched) return false;
           }
         }
         if (currentFilters.search) {
