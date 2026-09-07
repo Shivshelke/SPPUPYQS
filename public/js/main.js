@@ -203,7 +203,16 @@ async function init() {
         if (nav) {
           nav.innerHTML = `
             <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${escHtml(authData.username)}</span>
+            <a href="/my-purchases.html" class="btn-ghost" style="padding:0.4rem 0.8rem; font-size:0.85rem; text-decoration:none;">My Purchases</a>
             <button class="btn-ghost" onclick="doStudentLogout()" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
+          `;
+        }
+        const mobileNavBtn = document.getElementById('mobileAuthNavBtn');
+        if (mobileNavBtn) {
+          mobileNavBtn.href = '/my-purchases.html';
+          mobileNavBtn.innerHTML = `
+            <div class="bottom-nav-icon">👤</div>
+            <span>Profile</span>
           `;
         }
         const welcome = document.getElementById('premiumWelcomeText');

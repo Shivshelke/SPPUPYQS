@@ -135,6 +135,7 @@ router.get('/status', async (req, res) => {
       return res.json({ 
         loggedIn: true, 
         username: student.username, 
+        email: student.email,
         isPremium: student.isPremium,
         premiumStatus: student.premiumStatus || 'none'
       });
