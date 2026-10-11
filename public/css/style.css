@@ -457,6 +457,14 @@ a {
   font-size: 2rem;
   font-weight: 800;
   color: var(--text);
+  filter: none !important;
+  opacity: 1 !important;
+  text-rendering: optimizeLegibility;
+}
+
+#statTotal {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 .stat-label {

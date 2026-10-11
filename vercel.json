@@ -19,6 +19,16 @@
   ],
   "routes": [
     {
+      "src": "/second-year-aiml-engineering/data-structures-algoriths",
+      "status": 301,
+      "headers": { "Location": "/second-year-aiml-engineering/data-structures-algorithms" }
+    },
+    {
+      "src": "/sppu-2025-pattern",
+      "status": 301,
+      "headers": { "Location": "/sppu-pyq-2024-pattern" }
+    },
+    {
       "src": "/(.*)",
       "dest": "server.js"
     }

@@ -594,10 +594,7 @@
       <a href="/marketplace.html?content=notes">Notes</a>
       <a href="/marketplace.html?content=imp">IMP Questions</a>
       <a href="/my-purchases.html">My Purchases</a>
-      <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
-        <a href="/student-login.html" class="btn-view"
-          style="padding: 0.4rem 0.8rem; border-color:var(--accent); color:var(--accent);">Login / Sign Up</a>
-      </div>
+      <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px; visibility:hidden;"></div>
     </div>
   </nav>
 
@@ -685,6 +682,7 @@
               <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${authData.username}</span>
               <button class="btn-ghost" onclick="fetch('/student/logout', {method:'POST'}).then(()=>window.location.reload())" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
             `;
+            nav.style.visibility = 'visible';
           }
         } else {
           window.location.href = '/student-login.html?redirect=/marketplace.html';
@@ -840,10 +838,6 @@
               </div>
               <h3 class="product-title" onclick="window.location.href='/product.html?id=${p.slug || p._id}'" style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color=''"> ${p.title}</h3>
               <p class="product-subtitle">${p.branch || 'Common'} | ${p.subject || 'Various'}</p>
-              <div class="product-stats">
-                <span>⭐ 4.8</span>
-                <span>👁 1.2k views</span>
-              </div>
               <div class="product-footer">
                 ${priceHTML}
                 <div class="btn-group">

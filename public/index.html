@@ -87,7 +87,7 @@
         "name": "Are these question papers updated for the 2024 Pattern?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, all the resources and question papers available on the SYNAPSE portal are updated specifically for the latest SPPU 2024 Pattern, covering First Year (FE), Second Year (SE), Third Year (TE), and Fourth Year (BE)."
+          "text": "Yes, all First Year (FE) papers are for the latest SPPU 2024 Pattern, and higher years cover both 2024 Pattern and 2019 Pattern (legacy) question papers."
         }
       },
       {
@@ -553,10 +553,7 @@
       <a href="/articles.html" onclick="closeMobileMenu()">Articles</a>
       <a href="#about" onclick="closeMobileMenu()">About</a>
       <a href="#feedback" onclick="closeMobileMenu()">Feedback</a>
-      <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
-        <a href="/student-login.html" class="btn-ghost"
-          style="color:var(--accent)!important; border-color:var(--accent)">Login / Sign Up</a>
-      </div>
+      <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px; visibility:hidden;"></div>
       <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span
           class="theme-icon">☀️</span></button>
     </div>
@@ -575,7 +572,7 @@
 
       <div class="pattern-notice">
         <span class="pattern-notice-icon">⚠️</span>
-        <span>All PYQs available on this portal are for the <strong>2024 SPPU Pattern</strong> only.</span>
+        <span>PYQs available on this portal cover the latest <strong>2024 Pattern</strong> as well as <strong>2019 Pattern (legacy)</strong> for higher years.</span>
       </div>
 
       <div class="search-wrap" style="position:relative;">
@@ -597,52 +594,13 @@
 
     </div>
     <div class="hero-stats" id="heroStats">
-      <div class="stat"><span class="stat-num" id="statTotal"><span class="skeleton"
-            style="display:inline-block; width:50px; height:24px; border-radius:4px; vertical-align:middle;"></span></span><span
+      <div class="stat"><span class="stat-num" id="statTotal">553</span><span
           class="stat-label">Papers</span></div>
       <div class="stat-div"></div>
       <div class="stat"><span class="stat-num">4</span><span class="stat-label">Years</span></div>
       <div class="stat-div"></div>
       <div class="stat"><span class="stat-num">10+</span><span class="stat-label">Branches</span></div>
-      <div class="stat-div"></div>
-      <div class="stat">
-        <span class="stat-num" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span
-            style="width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; display: inline-block; animation: pulse-green 2s infinite;"></span>
-          <span id="liveStudentsCount">18</span>
-        </span>
-        <span class="stat-label">Online</span>
-      </div>
     </div>
-
-    <style>
-      @keyframes pulse-green {
-        0% {
-          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
-        }
-
-        70% {
-          box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
-        }
-
-        100% {
-          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
-        }
-      }
-    </style>
-    <script>
-      setInterval(() => {
-        const countEl = document.getElementById('liveStudentsCount');
-        if (countEl) {
-          let current = parseInt(countEl.innerText);
-          let change = Math.floor(Math.random() * 5) - 2; // -2 to +2
-          let newCount = current + change;
-          if (newCount < 14) newCount = 14 + Math.floor(Math.random() * 3);
-          if (newCount > 35) newCount = 35 - Math.floor(Math.random() * 3);
-          countEl.innerText = newCount;
-        }
-      }, 5000); // changes every 5 seconds
-    </script>
   </header>
 
   <!-- ── SEARCH RESULTS (hidden by default) ── -->
@@ -759,7 +717,7 @@
           Access free study material or unlock verified solved PYQs, handwritten notes, and IMP questions.
         </p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="/marketplace.html" class="btn-premium" onclick="if(typeof isLoggedIn !== 'undefined' && !isLoggedIn) { alert('Please Login / Sign Up first to access Premium Content!'); window.location.href='/student-login.html?redirect=/marketplace.html'; return false; }"
+          <a href="/marketplace.html" class="btn-premium" onclick="if(typeof isLoggedIn !== 'undefined' && !isLoggedIn) { window.location.href='/student-login.html?redirect=/marketplace.html'; return false; }"
             style="text-decoration: none; padding: 1rem 2rem; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);">
             Enter Premium Content 🚀
           </a>
@@ -778,7 +736,7 @@
       <div class="about-text">
         <h2>What is SYNAPSE SPPU PYQ?</h2>
         <p>SYNAPSE is a dedicated SPPU PYQ portal built for engineering students. Find previous year question papers
-          organized by year, branch, and subject — no registration, no paywalls.</p>
+          organized by year, branch, and subject. Free PYQs, no login needed. Premium solved papers and notes need a free account.</p>
         <ul class="feature-list">
           <li>✦ Free to access and download</li>
           <li>✦ Organized by Year → Branch → Subject</li>
@@ -858,9 +816,7 @@
           </details>
           <details class="faq-item">
             <summary>Are these question papers updated for the 2024 Pattern?</summary>
-            <p>Yes, all the resources and question papers available on the SYNAPSE portal are updated specifically for
-              the latest SPPU 2024 Pattern, covering First Year (FE), Second Year (SE), Third Year (TE), and Fourth Year
-              (BE).</p>
+            <p>Yes, all First Year (FE) papers are updated for the latest SPPU 2024 Pattern, and higher years cover both the 2024 Pattern and 2019 Pattern (legacy) for comprehensive exam preparation.</p>
           </details>
           <details class="faq-item">
             <summary>Does SYNAPSE provide In-Sem and End-Sem question papers?</summary>
@@ -952,6 +908,7 @@
   </footer>
   <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
 
+  <!-- Reserved for future feature: Solved PYQs subject picker modal -->
   <!-- ── Premium Modal ── -->
   <div id="premiumModal" class="modal-overlay" onclick="closePremiumModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -970,6 +927,7 @@
     </div>
   </div>
 
+  <!-- Reserved for future feature: Download gate modal (WhatsApp/Telegram group join) -->
   <!-- ── Join to Download Modal ── -->
   <div id="gateModal" class="modal-overlay" onclick="closeGateModal(event)">
     <div class="modal gate-modal" onclick="event.stopPropagation()">

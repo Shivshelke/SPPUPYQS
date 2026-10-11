@@ -433,9 +433,9 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       }
     });
 
-    // --- SEO BOOST: Inject all possible subjects for 2019, 2024, and 2025 patterns ---
+    // --- SEO BOOST: Inject all possible subjects for 2019 and 2024 patterns ---
     // Since there's a catch-all route mapping to index.html, these URLs will serve the home page
-    const seoPatterns = ['2019 pattern', '2024 pattern', '2025 pattern'];
+    const seoPatterns = ['2019 pattern', '2024 pattern'];
     const seoSubjects = [
       'engineering mathematics 1', 'engineering mathematics 2', 'engineering mathematics 3',
       'engineering physics', 'engineering chemistry', 'basic electrical engineering',
@@ -460,7 +460,7 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     ];
     
     // Add generic broad search terms
-    ['sppu pyq 2024 pattern', 'sppu 2025 pattern', 'sppu 2019 pattern', 
+    ['sppu pyq 2024 pattern', 'sppu 2019 pattern', 
      'sppu engineering pyq 2024 pattern', 'sppu pyq 2024 pattern computer engineering',
      'sppu pyq 2024 pattern it engineering', 'sppu pyq 2024 pattern aids',
      'sppu pyq 2024 pattern entc', 'sppu pyq 2024 pattern mechanical', 
@@ -501,9 +501,13 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     });
     // ----------------------------------------------------------------------------------
 
+    const cleanedUrls = Array.from(urls)
+      .map(url => url.replace(/data-structures-algoriths/g, 'data-structures-algorithms'))
+      .filter(url => !url.includes('2025-pattern') && !url.includes('sppu-2025'));
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${Array.from(urls).map(url => `  <url>
+${cleanedUrls.map(url => `  <url>
     <loc>${url.replace(/&/g, '&amp;')}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
@@ -547,10 +551,22 @@ app.get('/catalog/:year/:branch?/:subject?', (req, res) => {
   return res.redirect(301, newUrl);
 });
 
+// ── 301 Redirects for typo slugs and bogus pattern URLs ───────────────────────
+app.get('/second-year-aiml-engineering/data-structures-algoriths', (req, res) => {
+  return res.redirect(301, '/second-year-aiml-engineering/data-structures-algorithms');
+});
+app.get('/sppu-2025-pattern', (req, res) => {
+  return res.redirect(301, '/sppu-pyq-2024-pattern');
+});
+
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
 app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) => {
   const { yearSlug, subjectSlug } = req.params;
   
+  if (yearSlug && yearSlug.includes('2025-pattern')) {
+    return res.redirect(301, '/' + yearSlug.replace(/2025-pattern/g, '2024-pattern'));
+  }
+
   // Regex to match the new SEO-friendly year slugs e.g., first-year-fe-engineering
   const match = yearSlug.match(/^(first|second|third|fourth|final)-year-(.+)$/);
   if (!match) {
@@ -571,16 +587,19 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
 
   const { resolvedBranch, resolvedSubject } = await resolveBranchAndSubject(year, branchSlug, subjectSlug);
 
-  let title = "SPPU PYQ 2024 Pattern — Pune University Engineering Question Papers | SYNAPSE";
-  let description = "Download SPPU Engineering Previous Year Question Papers (PYQs) for 2024 Pattern. Free access to all branches: Computer, IT, Mechanical, Civil, E&TC, and more.";
+  const is2019 = (subjectSlug && subjectSlug.includes('2019')) || (resolvedSubject && resolvedSubject.includes('2019'));
+  const patternLabel = is2019 ? '2019 Pattern (legacy)' : '2024 Pattern';
+
+  let title = `SPPU PYQ ${patternLabel} — Pune University Engineering Question Papers | SYNAPSE`;
+  let description = `Download SPPU Engineering Previous Year Question Papers (PYQs) for ${patternLabel}. Free access to all branches: Computer, IT, Mechanical, Civil, E&TC, and more.`;
 
   const formattedYear = year.charAt(0).toUpperCase() + year.slice(1);
   const formattedBranch = resolvedBranch || '';
   const formattedSubject = resolvedSubject || '';
 
   if (resolvedSubject) {
-    title = `${formattedSubject} SPPU PYQ 2024 Pattern (Insem & Endsem) | ${formattedBranch || 'First Year'} — SYNAPSE`;
-    description = `Download Savitribai Phule Pune University (SPPU) Insem & Endsem previous year question papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Free PDF downloads for 2024 Pattern.`;
+    title = `${formattedSubject} SPPU PYQ ${patternLabel} (Insem & Endsem) | ${formattedBranch || 'First Year'} — SYNAPSE`;
+    description = `Download Savitribai Phule Pune University (SPPU) Insem & Endsem previous year question papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Free PDF downloads for ${patternLabel}.`;
   } else if (resolvedBranch) {
     title = `${formattedBranch} (${formattedYear} Year) SPPU Engineering PYQs (Insem & Endsem) — SYNAPSE`;
     description = `Access Savitribai Phule Pune University (SPPU) Engineering ${formattedBranch} branch previous year question papers (PYQs) for Insem & Endsem exams.`;
@@ -767,7 +786,7 @@ app.get('*', async (req, res) => {
       }).join(' ');
 
       const title = `${searchKeyword} — Download PDF & Notes | SYNAPSE`;
-      const description = `Get the best resources for ${searchKeyword}. Download Savitribai Phule Pune University (SPPU) previous year question papers, notes, syllabus, and solutions in PDF format for 2019, 2024, and 2025 patterns.`;
+      const description = `Get the best resources for ${searchKeyword}. Download Savitribai Phule Pune University (SPPU) previous year question papers, notes, syllabus, and solutions in PDF format for 2019 and 2024 patterns.`;
 
       // Replace Meta Tags dynamically
       html = html.replace(/<title>[^<]+<\/title>/g, `<title>${title}</title>`);
@@ -787,7 +806,7 @@ app.get('*', async (req, res) => {
       const crawlerContent = `
   <div id="seo-crawler-content" class="seo-crawler-container" style="margin-top: clamp(2rem, 5vw, 3rem); background: rgba(255, 255, 255, 0.02); padding: clamp(1.2rem, 5vw, 2rem); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box;">
     <h2 style="color: var(--accent); margin-bottom: 1rem; font-size: clamp(1.3rem, 4vw, 1.8rem); line-height: 1.3;">${searchKeyword} Download Free</h2>
-    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: clamp(0.9rem, 3vw, 1rem);">We provide the largest collection of SPPU resources. If you are looking for <strong>${searchKeyword}</strong>, you are at the right place. Access the best study materials, insem/endsem papers, syllabus patterns (2019/2024/2025), and solutions exclusively on SYNAPSE.</p>
+    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: clamp(0.9rem, 3vw, 1rem);">We provide the largest collection of SPPU resources. If you are looking for <strong>${searchKeyword}</strong>, you are at the right place. Access the best study materials, insem/endsem papers, syllabus patterns (2019/2024), and solutions exclusively on SYNAPSE.</p>
     <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
       <a href="/#catalog" class="btn primary" style="display: flex; justify-content: center; align-items: center; text-align: center; flex: 1 1 auto; min-width: 200px;">Browse Full SPPU Catalog</a>
     </div>

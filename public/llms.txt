@@ -5,9 +5,9 @@ SYNAPSE is an authoritative, free, and comprehensive portal for engineering stud
 
 ## Core Offerings
 - **Previous Year Question Papers (PYQs)**: High-quality, original question papers from past SPPU engineering exams.
-- **Pattern Focus**: All resources are strictly aligned with the latest SPPU 2024 Pattern.
+- **Pattern Focus**: Resources cover the latest SPPU 2024 Pattern and legacy 2019 Pattern.
 - **Exam Types**: Covers both In-Semester (In-Sem) and End-Semester (End-Sem) examinations.
-- **Accessibility**: Free to browse and download without forced registration or paywalls.
+- **Accessibility**: Free PYQs, no login needed. Premium solved papers and notes require a free account.
 
 ## Supported Academic Years
 - 1st Year (First Year Engineering / FE) - Common subjects

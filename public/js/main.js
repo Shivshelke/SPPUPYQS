@@ -185,11 +185,17 @@ async function init() {
   fetch('/api/stats')
     .then(r => r.json())
     .then(stats => {
-      document.getElementById('statTotal').textContent = stats.total || 0;
-      if (document.getElementById('count-first')) document.getElementById('count-first').textContent = `${stats.byYear.first || 0} papers`;
-      if (document.getElementById('count-second')) document.getElementById('count-second').textContent = `${stats.byYear.second || 0} papers`;
-      if (document.getElementById('count-third')) document.getElementById('count-third').textContent = `${stats.byYear.third || 0} papers`;
-      if (document.getElementById('count-fourth')) document.getElementById('count-fourth').textContent = `${stats.byYear.fourth || 0} papers`;
+      if (document.getElementById('statTotal') && stats.total) {
+        document.getElementById('statTotal').textContent = stats.total;
+      }
+      const formatPaperCount = (cnt) => {
+        const c = cnt || 0;
+        return `${c} ${c === 1 ? 'paper' : 'papers'}`;
+      };
+      if (document.getElementById('count-first')) document.getElementById('count-first').textContent = formatPaperCount(stats.byYear && stats.byYear.first);
+      if (document.getElementById('count-second')) document.getElementById('count-second').textContent = formatPaperCount(stats.byYear && stats.byYear.second);
+      if (document.getElementById('count-third')) document.getElementById('count-third').textContent = formatPaperCount(stats.byYear && stats.byYear.third);
+      if (document.getElementById('count-fourth')) document.getElementById('count-fourth').textContent = formatPaperCount(stats.byYear && stats.byYear.fourth);
     })
     .catch(e => console.error('Stats load error', e));
 
@@ -198,14 +204,15 @@ async function init() {
     .then(r => r.json())
     .then(authData => {
       currentUsername = authData.username || null;
+      const nav = document.getElementById('studentAuthNav');
       if (authData.loggedIn) {
-        const nav = document.getElementById('studentAuthNav');
         if (nav) {
           nav.innerHTML = `
             <span style="color:var(--text); font-weight:600; font-size:0.9rem;">Hi, ${escHtml(authData.username)}</span>
             <a href="/my-purchases.html" class="btn-ghost" style="padding:0.4rem 0.8rem; font-size:0.85rem; text-decoration:none;">My Purchases</a>
             <button class="btn-ghost" onclick="doStudentLogout()" style="padding:0.4rem 0.8rem; font-size:0.85rem">Logout</button>
           `;
+          nav.style.visibility = 'visible';
         }
         const mobileNavBtn = document.getElementById('mobileAuthNavBtn');
         if (mobileNavBtn) {
@@ -225,12 +232,29 @@ async function init() {
         const fbNameInput = document.getElementById('fbName');
         if (fbNameInput) fbNameInput.value = authData.username;
       } else {
+        if (nav) {
+          nav.innerHTML = `
+            <a href="/student-login.html" class="btn-ghost"
+              style="color:var(--accent)!important; border-color:var(--accent)">Login / Sign Up</a>
+          `;
+          nav.style.visibility = 'visible';
+        }
         isLoggedIn = false;
         isPremiumUser = false;
         togglePremiumState();
       }
     })
-    .catch(e => console.error('Auth load error', e));
+    .catch(e => {
+      console.error('Auth load error', e);
+      const nav = document.getElementById('studentAuthNav');
+      if (nav) {
+        nav.innerHTML = `
+          <a href="/student-login.html" class="btn-ghost"
+            style="color:var(--accent)!important; border-color:var(--accent)">Login / Sign Up</a>
+        `;
+        nav.style.visibility = 'visible';
+      }
+    });
 
   // Load Config
   try {
