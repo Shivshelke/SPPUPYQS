@@ -202,6 +202,9 @@ function onBranchChange() {
   subj.addEventListener('change', function () {
     document.getElementById('customSubjectGroup').style.display =
       this.value === '__custom__' ? 'block' : 'none';
+    if (typeof loadSolutionTargetPapers === 'function' && currentUploadMethod === 'solution') {
+      loadSolutionTargetPapers();
+    }
   });
 }
 
@@ -226,52 +229,220 @@ function clearFile() {
 
 function setupDragDrop() {
   const zone = document.getElementById('dropzone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      const input = document.getElementById('pdfInput');
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      input.files = dt.files;
-      onFileSelect(input);
-    }
-  });
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const input = document.getElementById('pdfInput');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        onFileSelect(input);
+      }
+    });
+  }
+
+  const solZone = document.getElementById('solutionDropzone');
+  if (solZone) {
+    solZone.addEventListener('dragover', e => { e.preventDefault(); solZone.classList.add('drag-over'); });
+    solZone.addEventListener('dragleave', () => solZone.classList.remove('drag-over'));
+    solZone.addEventListener('drop', e => {
+      e.preventDefault(); solZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const input = document.getElementById('solutionPdfInput');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        onSolutionFileSelect(input);
+      }
+    });
+  }
 }
 
 let currentUploadMethod = 'file';
 let currentPrmUploadMethod = 'file';
+let currentSolSubMethod = 'file';
 
 function setUploadMethod(method) {
   currentUploadMethod = method;
   const btnFile = document.getElementById('btnMethodFile');
   const btnLink = document.getElementById('btnMethodLink');
+  const btnSolution = document.getElementById('btnMethodSolution');
   const fileContainer = document.getElementById('fileUploadContainer');
   const linkContainer = document.getElementById('linkUploadContainer');
+  const solutionContainer = document.getElementById('solutionUploadContainer');
+  const customFileNameGroup = document.getElementById('customFileNameGroup');
+  const uploadBtn = document.getElementById('uploadBtn');
+
+  // Reset button styles
+  [btnFile, btnLink, btnSolution].forEach(b => {
+    if (b) {
+      b.style.borderColor = '';
+      b.style.background = '';
+      b.style.color = '';
+    }
+  });
 
   if (method === 'file') {
-    fileContainer.style.display = 'block';
-    linkContainer.style.display = 'none';
-    btnFile.style.borderColor = 'var(--accent)';
-    btnFile.style.background = 'rgba(99,102,241,.15)';
-    btnFile.style.color = 'var(--accent)';
-    btnLink.style.borderColor = '';
-    btnLink.style.background = '';
-    btnLink.style.color = '';
-  } else {
-    fileContainer.style.display = 'none';
-    linkContainer.style.display = 'block';
-    btnLink.style.borderColor = 'var(--accent)';
-    btnLink.style.background = 'rgba(99,102,241,.15)';
-    btnLink.style.color = 'var(--accent)';
-    btnFile.style.borderColor = '';
-    btnFile.style.background = '';
-    btnFile.style.color = '';
+    if (fileContainer) fileContainer.style.display = 'block';
+    if (linkContainer) linkContainer.style.display = 'none';
+    if (solutionContainer) solutionContainer.style.display = 'none';
+    if (customFileNameGroup) customFileNameGroup.style.display = 'block';
+    if (btnFile) {
+      btnFile.style.borderColor = 'var(--accent)';
+      btnFile.style.background = 'rgba(99,102,241,.15)';
+      btnFile.style.color = 'var(--accent)';
+    }
+    if (uploadBtn) uploadBtn.textContent = 'Upload Paper →';
+  } else if (method === 'link') {
+    if (fileContainer) fileContainer.style.display = 'none';
+    if (linkContainer) linkContainer.style.display = 'block';
+    if (solutionContainer) solutionContainer.style.display = 'none';
+    if (customFileNameGroup) customFileNameGroup.style.display = 'block';
+    if (btnLink) {
+      btnLink.style.borderColor = 'var(--accent)';
+      btnLink.style.background = 'rgba(99,102,241,.15)';
+      btnLink.style.color = 'var(--accent)';
+    }
+    if (uploadBtn) uploadBtn.textContent = 'Upload Paper →';
+  } else if (method === 'solution') {
+    if (fileContainer) fileContainer.style.display = 'none';
+    if (linkContainer) linkContainer.style.display = 'none';
+    if (solutionContainer) solutionContainer.style.display = 'block';
+    if (customFileNameGroup) customFileNameGroup.style.display = 'none';
+    if (btnSolution) {
+      btnSolution.style.borderColor = 'var(--accent)';
+      btnSolution.style.background = 'rgba(99,102,241,.15)';
+      btnSolution.style.color = 'var(--accent)';
+    }
+    if (uploadBtn) uploadBtn.textContent = 'Upload Solution →';
+    loadSolutionTargetPapers();
   }
 }
 window.setUploadMethod = setUploadMethod;
+
+function setSolutionSubMethod(subMethod) {
+  currentSolSubMethod = subMethod;
+  const btnFile = document.getElementById('btnSolMethodFile');
+  const btnLink = document.getElementById('btnSolMethodLink');
+  const fileWrap = document.getElementById('solFileUploadWrap');
+  const linkWrap = document.getElementById('solLinkUploadWrap');
+
+  if (subMethod === 'file') {
+    if (fileWrap) fileWrap.style.display = 'block';
+    if (linkWrap) linkWrap.style.display = 'none';
+    if (btnFile) {
+      btnFile.style.borderColor = 'var(--accent)';
+      btnFile.style.background = 'rgba(99,102,241,.15)';
+      btnFile.style.color = 'var(--accent)';
+    }
+    if (btnLink) {
+      btnLink.style.borderColor = '';
+      btnLink.style.background = '';
+      btnLink.style.color = '';
+    }
+  } else {
+    if (fileWrap) fileWrap.style.display = 'none';
+    if (linkWrap) linkWrap.style.display = 'block';
+    if (btnLink) {
+      btnLink.style.borderColor = 'var(--accent)';
+      btnLink.style.background = 'rgba(99,102,241,.15)';
+      btnLink.style.color = 'var(--accent)';
+    }
+    if (btnFile) {
+      btnFile.style.borderColor = '';
+      btnFile.style.background = '';
+      btnFile.style.color = '';
+    }
+  }
+}
+window.setSolutionSubMethod = setSolutionSubMethod;
+
+async function loadSolutionTargetPapers() {
+  const year = document.getElementById('upYear').value;
+  const branch = document.getElementById('upBranch').value;
+  const subjectEl = document.getElementById('upSubject');
+  const customSubEl = document.getElementById('upCustomSubject');
+  const selPaper = document.getElementById('upSolutionPaper');
+  const hint = document.getElementById('solutionPaperHint');
+
+  if (!selPaper) return;
+  selPaper.innerHTML = '<option value="">— Loading papers… —</option>';
+
+  const subjectVal = subjectEl && subjectEl.value === '__custom__' 
+    ? (customSubEl ? customSubEl.value.trim() : '') 
+    : (subjectEl ? subjectEl.value : '');
+
+  if (!year || !branch || !subjectVal) {
+    selPaper.innerHTML = '<option value="">— Select Year, Branch & Subject above first —</option>';
+    if (hint) hint.textContent = 'Please choose a Year, Branch, and Subject above to list its question papers.';
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({ year, branch, subject: subjectVal });
+    const res = await fetch(`/admin/subject-papers?${params}`);
+    const papers = await res.json();
+
+    if (!papers || papers.length === 0) {
+      selPaper.innerHTML = '<option value="">No papers found for this subject</option>';
+      if (hint) hint.textContent = 'No question papers exist yet for this subject. Upload a paper first!';
+      return;
+    }
+
+    selPaper.innerHTML = '<option value="">— Choose Paper to Attach Solution —</option>' +
+      papers.map(p => {
+        const hasSol = p.solutionUrl ? ' [✓ Has Solution]' : ' [No Solution]';
+        return `<option value="${p._id}">${p.originalName}${hasSol}</option>`;
+      }).join('');
+    if (hint) hint.textContent = `Found ${papers.length} question paper(s) for ${subjectVal}.`;
+  } catch (err) {
+    selPaper.innerHTML = '<option value="">Error loading papers</option>';
+  }
+}
+window.loadSolutionTargetPapers = loadSolutionTargetPapers;
+
+function onSolutionPaperSelected() {
+  const selPaper = document.getElementById('upSolutionPaper');
+  const paperId = selPaper ? selPaper.value : '';
+  const titleInput = document.getElementById('upSolutionTitle');
+  if (paperId && selPaper.selectedIndex > 0) {
+    const paperName = selPaper.options[selPaper.selectedIndex].text.replace(/\s*\[.*\]/, '');
+    if (titleInput && !titleInput.value) {
+      titleInput.value = paperName.replace(/\.pdf$/i, '') + '_Solution.pdf';
+    }
+  }
+}
+window.onSolutionPaperSelected = onSolutionPaperSelected;
+
+function onSolutionFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) {
+    showUploadAlert('Solution file exceeds 20MB limit.', 'error'); return;
+  }
+  const drop = document.getElementById('solutionDropzone');
+  const prev = document.getElementById('solutionFilePreview');
+  const name = document.getElementById('solutionFileName');
+  if (drop) drop.style.display = 'none';
+  if (prev) prev.style.display = 'flex';
+  if (name) name.textContent = `${file.name} (${formatSize(file.size)})`;
+}
+window.onSolutionFileSelect = onSolutionFileSelect;
+
+function clearSolutionFile() {
+  const inp = document.getElementById('solutionPdfInput');
+  const drop = document.getElementById('solutionDropzone');
+  const prev = document.getElementById('solutionFilePreview');
+  if (inp) inp.value = '';
+  if (drop) drop.style.display = 'block';
+  if (prev) prev.style.display = 'none';
+}
+window.clearSolutionFile = clearSolutionFile;
 
 function setPrmUploadMethod(method) {
   currentPrmUploadMethod = method;
@@ -304,6 +475,85 @@ window.setPrmUploadMethod = setPrmUploadMethod;
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 async function doUpload() {
+  if (currentUploadMethod === 'solution') {
+    const paperId = document.getElementById('upSolutionPaper').value;
+    if (!paperId) {
+      showUploadAlert('Please select a question paper to attach the solution to.', 'error');
+      return;
+    }
+
+    const solTitle = document.getElementById('upSolutionTitle').value.trim();
+    const solFile = document.getElementById('solutionPdfInput').files[0];
+    const solLink = document.getElementById('upSolutionLink').value.trim();
+
+    if (currentSolSubMethod === 'file') {
+      if (!solFile) {
+        showUploadAlert('Please select a solution PDF file.', 'error');
+        return;
+      }
+    } else {
+      if (!solLink || (!solLink.startsWith('http://') && !solLink.startsWith('https://'))) {
+        showUploadAlert('Please enter a valid Solution URL (starting with http:// or https://).', 'error');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('uploadBtn');
+    btn.disabled = true; btn.textContent = 'Uploading Solution…';
+
+    const progressWrap = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    progressWrap.style.display = 'block';
+    progressFill.style.width = '0%';
+
+    let prog = 0;
+    const interval = setInterval(() => {
+      prog = Math.min(prog + 8, 85);
+      progressFill.style.width = `${prog}%`;
+      progressText.textContent = `Uploading… ${prog}%`;
+    }, 150);
+
+    const fd = new FormData();
+    fd.append('paperId', paperId);
+    fd.append('solutionType', currentSolSubMethod);
+    if (solTitle) fd.append('solutionTitle', solTitle);
+
+    if (currentSolSubMethod === 'file') {
+      fd.append('solutionPdf', solFile);
+    } else {
+      fd.append('solutionLink', solLink);
+    }
+
+    try {
+      const res = await fetch('/admin/upload-solution', { method: 'POST', body: fd });
+      const data = await res.json();
+      clearInterval(interval);
+
+      if (data.success) {
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Solution attached successfully!';
+        showUploadAlert('Solution attached successfully! ✓', 'success');
+        clearSolutionFile();
+        document.getElementById('upSolutionLink').value = '';
+        document.getElementById('upSolutionTitle').value = '';
+        await loadSolutionTargetPapers();
+        if (typeof loadAdminFiles === 'function') await loadAdminFiles();
+      } else {
+        showUploadAlert(data.error || 'Failed to attach solution.', 'error');
+        progressFill.style.width = '0%';
+      }
+    } catch (e) {
+      clearInterval(interval);
+      showUploadAlert('Network error. Please try again.', 'error');
+      progressFill.style.width = '0%';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Upload Solution →';
+      setTimeout(() => { progressWrap.style.display = 'none'; }, 2000);
+    }
+    return;
+  }
+
   const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch').value;
   const semesterEl = document.getElementById('upSemester');
@@ -560,26 +810,35 @@ async function loadAdminFiles() {
             <th>Year/Branch</th>
             <th>Sem</th>
             <th>Subject</th>
+            <th>Solution</th>
             <th>Size</th>
             <th>Uploaded</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          ${files.map(f => `
+          ${files.map(f => {
+            const hasSol = Boolean(f.solutionUrl);
+            const solBadge = hasSol 
+              ? `<a href="${escHtml(f.solutionUrl)}" target="_blank" rel="noopener noreferrer" class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:3px;" title="${escHtml(f.solutionOriginalName || 'Solution')}">✓ Solved</a>` 
+              : `<span style="color:var(--muted); font-size:0.75rem;">None</span>`;
+            
+            return `
             <tr>
               <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td><span class="badge" style="background:var(--card-bg); color:var(--text); border:1px solid var(--border); font-size:0.7rem">${escHtml(f.semester || '—')}</span></td>
               <td>${escHtml(f.subject)}</td>
+              <td>${solBadge}</td>
               <td>${formatSize(f.size)}</td>
               <td>${formatDate(f.uploadDate)}</td>
               <td>
-                <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.5rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}', '${f.downloadGate ? escHtml(f.downloadGate.telegramUrl || '') : ''}')">Gate</button>
+                <button class="btn-ghost" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem; ${hasSol ? '' : 'color:var(--accent); border-color:var(--accent);'}" onclick="openSolutionModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${escHtml(f.solutionUrl || '')}', '${escHtml(f.solutionType || 'none')}', '${escHtml(f.solutionOriginalName || '')}')">${hasSol ? 'Edit Sol' : '+ Solution'}</button>
+                <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}', '${f.downloadGate ? escHtml(f.downloadGate.telegramUrl || '') : ''}')">Gate</button>
                 <button class="btn-del" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
               </td>
             </tr>
-          `).join('')}
+          `}).join('')}
         </tbody>
       </table>
     </div>
@@ -1585,4 +1844,213 @@ async function saveBannerConfig() {
     alertBox.style.display = 'block';
   }
 }
+
+// ── Solution modal ────────────────────────────────────────────────────────────
+let solModalTargetId = null;
+let solModalMethod = 'file';
+
+function openSolutionModal(id, paperName, currentUrl, currentType, currentOriginalName) {
+  solModalTargetId = id;
+  const header = document.getElementById('solModalHeader');
+  const paperTitle = document.getElementById('solModalPaperName');
+  const curStatus = document.getElementById('solCurrentStatus');
+  const btnRemove = document.getElementById('btnRemoveSolution');
+  const alertEl = document.getElementById('solModalAlert');
+  const fileDropText = document.getElementById('modalSolDropText');
+  const fileInp = document.getElementById('modalSolPdfInput');
+  const linkInp = document.getElementById('modalSolLinkInput');
+  const titleInp = document.getElementById('modalSolTitleInput');
+
+  if (alertEl) alertEl.style.display = 'none';
+  if (fileInp) fileInp.value = '';
+  if (fileDropText) fileDropText.textContent = 'Click to select Solution PDF';
+
+  if (paperTitle) paperTitle.textContent = `Paper: ${paperName}`;
+
+  if (currentUrl) {
+    if (header) header.textContent = 'Edit Solution';
+    if (curStatus) {
+      curStatus.innerHTML = `<strong>Current Solution:</strong> <a href="${escHtml(currentUrl)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">${escHtml(currentOriginalName || 'View Solution Link')}</a> <span class="badge" style="margin-left:6px; font-size:0.75rem;">${currentType === 'link' ? '🔗 External Link' : '📄 File Upload'}</span>`;
+      curStatus.style.display = 'block';
+    }
+    if (btnRemove) btnRemove.style.display = 'inline-block';
+    if (linkInp && currentType === 'link') linkInp.value = currentUrl;
+    if (titleInp) titleInp.value = currentOriginalName || '';
+    setModalSolutionMethod(currentType === 'link' ? 'link' : 'file');
+  } else {
+    if (header) header.textContent = 'Attach Solution';
+    if (curStatus) {
+      curStatus.innerHTML = `<span style="color:var(--muted)">No solution attached to this question paper yet.</span>`;
+      curStatus.style.display = 'block';
+    }
+    if (btnRemove) btnRemove.style.display = 'none';
+    if (linkInp) linkInp.value = '';
+    if (titleInp) titleInp.value = paperName.replace(/\.pdf$/i, '') + '_Solution.pdf';
+    setModalSolutionMethod('file');
+  }
+
+  const modal = document.getElementById('solutionModal');
+  if (modal) modal.style.display = 'flex';
+}
+window.openSolutionModal = openSolutionModal;
+
+function closeSolutionModal() {
+  const modal = document.getElementById('solutionModal');
+  if (modal) modal.style.display = 'none';
+  solModalTargetId = null;
+}
+window.closeSolutionModal = closeSolutionModal;
+
+function setModalSolutionMethod(method) {
+  solModalMethod = method;
+  const btnFile = document.getElementById('modalBtnSolFile');
+  const btnLink = document.getElementById('modalBtnSolLink');
+  const fileWrap = document.getElementById('modalSolFileWrap');
+  const linkWrap = document.getElementById('modalSolLinkWrap');
+
+  if (method === 'file') {
+    if (fileWrap) fileWrap.style.display = 'block';
+    if (linkWrap) linkWrap.style.display = 'none';
+    if (btnFile) {
+      btnFile.style.borderColor = 'var(--accent)';
+      btnFile.style.background = 'rgba(99,102,241,.15)';
+      btnFile.style.color = 'var(--accent)';
+    }
+    if (btnLink) {
+      btnLink.style.borderColor = '';
+      btnLink.style.background = '';
+      btnLink.style.color = '';
+    }
+  } else {
+    if (fileWrap) fileWrap.style.display = 'none';
+    if (linkWrap) linkWrap.style.display = 'block';
+    if (btnLink) {
+      btnLink.style.borderColor = 'var(--accent)';
+      btnLink.style.background = 'rgba(99,102,241,.15)';
+      btnLink.style.color = 'var(--accent)';
+    }
+    if (btnFile) {
+      btnFile.style.borderColor = '';
+      btnFile.style.background = '';
+      btnFile.style.color = '';
+    }
+  }
+}
+window.setModalSolutionMethod = setModalSolutionMethod;
+
+function onModalSolFileSelect(input) {
+  const file = input.files[0];
+  const dropText = document.getElementById('modalSolDropText');
+  if (file && dropText) {
+    dropText.textContent = `Selected: ${file.name} (${formatSize(file.size)})`;
+  }
+}
+window.onModalSolFileSelect = onModalSolFileSelect;
+
+async function doSaveModalSolution() {
+  if (!solModalTargetId) return;
+  const alertEl = document.getElementById('solModalAlert');
+  const btn = document.getElementById('saveSolutionBtn');
+  const fileInp = document.getElementById('modalSolPdfInput');
+  const linkInp = document.getElementById('modalSolLinkInput');
+  const titleInp = document.getElementById('modalSolTitleInput');
+
+  const file = fileInp && fileInp.files ? fileInp.files[0] : null;
+  const link = linkInp ? linkInp.value.trim() : '';
+  const title = titleInp ? titleInp.value.trim() : '';
+
+  if (solModalMethod === 'file' && !file) {
+    if (alertEl) {
+      alertEl.textContent = 'Please choose a solution PDF file.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+    return;
+  }
+  if (solModalMethod === 'link' && (!link || (!link.startsWith('http://') && !link.startsWith('https://')))) {
+    if (alertEl) {
+      alertEl.textContent = 'Please provide a valid URL starting with http:// or https://';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  if (alertEl) alertEl.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('paperId', solModalTargetId);
+  fd.append('solutionType', solModalMethod);
+  if (title) fd.append('solutionTitle', title);
+  if (solModalMethod === 'file') {
+    fd.append('solutionPdf', file);
+  } else {
+    fd.append('solutionLink', link);
+  }
+
+  try {
+    const res = await fetch('/admin/upload-solution', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      closeSolutionModal();
+      if (typeof loadAdminFiles === 'function') await loadAdminFiles();
+      if (typeof loadSolutionTargetPapers === 'function') await loadSolutionTargetPapers();
+    } else {
+      if (alertEl) {
+        alertEl.textContent = data.error || 'Failed to save solution.';
+        alertEl.className = 'alert error';
+        alertEl.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    if (alertEl) {
+      alertEl.textContent = 'Network error. Please try again.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Solution';
+  }
+}
+window.doSaveModalSolution = doSaveModalSolution;
+
+async function doRemoveSolution() {
+  if (!solModalTargetId) return;
+  if (!confirm('Are you sure you want to remove the solution for this question paper?')) return;
+
+  const btn = document.getElementById('btnRemoveSolution');
+  const alertEl = document.getElementById('solModalAlert');
+  btn.disabled = true;
+  btn.textContent = 'Removing…';
+
+  try {
+    const res = await fetch(`/admin/files/${solModalTargetId}/solution`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      closeSolutionModal();
+      if (typeof loadAdminFiles === 'function') await loadAdminFiles();
+      if (typeof loadSolutionTargetPapers === 'function') await loadSolutionTargetPapers();
+    } else {
+      if (alertEl) {
+        alertEl.textContent = data.error || 'Failed to remove solution.';
+        alertEl.className = 'alert error';
+        alertEl.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    if (alertEl) {
+      alertEl.textContent = 'Network error. Please try again.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Remove Solution';
+  }
+}
+window.doRemoveSolution = doRemoveSolution;
+
 

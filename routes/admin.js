@@ -146,6 +146,80 @@ router.post('/upload', (req, res) => {
   });
 });
 
+// GET /admin/subject-papers (Get papers for a subject to attach solution)
+router.get('/subject-papers', async (req, res) => {
+  try {
+    const { year, branch, subject } = req.query;
+    const query = { contentType: 'regular' };
+    if (year) query.year = year;
+    if (branch && branch !== 'any' && branch !== 'FE') query.branch = branch;
+    if (subject && subject !== '__custom__') query.subject = subject;
+    const files = await File.find(query, '_id originalName subject pattern year branch semester solutionUrl solutionType solutionOriginalName').sort({ uploadDate: -1 }).lean();
+    res.json(files);
+  } catch (e) {
+    console.error('Error fetching subject papers:', e);
+    res.status(500).json({ error: 'Failed to fetch subject papers' });
+  }
+});
+
+// POST /admin/upload-solution (Upload file or link solution to a question paper)
+router.post('/upload-solution', (req, res) => {
+  upload.single('solutionPdf')(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    try {
+      const { paperId, solutionType, solutionLink, solutionTitle } = req.body;
+      if (!paperId) return res.status(400).json({ error: 'Please select a target question paper.' });
+
+      const fileDoc = await File.findById(paperId);
+      if (!fileDoc) return res.status(404).json({ error: 'Target question paper not found.' });
+
+      if (solutionType === 'link') {
+        if (!solutionLink || !solutionLink.trim()) {
+          return res.status(400).json({ error: 'Solution link URL is required.' });
+        }
+        const url = solutionLink.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return res.status(400).json({ error: 'Link must start with http:// or https://' });
+        }
+        fileDoc.solutionUrl = url;
+        fileDoc.solutionType = 'link';
+        fileDoc.solutionOriginalName = solutionTitle && solutionTitle.trim() ? solutionTitle.trim() : `${fileDoc.subject || 'Paper'}_Solution.pdf`;
+        fileDoc.solutionUploadDate = new Date();
+      } else {
+        if (!req.file) return res.status(400).json({ error: 'Solution PDF file is required.' });
+        fileDoc.solutionUrl = req.file.path;
+        fileDoc.solutionType = 'file';
+        fileDoc.solutionOriginalName = solutionTitle && solutionTitle.trim() ? solutionTitle.trim() : req.file.originalname;
+        fileDoc.solutionPublicId = req.file.filename || req.file.public_id;
+        fileDoc.solutionUploadDate = new Date();
+      }
+
+      await fileDoc.save();
+      return res.json({ success: true, file: fileDoc });
+    } catch (e) {
+      console.error('Upload solution error:', e);
+      return res.status(500).json({ error: 'Server error uploading solution' });
+    }
+  });
+});
+
+// DELETE /admin/files/:id/solution (Remove solution from paper)
+router.delete('/files/:id/solution', async (req, res) => {
+  try {
+    const fileDoc = await File.findById(req.params.id);
+    if (!fileDoc) return res.status(404).json({ error: 'File not found' });
+    fileDoc.solutionUrl = '';
+    fileDoc.solutionType = 'none';
+    fileDoc.solutionOriginalName = '';
+    fileDoc.solutionPublicId = '';
+    fileDoc.solutionUploadDate = null;
+    await fileDoc.save();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to remove solution' });
+  }
+});
+
 // POST /admin/product (Marketplace upload)
 router.post('/product', (req, res) => {
   try {

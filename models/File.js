@@ -18,6 +18,11 @@ const schema = new mongoose.Schema({
     type: { type: String, enum: ['none', 'whatsapp', 'telegram', 'both'], default: 'none' },
     whatsappUrl: { type: String, default: '' },
     telegramUrl: { type: String, default: '' }
-  }
+  },
+  solutionUrl: { type: String, default: '' },
+  solutionType: { type: String, enum: ['file', 'link', 'none'], default: 'none' },
+  solutionOriginalName: { type: String, default: '' },
+  solutionPublicId: { type: String, default: '' },
+  solutionUploadDate: { type: Date }
 });
 module.exports = mongoose.model('File', schema);

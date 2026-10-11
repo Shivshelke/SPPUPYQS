@@ -231,6 +231,16 @@ async function init() {
 
         const fbNameInput = document.getElementById('fbName');
         if (fbNameInput) fbNameInput.value = authData.username;
+
+        try {
+          const pendingSol = sessionStorage.getItem('pendingSolutionUrl');
+          if (pendingSol) {
+            sessionStorage.removeItem('pendingSolutionUrl');
+            setTimeout(() => {
+              window.open(pendingSol, '_blank', 'noopener,noreferrer');
+            }, 300);
+          }
+        } catch (e) {}
       } else {
         if (nav) {
           nav.innerHTML = `
@@ -763,6 +773,11 @@ function renderFileGrid(files, gridId) {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
     </a>`;
 
+    const hasSolution = Boolean(f.solutionUrl && f.solutionUrl.trim());
+    const solutionBtn = hasSolution
+      ? `<button type="button" class="btn-solution has-solution" onclick="handleViewSolutionClick('${escHtml(f.solutionUrl)}', '${escHtml(f.originalName)}')" title="View Solution for ${escHtml(f.originalName)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>View Solution</button>`
+      : '';
+
     return `
       <div class="file-card fade-in-card" style="animation-delay: ${i * 0.05}s">
         <div class="file-icon">📄</div>
@@ -771,14 +786,119 @@ function renderFileGrid(files, gridId) {
           <div class="file-meta">${escHtml(f.subject)} · ${formatSize(f.size)}</div>
           <div class="file-meta">${formatDate(f.uploadDate)}</div>
         </div>
+        ${hasSolution ? `
+        <div class="file-actions" style="display: flex; flex-direction: column; gap: 0.35rem; align-items: stretch; min-width: 125px;">
+          <div style="display: flex; gap: 0.35rem; align-items: center;">
+            <div style="flex: 1;">${downloadBtn}</div>
+            ${shareBtn}
+          </div>
+          ${solutionBtn}
+        </div>` : `
         <div class="file-actions">
-          ${downloadBtn}
+          <div style="flex: 1;">${downloadBtn}</div>
           ${shareBtn}
-        </div>
+        </div>`}
       </div>
     `;
   }).join('');
 }
+
+window.handleViewSolutionClick = async function(solutionUrl, paperName) {
+  if (!solutionUrl) return;
+
+  // Double check login status if local variable is false
+  if (!isLoggedIn) {
+    try {
+      const res = await fetch('/student/status');
+      const data = await res.json();
+      if (data && data.loggedIn) {
+        isLoggedIn = true;
+        currentUsername = data.username || null;
+      }
+    } catch (e) {
+      console.warn('Could not verify student auth', e);
+    }
+  }
+
+  if (isLoggedIn) {
+    // Logged in: open solution directly in a new tab
+    window.open(solutionUrl, '_blank', 'noopener,noreferrer');
+  } else {
+    // Not logged in: show login prompt modal
+    showSolutionLoginModal(paperName, solutionUrl);
+  }
+};
+
+window.showSolutionLoginModal = function(paperName, solutionUrl) {
+  const existing = document.getElementById('solutionAuthModal');
+  if (existing) existing.remove();
+
+  if (solutionUrl) {
+    try {
+      sessionStorage.setItem('pendingSolutionUrl', solutionUrl);
+    } catch (e) {}
+  }
+
+  const currentRedirect = encodeURIComponent(window.location.pathname + window.location.search);
+  const loginUrl = `/student-login.html?redirect=${currentRedirect}`;
+
+  const modal = document.createElement('div');
+  modal.id = 'solutionAuthModal';
+  modal.className = 'modal-overlay show';
+  modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:999999; padding:1rem; opacity:1; pointer-events:auto;';
+  modal.innerHTML = `
+    <div class="modal" style="background:var(--surface2, #181a29); border:1px solid var(--glass-border, rgba(255,255,255,0.15)); border-radius:20px; max-width:440px; width:100%; text-align:center; padding:2.2rem 1.8rem; position:relative; box-shadow:0 25px 50px rgba(0,0,0,0.6); transform:translateY(0); opacity:1;">
+      <button type="button" onclick="document.getElementById('solutionAuthModal').remove()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.3rem; color:var(--muted, #94a3b8); cursor:pointer; line-height:1; padding:0.3rem;" aria-label="Close">✕</button>
+      <div style="width:62px; height:62px; margin:0 auto 1.2rem auto; background:rgba(99, 102, 241, 0.16); border:1px solid rgba(99, 102, 241, 0.35); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:1.9rem;">
+        🔒
+      </div>
+      <h3 style="margin:0 0 0.5rem 0; font-family:'Syne',sans-serif; font-size:1.4rem; color:var(--text, #fff);">Student Login Required</h3>
+      <p style="color:var(--text-secondary, #cbd5e1); font-size:0.95rem; margin-bottom:0.5rem; line-height:1.5;">
+        <strong style="color:var(--accent, #818cf8);">${escHtml(paperName || 'This paper')}</strong> ka verified solution dekhne ke liye login karna zaroori hai.
+      </p>
+      <p style="color:var(--muted, #94a3b8); font-size:0.85rem; margin-bottom:1.5rem;">
+        Kripya apne student account me login karein ya free Sign Up karein.
+      </p>
+      <div style="display:flex; gap:0.75rem; justify-content:center; flex-direction:column;">
+        <a href="${loginUrl}" class="btn-primary" style="padding:0.85rem 1.5rem; text-decoration:none; font-weight:600; font-size:0.95rem; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 4px 15px rgba(99, 102, 241, 0.4); background:var(--accent, #6366f1); color:#fff; border:none;">
+          Login / Sign Up to View Solution →
+        </a>
+        <button type="button" class="btn-ghost" onclick="document.getElementById('solutionAuthModal').remove()" style="padding:0.6rem 1rem; font-size:0.88rem; border-radius:8px; cursor:pointer;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  `;
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
+};
+
+window.handleViewSolutionEmpty = function(paperName) {
+  const existing = document.getElementById('solutionNoticeModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'solutionNoticeModal';
+  modal.className = 'modal-overlay';
+  modal.style.display = 'flex';
+  modal.style.zIndex = '9999';
+  modal.innerHTML = `
+    <div class="modal" style="max-width: 420px; text-align: center; padding: 2rem;">
+      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📝</div>
+      <h3 style="margin: 0 0 0.5rem 0; font-family: 'Syne', sans-serif;">Solution in Preparation</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.2rem; line-height: 1.5;">
+        Verified step-by-step solution for <strong style="color:var(--text);">${escHtml(paperName)}</strong> is currently being prepared.
+      </p>
+      <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+        <button class="btn-ghost" onclick="document.getElementById('solutionNoticeModal').remove()">Close</button>
+        <button class="btn-primary" onclick="document.getElementById('solutionNoticeModal').remove(); const fb = document.getElementById('feedback'); if (fb) fb.scrollIntoView({behavior: 'smooth'});">Request Solution ✨</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
 
 // ── Local filter ──────────────────────────────────────────────────────────────
 function filterLocal(q) {
