@@ -379,6 +379,13 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     const urls = new Set();
     urls.add('https://sppupyq.vercel.app/');
     urls.add('https://sppupyq.vercel.app/student-login.html');
+    urls.add('https://sppupyq.vercel.app/sppu-previous-year-question-paper-2024-pattern');
+    urls.add('https://sppupyq.vercel.app/sppu-pyq-drive-2024-pattern');
+    urls.add('https://sppupyq.vercel.app/sppu-dsa-question-paper-2024-pattern');
+    urls.add('https://sppupyq.vercel.app/deld-subject-in-engineering');
+    urls.add('https://sppupyq.vercel.app/deld-subject');
+    urls.add('https://sppupyq.vercel.app/sppu-m2-pyq');
+    urls.add('https://sppupyq.vercel.app/sppu-question-paper-2019-pattern');
 
     // Add Year page catalogs
     const yearOrder = ['first', 'second', 'third', 'fourth'];
@@ -551,12 +558,33 @@ app.get('/catalog/:year/:branch?/:subject?', (req, res) => {
   return res.redirect(301, newUrl);
 });
 
-// ── 301 Redirects for typo slugs and bogus pattern URLs ───────────────────────
+// ── 301 Redirects for typo slugs, short aliases, and bogus pattern URLs ───────
 app.get('/second-year-aiml-engineering/data-structures-algoriths', (req, res) => {
   return res.redirect(301, '/second-year-aiml-engineering/data-structures-algorithms');
 });
 app.get('/sppu-2025-pattern', (req, res) => {
   return res.redirect(301, '/sppu-pyq-2024-pattern');
+});
+app.get('/deld', (req, res) => {
+  return res.redirect(301, '/second-year-computer-engineering/digital-electronics-and-logic-design');
+});
+app.get('/m2', (req, res) => {
+  return res.redirect(301, '/first-year-fe-engineering/engineering-mathematics-ii');
+});
+app.get('/dsa', (req, res) => {
+  return res.redirect(301, '/second-year-computer-engineering/data-structures-and-algorithms');
+});
+
+// ── Complete SPPU PYQ Drive 2024 Pattern Route ────────────────────────────────
+app.get('/sppu-pyq-drive-2024-pattern', ensureDbConnected, async (req, res) => {
+  try {
+    let html = fs.readFileSync(path.join(__dirname, 'public', 'sppu-pyq-drive-2024-pattern.html'), 'utf8');
+    const directoryHtml = await generateSeoDirectory();
+    html = html.replace('<div id="seo-links-directory"></div>', directoryHtml);
+    res.send(html);
+  } catch (err) {
+    res.sendFile(path.join(__dirname, 'public', 'sppu-pyq-drive-2024-pattern.html'));
+  }
 });
 
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
@@ -590,6 +618,11 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
   const is2019 = (subjectSlug && subjectSlug.includes('2019')) || (resolvedSubject && resolvedSubject.includes('2019'));
   const patternLabel = is2019 ? '2019 Pattern (legacy)' : '2024 Pattern';
 
+  // Check for specific striking-distance subject abbreviations
+  const isDsa = /data\s*structures?|dsa/i.test(resolvedSubject || '') || /data-structures?|dsa/i.test(subjectSlug || '');
+  const isDeld = /deld|digital\s*electronics.*logic\s*design/i.test(resolvedSubject || '') || /deld|digital-electronics.*logic-design/i.test(subjectSlug || '');
+  const isM2 = /engineering\s*mathematics.*(?:ii|2)\b|m2|m-2/i.test(resolvedSubject || '') || /engineering-mathematics.*(?:ii|2)\b|m2|m-2/i.test(subjectSlug || '');
+
   let title = `SPPU PYQ ${patternLabel} — Pune University Engineering Question Papers | SYNAPSE`;
   let description = `Download SPPU Engineering Previous Year Question Papers (PYQs) for ${patternLabel}. Free access to all branches: Computer, IT, Mechanical, Civil, E&TC, and more.`;
 
@@ -597,7 +630,16 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
   const formattedBranch = resolvedBranch || '';
   const formattedSubject = resolvedSubject || '';
 
-  if (resolvedSubject) {
+  if (isDsa) {
+    title = `Data Structures and Algorithms (DSA) – SPPU PYQ ${patternLabel} | SYNAPSE`;
+    description = `Download SPPU Data Structures and Algorithms (DSA) question papers for ${patternLabel} in PDF format. Free Insem & Endsem previous year question papers with solutions.`;
+  } else if (isDeld) {
+    title = `Digital Electronics & Logic Design (DELD) – SPPU PYQ ${patternLabel} | SYNAPSE`;
+    description = `Download SPPU Digital Electronics & Logic Design (DELD) question papers for engineering students. Free Insem & Endsem ${patternLabel} PYQ PDFs for Computer & AIML.`;
+  } else if (isM2) {
+    title = `Engineering Mathematics II (M2) – SPPU PYQ ${patternLabel} | SYNAPSE`;
+    description = `Download SPPU Engineering Mathematics II (M2) previous year question papers (PYQs) for ${patternLabel}. Free Insem and Endsem FE PDF downloads on SYNAPSE.`;
+  } else if (resolvedSubject) {
     title = `${formattedSubject} SPPU PYQ ${patternLabel} (Insem & Endsem) | ${formattedBranch || 'First Year'} — SYNAPSE`;
     description = `Download Savitribai Phule Pune University (SPPU) Insem & Endsem previous year question papers (PYQs) for ${formattedSubject} (${formattedBranch || 'First Year'}). Free PDF downloads for ${patternLabel}.`;
   } else if (resolvedBranch) {
@@ -716,11 +758,19 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
     html = html.replace('</head>', schemaScript);
 
     // Dynamic Hero Header replacement for SEO
-    const mainHeading = formattedSubject 
+    let mainHeading = formattedSubject 
       ? `SPPU ${formattedSubject} <span class="accent">PYQs</span>`
       : (formattedBranch 
           ? `SPPU ${formattedBranch} <span class="accent">PYQs</span>`
           : `SPPU ${formattedYear} Year <span class="accent">PYQs</span>`);
+    
+    if (isDsa) {
+      mainHeading = `SPPU Data Structures and Algorithms (DSA) <span class="accent">PYQs</span>`;
+    } else if (isDeld) {
+      mainHeading = `SPPU Digital Electronics & Logic Design (DELD) <span class="accent">PYQs</span>`;
+    } else if (isM2) {
+      mainHeading = `SPPU Engineering Mathematics II (M2) <span class="accent">PYQs</span>`;
+    }
     
     const mainSub = formattedSubject 
       ? `Download Savitribai Phule Pune University (SPPU) Insem and Endsem question papers for ${formattedSubject} (${formattedBranch || 'First Year'}).`
@@ -730,6 +780,46 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
 
     html = html.replace('<h1>SPPU <span class="accent">PYQ</span> Portal</h1>', `<h1>${mainHeading}</h1>`);
     html = html.replace('<p class="hero-sub">The most organized archive of previous year question papers for Pune University students.</p>', `<p class="hero-sub">${mainSub}</p>`);
+
+    // Build Year x Month table for DSA or standard listing
+    let dsaTableHtml = '';
+    if (isDsa && files.length > 0) {
+      dsaTableHtml = `
+      <div class="dsa-table-wrap" style="margin: 1.5rem 0; overflow-x: auto;">
+        <h4 style="color: var(--accent); margin-bottom: 0.75rem; font-size: 1.1rem;">Available DSA Papers by Year &amp; Session (Real Database Papers)</h4>
+        <table class="papers-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+          <thead>
+            <tr style="background: rgba(99,102,241,0.15); border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <th style="padding: 10px 14px; color: var(--accent);">Pattern</th>
+              <th style="padding: 10px 14px; color: var(--accent);">Branch</th>
+              <th style="padding: 10px 14px; color: var(--accent);">Exam Session / Year</th>
+              <th style="padding: 10px 14px; color: var(--accent);">Official Paper Name</th>
+              <th style="padding: 10px 14px; color: var(--accent); text-align: center;">Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${files.map(f => {
+              const pat = f.pattern === '2019' ? '2019 Pattern (legacy)' : '2024 Pattern';
+              let session = 'Official Exam Paper';
+              if (/dec.*2025/i.test(f.originalName)) session = 'Dec 2025 (Insem)';
+              else if (/2025/i.test(f.originalName)) session = '2025 Session';
+              else if (/2024/i.test(f.originalName)) session = '2024 Session';
+              else if (/_(\d+)\.pdf/i.test(f.originalName)) session = `Exam Paper #${f.originalName.match(/_(\d+)\.pdf/i)[1]}`;
+              return `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 14px;"><span style="color:#10b981; font-weight:600;">${pat}</span></td>
+                <td style="padding: 10px 14px;">${f.branch || 'Computer Engineering'}</td>
+                <td style="padding: 10px 14px;">${session}</td>
+                <td style="padding: 10px 14px; font-family: monospace; font-size: 0.85rem;">${f.originalName || f.subject}</td>
+                <td style="padding: 10px 14px; text-align: center;">
+                  <a href="/api/download/${f._id}" style="color:var(--accent); font-weight:600; text-decoration:none;">⬇ Download PDF</a>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }
 
     // Inject dynamic HTML crawler content (rendered visibly)
     const listHtml = files.length > 0
@@ -749,6 +839,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
     <h2>SPPU ${formattedSubject || formattedBranch || formattedYear + ' Year'} Previous Year Question Papers (PYQ)</h2>
     <h3>Savitribai Phule Pune University Exam Papers PDF Download</h3>
     <p>${seoIntroText}</p>
+    ${dsaTableHtml}
     ${listHtml}
   </div>
 `;
@@ -764,29 +855,189 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
   }
 });
 
-// ── Catch-all ─────────────────────────────────────────────────────────────────
-app.get('*', async (req, res) => {
+// ── Catch-all Programmatic SEO Route ──────────────────────────────────────────
+app.get('*', ensureDbConnected, async (req, res) => {
   try {
     const urlPath = req.path.substring(1).toLowerCase();
+    const File = require('./models/File');
     
-    // Programmatic SEO: Check if the route looks like an SEO keyword
-    if (urlPath && (urlPath.includes('sppu') || urlPath.includes('pyq') || urlPath.includes('pattern') || urlPath.includes('engineering') || urlPath.includes('notes'))) {
+    // Programmatic SEO: Check if route matches striking-distance queries or engineering keywords
+    if (urlPath && (
+      urlPath.includes('sppu') || urlPath.includes('pyq') || urlPath.includes('pattern') || 
+      urlPath.includes('engineering') || urlPath.includes('notes') || urlPath.includes('deld') || 
+      urlPath.includes('dsa') || urlPath.includes('m2')
+    )) {
       
       let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
       
-      // Convert URL path "sppu-pyq-2024-pattern" to "SPPU PYQ 2024 Pattern"
-      let searchKeyword = urlPath.replace(/-/g, ' ');
-      searchKeyword = searchKeyword.split(' ').map(w => {
-        if (w === 'sppu') return 'SPPU';
-        if (w === 'pyq') return 'PYQ';
-        if (w === 'pdf') return 'PDF';
-        if (w === 'insem') return 'Insem';
-        if (w === 'endsem') return 'Endsem';
-        return w.charAt(0).toUpperCase() + w.slice(1);
-      }).join(' ');
+      let title = '';
+      let description = '';
+      let searchKeyword = '';
+      let customHeading = '';
+      let extraCrawlerHtml = '';
 
-      const title = `${searchKeyword} — Download PDF & Notes | SYNAPSE`;
-      const description = `Get the best resources for ${searchKeyword}. Download Savitribai Phule Pune University (SPPU) previous year question papers, notes, syllabus, and solutions in PDF format for 2019 and 2024 patterns.`;
+      // ── Task 1: CTR Fix for "sppu previous year question paper 2024 pattern"
+      if (urlPath === 'sppu-previous-year-question-paper-2024-pattern') {
+        title = 'SPPU Previous Year Question Paper 2024 Pattern | SYNAPSE';
+        description = 'Download SPPU previous year question paper 2024 pattern PDFs for free. Insem and endsem papers for Computer, IT, Mechanical, Civil, and E&TC engineering.';
+        searchKeyword = 'SPPU Previous Year Question Paper 2024 Pattern';
+        customHeading = 'SPPU Previous Year Question Paper 2024 Pattern';
+      }
+      // ── Task 2: DSA Page ("sppu dsa question paper 2024 pattern")
+      else if (urlPath.includes('dsa') || (urlPath.includes('data-structures') && urlPath.includes('2024'))) {
+        title = 'Data Structures and Algorithms (DSA) – SPPU PYQ 2024 Pattern | SYNAPSE';
+        description = 'Download SPPU Data Structures and Algorithms (DSA) question papers for 2024 Pattern in PDF format. Free Insem & Endsem previous year question papers with solutions.';
+        searchKeyword = 'SPPU Data Structures and Algorithms (DSA) 2024 Pattern';
+        customHeading = 'SPPU Data Structures and Algorithms (DSA) <span class="accent">PYQs</span>';
+
+        const dsaFiles = await File.find({
+          contentType: 'regular',
+          $or: [
+            { subject: /data structures/i },
+            { originalName: /dsa|data structure/i }
+          ]
+        }).sort({ uploadDate: -1 }).lean();
+
+        if (dsaFiles.length > 0) {
+          extraCrawlerHtml = `
+          <div class="dsa-table-wrap" style="margin: 1.5rem 0; overflow-x: auto;">
+            <h4 style="color: var(--accent); margin-bottom: 0.75rem; font-size: 1.1rem;">Available DSA Papers by Year &amp; Session (Real Database Papers)</h4>
+            <table class="papers-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+              <thead>
+                <tr style="background: rgba(99,102,241,0.15); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                  <th style="padding: 10px 14px; color: var(--accent);">Pattern</th>
+                  <th style="padding: 10px 14px; color: var(--accent);">Branch</th>
+                  <th style="padding: 10px 14px; color: var(--accent);">Exam Session / Year</th>
+                  <th style="padding: 10px 14px; color: var(--accent);">Official Paper Name</th>
+                  <th style="padding: 10px 14px; color: var(--accent); text-align: center;">Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${dsaFiles.map(f => {
+                  const pat = f.pattern === '2019' ? '2019 Pattern (legacy)' : '2024 Pattern';
+                  let session = 'Official Exam Paper';
+                  if (/dec.*2025/i.test(f.originalName)) session = 'Dec 2025 (Insem)';
+                  else if (/2025/i.test(f.originalName)) session = '2025 Session';
+                  else if (/2024/i.test(f.originalName)) session = '2024 Session';
+                  else if (/_(\d+)\.pdf/i.test(f.originalName)) session = `Exam Paper #${f.originalName.match(/_(\d+)\.pdf/i)[1]}`;
+                  return `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 10px 14px;"><span style="color:#10b981; font-weight:600;">${pat}</span></td>
+                    <td style="padding: 10px 14px;">${f.branch || 'Computer Engineering'}</td>
+                    <td style="padding: 10px 14px;">${session}</td>
+                    <td style="padding: 10px 14px; font-family: monospace; font-size: 0.85rem;">${f.originalName || f.subject}</td>
+                    <td style="padding: 10px 14px; text-align: center;">
+                      <a href="/api/download/${f._id}" style="color:var(--accent); font-weight:600; text-decoration:none;">⬇ Download PDF</a>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        }
+      }
+      // ── Task 3: DELD ("deld subject in engineering", "deld subject")
+      else if (urlPath.includes('deld') || urlPath.includes('digital-electronics-and-logic-design')) {
+        title = 'Digital Electronics & Logic Design (DELD) – SPPU PYQ 2024 Pattern | SYNAPSE';
+        description = 'Download SPPU Digital Electronics & Logic Design (DELD) question papers for engineering students. Free Insem & Endsem 2024 pattern PYQ PDFs for Computer & AIML.';
+        searchKeyword = 'Digital Electronics & Logic Design (DELD)';
+        customHeading = 'SPPU Digital Electronics & Logic Design (DELD) <span class="accent">PYQs</span>';
+
+        const deldFiles = await File.find({
+          contentType: 'regular',
+          $or: [
+            { subject: /deld|digital electronics/i },
+            { originalName: /deld|digital electronics/i }
+          ]
+        }).sort({ uploadDate: -1 }).lean();
+
+        if (deldFiles.length > 0) {
+          extraCrawlerHtml = `
+          <div style="margin: 1.5rem 0;">
+            <h4 style="color: var(--accent); margin-bottom: 0.75rem;">Official SPPU DELD Exam Papers:</h4>
+            <ul>
+              ${deldFiles.map(f => `
+                <li>
+                  <a href="/api/download/${f._id}">${f.originalName || f.subject}</a>
+                  <span>Subject: ${f.subject} | Pattern: ${f.pattern || '2024'} | Branch: ${f.branch || 'Computer Engineering'}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>`;
+        }
+      }
+      // ── Task 3: M2 ("sppu m2 pyq", "m2 pyq")
+      else if (urlPath.includes('m2') || urlPath.includes('engineering-mathematics-2') || urlPath.includes('engineering-mathematics-ii')) {
+        title = 'Engineering Mathematics II (M2) – SPPU PYQ 2024 Pattern | SYNAPSE';
+        description = 'Download SPPU Engineering Mathematics II (M2) previous year question papers (PYQs) for 2024 Pattern. Free Insem and Endsem FE PDF downloads on SYNAPSE.';
+        searchKeyword = 'SPPU Engineering Mathematics II (M2)';
+        customHeading = 'SPPU Engineering Mathematics II (M2) <span class="accent">PYQs</span>';
+
+        const m2Files = await File.find({
+          contentType: 'regular',
+          year: 'first',
+          $or: [
+            { subject: /mathematics.*(?:ii|2)|m2/i },
+            { originalName: /math.*2|m2/i }
+          ]
+        }).sort({ uploadDate: -1 }).lean();
+
+        if (m2Files.length > 0) {
+          extraCrawlerHtml = `
+          <div style="margin: 1.5rem 0;">
+            <h4 style="color: var(--accent); margin-bottom: 0.75rem;">Official SPPU Engineering Mathematics II (M2) Papers:</h4>
+            <ul>
+              ${m2Files.map(f => `
+                <li>
+                  <a href="/api/download/${f._id}">${f.originalName || f.subject}</a>
+                  <span>Subject: ${f.subject} | Pattern: 2024 Pattern | First Year (FE)</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>`;
+        }
+      }
+      // ── Phase 2: 2019 Pattern Backfill ("sppu question paper 2019 pattern")
+      else if (urlPath === 'sppu-question-paper-2019-pattern' || (urlPath.includes('2019') && urlPath.includes('pattern') && !urlPath.includes('second') && !urlPath.includes('third'))) {
+        title = 'SPPU Question Paper 2019 Pattern (legacy) — Engineering PYQ PDF | SYNAPSE';
+        description = 'Download Savitribai Phule Pune University (SPPU) 2019 Pattern (legacy) question papers in PDF format. Over 470 real Insem & Endsem papers for all engineering branches.';
+        searchKeyword = 'SPPU Question Paper 2019 Pattern (legacy)';
+        customHeading = 'SPPU Question Paper 2019 Pattern <span class="accent">(legacy)</span>';
+
+        const files2019 = await File.find({
+          contentType: 'regular',
+          pattern: '2019'
+        }).sort({ branch: 1, subject: 1 }).limit(100).lean();
+
+        extraCrawlerHtml = `
+        <div style="margin: 1.5rem 0;">
+          <h4 style="color: var(--accent); margin-bottom: 0.75rem;">Archived 2019 Pattern (legacy) Exam Papers:</h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Showing top verified 2019 pattern papers. All 471 legacy papers can also be accessed through the branch catalog.</p>
+          <ul>
+            ${files2019.map(f => `
+              <li>
+                <a href="/api/download/${f._id}">${f.originalName || f.subject}</a>
+                <span>Subject: ${f.subject} | Branch: ${f.branch} | Pattern: 2019 Pattern (legacy)</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>`;
+      }
+      // ── Default programmatic keyword transformation
+      else {
+        searchKeyword = urlPath.replace(/-/g, ' ');
+        searchKeyword = searchKeyword.split(' ').map(w => {
+          if (w === 'sppu') return 'SPPU';
+          if (w === 'pyq') return 'PYQ';
+          if (w === 'pdf') return 'PDF';
+          if (w === 'insem') return 'Insem';
+          if (w === 'endsem') return 'Endsem';
+          return w.charAt(0).toUpperCase() + w.slice(1);
+        }).join(' ');
+
+        title = `${searchKeyword} — Download PDF & Notes | SYNAPSE`;
+        description = `Get the best resources for ${searchKeyword}. Download Savitribai Phule Pune University (SPPU) previous year question papers, notes, syllabus, and solutions in PDF format for 2019 and 2024 patterns.`;
+      }
 
       // Replace Meta Tags dynamically
       html = html.replace(/<title>[^<]+<\/title>/g, `<title>${title}</title>`);
@@ -799,7 +1050,8 @@ app.get('*', async (req, res) => {
       html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="https://sppupyq.vercel.app${req.originalUrl}"`);
 
       // Dynamic Hero Header replacement
-      html = html.replace('<h1>SPPU <span class="accent">PYQ</span> Portal</h1>', `<h1 style="font-size: clamp(2rem, 5vw, 3.8rem); font-family: 'DM Sans', sans-serif; letter-spacing: -0.03em; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; padding-bottom: 0.1em; margin-bottom: 1rem; text-align: center;">${searchKeyword}</h1>`);
+      const headingToUse = customHeading || searchKeyword;
+      html = html.replace('<h1>SPPU <span class="accent">PYQ</span> Portal</h1>', `<h1 style="font-size: clamp(2rem, 5vw, 3.8rem); font-family: 'DM Sans', sans-serif; letter-spacing: -0.03em; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block; padding-bottom: 0.1em; margin-bottom: 1rem; text-align: center;">${headingToUse}</h1>`);
       html = html.replace('<p class="hero-sub">The most organized archive of previous year question papers for Pune University students.</p>', `<p class="hero-sub">${description}</p>`);
 
       // Inject dynamic crawler text block (Mobile Optimized)
@@ -807,8 +1059,10 @@ app.get('*', async (req, res) => {
   <div id="seo-crawler-content" class="seo-crawler-container" style="margin-top: clamp(2rem, 5vw, 3rem); background: rgba(255, 255, 255, 0.02); padding: clamp(1.2rem, 5vw, 2rem); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box;">
     <h2 style="color: var(--accent); margin-bottom: 1rem; font-size: clamp(1.3rem, 4vw, 1.8rem); line-height: 1.3;">${searchKeyword} Download Free</h2>
     <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: clamp(0.9rem, 3vw, 1rem);">We provide the largest collection of SPPU resources. If you are looking for <strong>${searchKeyword}</strong>, you are at the right place. Access the best study materials, insem/endsem papers, syllabus patterns (2019/2024), and solutions exclusively on SYNAPSE.</p>
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+    ${extraCrawlerHtml}
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
       <a href="/#catalog" class="btn primary" style="display: flex; justify-content: center; align-items: center; text-align: center; flex: 1 1 auto; min-width: 200px;">Browse Full SPPU Catalog</a>
+      <a href="/sppu-pyq-drive-2024-pattern" class="btn secondary" style="display: flex; justify-content: center; align-items: center; text-align: center; flex: 1 1 auto; min-width: 200px;">Complete 2024 PYQ Drive</a>
     </div>
   </div>
 `;

@@ -565,7 +565,7 @@ function buildSubjectTags(subjects, isGrouped = false) {
       if (fileStep) fileStep.style.display = 'none';
 
       Array.from(tabContainer.children).forEach(btn => {
-        btn.classList.toggle('active', btn.textContent === patternName);
+        btn.classList.toggle('active', btn.textContent === patternName || (patternName === '2019 Pattern' && btn.textContent === '2019 Pattern (legacy)'));
       });
 
       const tagsContainer = document.createElement('div');
@@ -595,7 +595,7 @@ function buildSubjectTags(subjects, isGrouped = false) {
 
     availablePatterns.forEach(([patternName, list]) => {
       const tabBtn = document.createElement('div');
-      tabBtn.textContent = patternName;
+      tabBtn.textContent = (patternName === '2019 Pattern') ? '2019 Pattern (legacy)' : patternName;
       tabBtn.className = 'tag pattern-tab';
       tabBtn.style.cursor = 'pointer';
       tabBtn.style.fontWeight = '600';
@@ -672,6 +672,58 @@ async function selectSubject(subject, pattern) {
 
     allFiles = files;
     renderFileGrid(files, 'fileGrid');
+
+    // Render Year x Month table if DSA is selected
+    const dsaArea = document.getElementById('dsaTableArea');
+    if (dsaArea) {
+      if (/data\s*structures?|dsa/i.test(subject) && files.length > 0) {
+        dsaArea.innerHTML = `
+          <div style="background: var(--surface-glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem; backdrop-filter: var(--blur);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.8rem; flex-wrap:wrap; gap:0.5rem;">
+              <h3 style="font-family:'Syne',sans-serif; font-size:1.1rem; color:var(--text); margin:0;">
+                📊 Data Structures &amp; Algorithms (DSA) Available Papers
+              </h3>
+              <span style="font-size:0.8rem; color:var(--accent); font-weight:600;">Year × Month Session Table</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--border); color:var(--text-secondary);">
+                    <th style="padding:8px 10px;">Pattern</th>
+                    <th style="padding:8px 10px;">Branch</th>
+                    <th style="padding:8px 10px;">Exam Session</th>
+                    <th style="padding:8px 10px;">Paper Name</th>
+                    <th style="padding:8px 10px; text-align:center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${files.map(f => {
+                    const pat = f.pattern === '2019' ? '2019 Pattern (legacy)' : '2024 Pattern';
+                    let session = 'Official Exam Paper';
+                    if (/dec.*2025/i.test(f.originalName)) session = 'Dec 2025 (Insem)';
+                    else if (/2025/i.test(f.originalName)) session = '2025 Session';
+                    else if (/2024/i.test(f.originalName)) session = '2024 Session';
+                    else if (/_(\\d+)\\.pdf/i.test(f.originalName)) session = `Exam Paper #${f.originalName.match(/_(\\d+)\\.pdf/i)[1]}`;
+                    return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                      <td style="padding:8px 10px;"><span style="color:#10b981; font-weight:600;">${pat}</span></td>
+                      <td style="padding:8px 10px;">${escHtml(f.branch || 'Computer/AIML')}</td>
+                      <td style="padding:8px 10px;">${session}</td>
+                      <td style="padding:8px 10px; font-family:monospace; font-size:0.82rem;">${escHtml(f.originalName || f.subject)}</td>
+                      <td style="padding:8px 10px; text-align:center;">
+                        <a href="/api/download/${f._id}" style="color:var(--accent); font-weight:600; text-decoration:none; font-size:0.85rem;" download="${escHtml(f.originalName || f.subject + '.pdf')}">⬇ Download</a>
+                      </td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else {
+        dsaArea.innerHTML = '';
+      }
+    }
   } catch (e) {
     document.getElementById('fileGrid').innerHTML = '<div class="empty-state">Failed to load files.</div>';
   }
