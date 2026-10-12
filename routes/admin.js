@@ -338,6 +338,43 @@ router.get('/premium-files', async (req, res) => {
   }
 });
 
+// GET /admin/product/:id
+router.get('/product/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(product);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
+// PUT /admin/product/:id
+router.put('/product/:id', async (req, res) => {
+  try {
+    const { title, description, price, originalPrice, contentType, year, branch, thumbnailUrl, pdfUrl } = req.body;
+    
+    const updateData = {};
+    if (title !== undefined) updateData.title = title.trim();
+    if (description !== undefined) updateData.description = description.trim();
+    if (price !== undefined) updateData.price = Number(price);
+    if (originalPrice !== undefined) updateData.originalPrice = originalPrice ? Number(originalPrice) : null;
+    if (contentType !== undefined) updateData.contentType = contentType;
+    if (year !== undefined) updateData.year = year;
+    if (branch !== undefined) updateData.branch = branch.trim();
+    if (thumbnailUrl !== undefined) updateData.thumbnailUrl = thumbnailUrl.trim();
+    if (pdfUrl !== undefined) updateData.pdfUrl = pdfUrl.trim();
+
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    res.json({ success: true, product });
+  } catch (e) {
+    console.error("Failed to update product:", e);
+    res.status(500).json({ error: 'Failed to update product: ' + e.message });
+  }
+});
+
 // DELETE /admin/product/:id
 router.delete('/product/:id', async (req, res) => {
   try {

@@ -599,7 +599,78 @@
       </div>
     </section>
 
-  </main>
+  <!-- ── EDIT PREMIUM FILE MODAL ── -->
+  <div class="modal-overlay" id="editPremiumModal" style="display:none">
+    <div class="modal" style="max-width: 580px; text-align: left; max-height: 90vh; overflow-y: auto;">
+      <h3 style="margin-top: 0; font-family:'Syne',sans-serif; color:var(--text);">Edit Premium File ✏️</h3>
+      <input type="hidden" id="editPrmId" />
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>Product Title <span class="req">*</span></label>
+        <input type="text" id="editPrmTitle" class="input-field" placeholder="Product Title" style="width:100%; box-sizing:border-box;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>Product Description</label>
+        <textarea id="editPrmDesc" rows="3" style="width:100%; padding:.7rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:.9rem; outline:none; transition:.2s; resize:vertical; box-sizing:border-box;" placeholder="Description…"></textarea>
+      </div>
+
+      <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+          <label>Actual Price (MRP) ₹</label>
+          <input type="number" id="editPrmOriginalPrice" class="input-field" placeholder="e.g. 99" min="0" style="width:100%; box-sizing:border-box;" />
+        </div>
+        <div class="form-group">
+          <label>Offer Price (Sell) ₹ <span class="req">*</span></label>
+          <input type="number" id="editPrmPrice" class="input-field" placeholder="e.g. 29" min="0" style="width:100%; box-sizing:border-box;" />
+        </div>
+      </div>
+
+      <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+          <label>Content Type <span class="req">*</span></label>
+          <select id="editPrmType" class="input-field" style="width:100%; box-sizing:border-box;">
+            <option value="pyq">PYQ</option>
+            <option value="notes">Notes</option>
+            <option value="imp">IMP Questions</option>
+            <option value="solved">Solved Paper</option>
+            <option value="micro">Micro Notes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year <span class="req">*</span></label>
+          <select id="editPrmYear" class="input-field" style="width:100%; box-sizing:border-box;">
+            <option value="first">1st Year</option>
+            <option value="second">2nd Year</option>
+            <option value="third">3rd Year</option>
+            <option value="fourth">4th Year</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>Branch <span class="req">*</span></label>
+        <input type="text" id="editPrmBranch" class="input-field" placeholder="e.g. FE, Computer Engineering, all, etc." style="width:100%; box-sizing:border-box;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>Thumbnail Image URL (Optional)</label>
+        <input type="text" id="editPrmThumbnail" class="input-field" placeholder="https://example.com/thumbnail.png" style="width:100%; box-sizing:border-box;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label>PDF URL / Google Drive Link</label>
+        <input type="text" id="editPrmPdfUrl" class="input-field" placeholder="https://..." style="width:100%; box-sizing:border-box;" />
+      </div>
+
+      <div id="editPrmAlert" class="alert" style="display:none; margin-top: 1rem;"></div>
+
+      <div class="modal-actions" style="margin-top: 1.5rem; justify-content: flex-end; display:flex; gap:0.6rem;">
+        <button class="btn-ghost" onclick="closeEditPremiumModal()">Cancel</button>
+        <button class="btn-primary" id="saveEditPrmBtn" onclick="saveEditPremium()">Save Changes ✨</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── DELETE CONFIRM MODAL ── -->
   <div class="modal-overlay" id="deleteModal" style="display:none">

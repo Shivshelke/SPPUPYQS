@@ -768,7 +768,10 @@ window.loadPremiumAdminFilesForTab = async function () {
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
               <td>
-                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <button class="btn-edit small" onclick="openEditPremiumModal('${escHtml(f._id)}')">Edit</button>
+                  <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
+                </div>
               </td>
             </tr>
             `;
@@ -1472,7 +1475,10 @@ window.loadPremiumAdminFiles = async function () {
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
               <td>
-                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <button class="btn-edit small" onclick="openEditPremiumModal('${escHtml(f._id)}')">Edit</button>
+                  <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
+                </div>
               </td>
             </tr>
             `;
@@ -2052,5 +2058,118 @@ async function doRemoveSolution() {
   }
 }
 window.doRemoveSolution = doRemoveSolution;
+
+// ── EDIT PREMIUM FILE MODAL HANDLERS ──
+window.openEditPremiumModal = async function(id) {
+  const modal = document.getElementById('editPremiumModal');
+  const alertEl = document.getElementById('editPrmAlert');
+  if (alertEl) alertEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`/admin/product/${id}`);
+    const p = await res.json();
+    if (!res.ok || !p) {
+      alert(p.error || 'Failed to load product details');
+      return;
+    }
+
+    document.getElementById('editPrmId').value = p._id;
+    document.getElementById('editPrmTitle').value = p.title || '';
+    document.getElementById('editPrmDesc').value = p.description || '';
+    document.getElementById('editPrmOriginalPrice').value = p.originalPrice != null ? p.originalPrice : '';
+    document.getElementById('editPrmPrice').value = p.price != null ? p.price : '';
+    document.getElementById('editPrmType').value = p.contentType || 'pyq';
+    document.getElementById('editPrmYear').value = p.year || 'first';
+    document.getElementById('editPrmBranch').value = p.branch || '';
+    document.getElementById('editPrmThumbnail').value = p.thumbnailUrl || '';
+    document.getElementById('editPrmPdfUrl').value = p.pdfUrl || '';
+
+    modal.style.display = 'flex';
+  } catch (err) {
+    console.error(err);
+    alert('Error loading product details');
+  }
+};
+
+window.closeEditPremiumModal = function() {
+  const modal = document.getElementById('editPremiumModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.saveEditPremium = async function() {
+  const id = document.getElementById('editPrmId').value;
+  const title = document.getElementById('editPrmTitle').value.trim();
+  const price = document.getElementById('editPrmPrice').value;
+  const originalPrice = document.getElementById('editPrmOriginalPrice').value;
+  const contentType = document.getElementById('editPrmType').value;
+  const year = document.getElementById('editPrmYear').value;
+  const branch = document.getElementById('editPrmBranch').value.trim();
+  const description = document.getElementById('editPrmDesc').value.trim();
+  const thumbnailUrl = document.getElementById('editPrmThumbnail').value.trim();
+  const pdfUrl = document.getElementById('editPrmPdfUrl').value.trim();
+  const alertEl = document.getElementById('editPrmAlert');
+  const btn = document.getElementById('saveEditPrmBtn');
+
+  if (!title) {
+    if (alertEl) {
+      alertEl.textContent = 'Product title is required.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+    return;
+  }
+  if (price === '') {
+    if (alertEl) {
+      alertEl.textContent = 'Price is required.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(`/admin/product/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        price,
+        originalPrice,
+        contentType,
+        year,
+        branch,
+        description,
+        thumbnailUrl,
+        pdfUrl
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      closeEditPremiumModal();
+      if (typeof window.loadPremiumAdminFiles === 'function') await window.loadPremiumAdminFiles();
+      if (typeof window.loadPremiumAdminFilesForTab === 'function') await window.loadPremiumAdminFilesForTab();
+      if (typeof showPrmAlert === 'function') showPrmAlert('Premium file updated successfully! ✨', 'success');
+    } else {
+      if (alertEl) {
+        alertEl.textContent = data.error || 'Failed to update product.';
+        alertEl.className = 'alert error';
+        alertEl.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    if (alertEl) {
+      alertEl.textContent = 'Network error updating product.';
+      alertEl.className = 'alert error';
+      alertEl.style.display = 'block';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes ✨';
+  }
+};
 
 
