@@ -57,7 +57,7 @@ router.post('/create-order', requireAuth, async (req, res) => {
     const options = {
       amount: Math.round(product.price * 100),
       currency: 'INR',
-      receipt: `receipt_${req.user._id}_${Date.now()}`
+      receipt: `rcpt_${Date.now()}_${String(req.user._id).slice(-8)}`
     };
 
     const order = await razorpay.orders.create(options);
@@ -65,7 +65,7 @@ router.post('/create-order', requireAuth, async (req, res) => {
     // Save pending order to our DB
     const newOrder = new Order({
       user: req.user._id,
-      items: [{ product: productId }],
+      items: [{ product: product._id }],
       amount: product.price,
       orderId: order.id,
       status: 'pending'

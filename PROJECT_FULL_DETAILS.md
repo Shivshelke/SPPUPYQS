@@ -81,5 +81,5 @@ To run this project, you need the following keys:
 - **AI Integration**: Chatbot for quick student queries.
 
 ---
-**Created by**: Shivam Navnath Shelke
+**Created by**: Shivam Shelke
 **Project Name**: SYNAPSE SPPU
