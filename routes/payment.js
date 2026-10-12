@@ -9,11 +9,15 @@ const Purchase = require('../models/Purchase');
 const { requireAuth } = require('../middleware/auth');
 const https = require('https');
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_placeholder'
-});
+// Get Razorpay instance
+function getRazorpay() {
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!key_id || !key_secret || key_id === 'rzp_test_placeholder') {
+    return null;
+  }
+  return new Razorpay({ key_id, key_secret });
+}
 
 // POST /api/payment/create-order
 router.post('/create-order', requireAuth, async (req, res) => {
@@ -53,6 +57,13 @@ router.post('/create-order', requireAuth, async (req, res) => {
       });
     }
 
+    const rzp = getRazorpay();
+    if (!rzp) {
+      return res.status(500).json({ 
+        error: 'Razorpay keys not configured on Vercel. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Vercel Environment Variables and redeploy.' 
+      });
+    }
+
     // Razorpay amount is in paise (multiply by 100)
     const options = {
       amount: Math.round(product.price * 100),
@@ -60,7 +71,7 @@ router.post('/create-order', requireAuth, async (req, res) => {
       receipt: `rcpt_${Date.now()}_${String(req.user._id).slice(-8)}`
     };
 
-    const order = await razorpay.orders.create(options);
+    const order = await rzp.orders.create(options);
 
     // Save pending order to our DB
     const newOrder = new Order({
@@ -81,7 +92,8 @@ router.post('/create-order', requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(500).json({ error: 'Failed to create order' });
+    const detail = error?.error?.description || error?.message || 'Failed to create order';
+    res.status(500).json({ error: detail });
   }
 });
 
