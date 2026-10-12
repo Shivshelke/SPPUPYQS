@@ -95,19 +95,25 @@ router.post('/register', loginLimiter, async (req, res) => {
 router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !email || !password)
-      return res.status(400).json({ error: 'Username, email, and password required.' });
+    const identifier = (username || email || '').trim();
+    if (!identifier || !password)
+      return res.status(400).json({ error: 'Username and password required.' });
 
-    const student = await Student.findOne({ username, email });
+    const student = await Student.findOne({
+      $or: [
+        { username: { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } },
+        { email: identifier.toLowerCase() }
+      ]
+    });
     if (!student) return res.status(401).json({ error: 'Invalid credentials.' });
 
     const valid = await bcrypt.compare(password, student.password);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials.' });
 
     req.session.isStudent   = true;
-    req.session.studentUser = username;
+    req.session.studentUser = student.username;
     req.session.isPremium   = student.isPremium || false;
-    return res.json({ success: true, username, isPremium: req.session.isPremium });
+    return res.json({ success: true, username: student.username, isPremium: req.session.isPremium });
   } catch (error) {
     console.error("[Student Login Error]:", error);
     res.status(500).json({ error: 'Failed to log in. The database might be warming up, please try again.' });

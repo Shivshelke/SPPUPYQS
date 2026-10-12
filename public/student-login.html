@@ -453,15 +453,9 @@
         <div class="msg msg-success" id="loginSuccess" style="display: none;"></div>
 
         <div class="form-group">
-          <label>Username</label>
+          <label>Username or Email</label>
           <div class="input-wrapper">
-            <input type="text" id="lUsername" placeholder="your_username" autocomplete="username"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <div class="input-wrapper">
-            <input type="email" id="lEmail" placeholder="name@email.com" autocomplete="email"/>
+            <input type="text" id="lUsername" placeholder="your_username or email" autocomplete="username"/>
           </div>
         </div>
         <div class="form-group">
@@ -597,10 +591,10 @@
     async function doLogin() {
       const btn = document.getElementById('loginBtn');
       const username = document.getElementById('lUsername').value.trim();
-      const email = document.getElementById('lEmail').value.trim();
       const password = document.getElementById('lPassword').value;
 
-      if(!username || !email || !password){ showMsg('loginError', 'All fields are required.'); return; }
+      if(!username){ showMsg('loginError', 'Please enter your username or email.'); return; }
+      if(!password){ showMsg('loginError', 'Please enter your password.'); return; }
 
       btn.disabled = true; 
       btn.innerHTML = '<span class="loading-spinner"></span> Signing in...';
@@ -608,7 +602,7 @@
       try {
         const res = await fetch('/student/login',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({username, email, password})
+          body: JSON.stringify({username, password})
         });
         const data = await res.json();
         if(data.success) {
