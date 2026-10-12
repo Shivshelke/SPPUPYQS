@@ -69,7 +69,7 @@ const sendPurchaseEmail = async (studentEmail, studentName, productTitle, amount
         </div>
 
         <div class="btn-container">
-          <a href="http://localhost:3000/my-purchases.html" class="btn">View & Download Material</a>
+          <a href="${process.env.APP_URL || process.env.BASE_URL || 'https://sppupyq.vercel.app'}/my-purchases.html" class="btn">View & Download Material</a>
         </div>
         
         <p style="font-size: 14px; color: #475569; line-height: 1.5;">
