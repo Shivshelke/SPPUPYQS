@@ -377,9 +377,22 @@
         const buyBtn = document.getElementById('buyBtn');
         buyBtn.textContent = p.price === 0 ? 'Get for Free' : `Buy Now — ₹${p.price}`;
         
-        // Update images with placeholder since we secure actual PDFs
-        document.getElementById('productImg').src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
-        document.getElementById('modalImg').src = p.previewUrl || p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        // Update images with fallback handling
+        const prodImgEl = document.getElementById('productImg');
+        prodImgEl.onerror = function() {
+          this.src = 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+        };
+        prodImgEl.src = p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+
+        const modalImgEl = document.getElementById('modalImg');
+        modalImgEl.onerror = function() {
+          if (p.thumbnailUrl && this.src !== p.thumbnailUrl) {
+            this.src = p.thumbnailUrl;
+          } else {
+            this.src = 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
+          }
+        };
+        modalImgEl.src = p.previewUrl || p.thumbnailUrl || 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80';
         document.getElementById('modalUnlockBtn').textContent = `Unlock Full PDF for ₹${p.price}`;
 
       } catch (err) {
