@@ -92,7 +92,10 @@ router.post('/create-order', requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating order:', error);
-    const detail = error?.error?.description || error?.message || 'Failed to create order';
+    let detail = error?.error?.description || error?.message || 'Failed to create order';
+    if (detail === 'Authentication failed') {
+      detail = 'Razorpay Authentication Failed: The API Key ID or Key Secret is invalid or expired. Please update RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your Vercel Environment Variables.';
+    }
     res.status(500).json({ error: detail });
   }
 });
