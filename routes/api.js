@@ -108,7 +108,6 @@ router.post('/verify-gate/:id', async (req, res) => {
     if (!file) return res.status(404).json({ error: 'File not found' });
     
     // In the MVP, we just trust the frontend that the user completed the steps.
-    // Future: verify with Telegram Bot API if required.
     const token = generateGateToken(file._id.toString());
     res.json({ success: true, token });
   } catch (e) {

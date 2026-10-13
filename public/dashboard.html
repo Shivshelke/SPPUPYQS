@@ -696,19 +696,12 @@
         <select id="gateType" class="input-field" onchange="toggleGateFields()">
           <option value="none">Direct Download (No Gate)</option>
           <option value="whatsapp">WhatsApp Required</option>
-          <option value="telegram">Telegram Required</option>
-          <option value="both">WhatsApp + Telegram Required</option>
         </select>
       </div>
 
       <div class="form-group" id="gateWaGroup" style="display:none">
         <label>WhatsApp Group Link</label>
         <input type="url" id="gateWaUrl" class="input-field" placeholder="https://chat.whatsapp.com/...">
-      </div>
-
-      <div class="form-group" id="gateTgGroup" style="display:none">
-        <label>Telegram Group Link</label>
-        <input type="url" id="gateTgUrl" class="input-field" placeholder="https://t.me/...">
       </div>
 
       <div id="gateAlert" class="alert" style="display:none; margin-top: 1rem;"></div>

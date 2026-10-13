@@ -761,7 +761,7 @@ function renderFileGrid(files, gridId) {
     const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
     let downloadBtn;
     if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
-      downloadBtn = `<button class="btn-download" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')" title="Unlock PDF">🔒 Unlock</button>`;
+      downloadBtn = `<button class="btn-download" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}')" title="Unlock PDF">🔒 Unlock</button>`;
     } else {
       downloadBtn = isGdLink
         ? `<a class="btn-download" href="/api/download/${f._id}" target="_blank" title="Open PDF in Google Drive">↗ Open Link</a>`
@@ -1200,7 +1200,7 @@ async function openPremiumModal(type) {
         const isGdLink = f.publicId && f.publicId.startsWith('google-drive');
         let downloadAction = '';
         if (f.downloadGate && f.downloadGate.enabled && f.downloadGate.type !== 'none') {
-          downloadAction = `<button class="modal-list-btn" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}', '${f.downloadGate.telegramUrl || ''}')">🔒 Unlock</button>`;
+          downloadAction = `<button class="modal-list-btn" onclick="handleGatedDownload('${f._id}', '${f.downloadGate.type}', '${f.downloadGate.whatsappUrl || ''}')">🔒 Unlock</button>`;
         } else {
           downloadAction = isGdLink
             ? `<a href="/api/download/${f._id}" target="_blank" class="modal-list-btn" style="text-decoration:none;">↗ Open Link</a>`
@@ -1375,47 +1375,50 @@ async function sendChatMessage() {
 
 // ── Download Gate Logic ───────────────────────────────────────────────────────
 let activeGateFileId = null;
-let gateConfig = { type: 'none', waUrl: '', tgUrl: '' };
-let gateState = { wa: false, tg: false };
+let gateConfig = { type: 'none', waUrl: '' };
+let gateState = { wa: false };
 
-function handleGatedDownload(fileId, type, waUrl, tgUrl) {
+function handleGatedDownload(fileId, type, waUrl) {
   activeGateFileId = fileId;
-  gateConfig = { type, waUrl, tgUrl };
-  gateState = { wa: false, tg: false };
+  gateConfig = { type, waUrl };
+  gateState = { wa: false };
 
-  document.getElementById('gateStepWa').style.display = (type === 'whatsapp' || type === 'both') ? 'block' : 'none';
-  document.getElementById('gateStepTg').style.display = (type === 'telegram' || type === 'both') ? 'block' : 'none';
+  const gateStepWa = document.getElementById('gateStepWa');
+  if (gateStepWa) gateStepWa.style.display = (type === 'whatsapp') ? 'block' : 'none';
 
-  if (type === 'whatsapp' || type === 'both') {
-    document.getElementById('gateWaBtn').href = waUrl;
-    document.getElementById('gateWaBtn').style.pointerEvents = 'auto';
-    document.getElementById('gateWaStatus').textContent = "";
-    document.getElementById('gateWaStatus').style.color = "var(--muted)";
+  if (type === 'whatsapp') {
+    const gateWaBtn = document.getElementById('gateWaBtn');
+    const gateWaStatus = document.getElementById('gateWaStatus');
+    if (gateWaBtn) {
+      gateWaBtn.href = waUrl;
+      gateWaBtn.style.pointerEvents = 'auto';
+    }
+    if (gateWaStatus) {
+      gateWaStatus.textContent = "";
+      gateWaStatus.style.color = "var(--muted)";
+    }
   }
 
-  if (type === 'telegram' || type === 'both') {
-    document.getElementById('gateTgBtn').href = tgUrl;
-    document.getElementById('gateTgBtn').style.pointerEvents = 'auto';
-    document.getElementById('gateTgStatus').textContent = "";
-    document.getElementById('gateTgStatus').style.color = "var(--muted)";
-  }
-
-  document.getElementById('gateDownloadBtn').style.display = 'none';
-  document.getElementById('gateModal').classList.add('show');
+  const gateDownloadBtn = document.getElementById('gateDownloadBtn');
+  if (gateDownloadBtn) gateDownloadBtn.style.display = 'none';
+  const gateModal = document.getElementById('gateModal');
+  if (gateModal) gateModal.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
 
 function closeGateModal() {
-  document.getElementById('gateModal').classList.remove('show');
+  const gateModal = document.getElementById('gateModal');
+  if (gateModal) gateModal.classList.remove('show');
   activeGateFileId = null;
   document.body.style.overflow = '';
 }
 
 function startGateCountdown(platform) {
-  if (gateState[platform === 'whatsapp' ? 'wa' : 'tg']) return;
+  if (platform !== 'whatsapp' || gateState.wa) return;
 
-  const btn = document.getElementById(platform === 'whatsapp' ? 'gateWaBtn' : 'gateTgBtn');
-  const status = document.getElementById(platform === 'whatsapp' ? 'gateWaStatus' : 'gateTgStatus');
+  const btn = document.getElementById('gateWaBtn');
+  const status = document.getElementById('gateWaStatus');
+  if (!btn || !status) return;
 
   btn.style.pointerEvents = 'none';
 
@@ -1429,7 +1432,7 @@ function startGateCountdown(platform) {
       status.textContent = `⏳ Unlocking in ${count}s`;
     } else {
       clearInterval(timer);
-      gateState[platform === 'whatsapp' ? 'wa' : 'tg'] = true;
+      gateState.wa = true;
       status.textContent = 'Download Unlocked ✓';
       status.style.color = 'var(--accent)';
       checkGateCompletion();
@@ -1440,11 +1443,10 @@ function startGateCountdown(platform) {
 function checkGateCompletion() {
   let complete = false;
   if (gateConfig.type === 'whatsapp' && gateState.wa) complete = true;
-  if (gateConfig.type === 'telegram' && gateState.tg) complete = true;
-  if (gateConfig.type === 'both' && gateState.wa && gateState.tg) complete = true;
 
   if (complete) {
-    document.getElementById('gateDownloadBtn').style.display = 'block';
+    const gateDownloadBtn = document.getElementById('gateDownloadBtn');
+    if (gateDownloadBtn) gateDownloadBtn.style.display = 'block';
   }
 }
 
