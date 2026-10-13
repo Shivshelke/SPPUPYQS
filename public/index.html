@@ -772,6 +772,7 @@
         </div>
         <button class="btn-primary" id="fbBtn" onclick="submitFeedback()">Send Feedback</button>
 
+        <!-- Temporarily hidden for Razorpay review:
         <div style="margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--text-secondary, #666);">
           <p style="margin-bottom: 0.5rem;">Or ask for papers directly</p>
           <a href="https://t.me/synapse_support_bot" target="_blank" rel="noopener noreferrer"
@@ -784,6 +785,7 @@
             Chat with us
           </a>
         </div>
+        -->
       </div>
     </div>
   </section>
@@ -930,7 +932,7 @@
     </div>
   </div>
 
-  <!-- Reserved for future feature: Download gate modal (WhatsApp/Telegram group join) -->
+  <!-- Reserved for future feature: Download gate modal (WhatsApp group join) -->
   <!-- ── Join to Download Modal ── -->
   <div id="gateModal" class="modal-overlay" onclick="closeGateModal(event)">
     <div class="modal gate-modal" onclick="event.stopPropagation()">
@@ -951,6 +953,7 @@
           <div id="gateWaStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
         </div>
 
+        <!--
         <div id="gateStepTg" class="gate-step"
           style="display:none; text-align:center; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem;">
           <h4 style="margin: 0 0 0.5rem 0;">2. Telegram Group</h4>
@@ -959,6 +962,7 @@
             onclick="startGateCountdown('telegram')">Join Telegram</a>
           <div id="gateTgStatus" style="font-size: 0.9rem; color: var(--muted); height: 1.2rem;"></div>
         </div>
+        -->
 
         <button id="gateDownloadBtn" class="btn-primary" style="width: 100%; display: none;"
           onclick="executeGatedDownload()">Download PDF Now</button>
