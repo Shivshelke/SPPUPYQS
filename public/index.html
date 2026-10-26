@@ -620,21 +620,21 @@
       <div class="section-header">
         <h2>Browse by Year <span class="pattern-badge">2024 Pattern</span></h2>
         <p>Select your year to explore branches and subjects:
-          <a href="/first-year-fe-engineering" onclick="event.preventDefault(); selectYear('first');"
+          <a href="/first-year-fe-engineering" onclick="event.preventDefault(); onYearCardClick('first');"
             style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">1st Year
             (FE)</a>
-          <a href="/second-year-engineering" onclick="event.preventDefault(); selectYear('second');"
+          <a href="/second-year-engineering" onclick="event.preventDefault(); onYearCardClick('second');"
             style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">2nd Year
             (SE)</a>
-          <a href="/third-year-engineering" onclick="event.preventDefault(); selectYear('third');"
+          <a href="/third-year-engineering" onclick="event.preventDefault(); onYearCardClick('third');"
             style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">3rd Year
             (TE)</a>
-          <a href="/final-year-engineering" onclick="event.preventDefault(); selectYear('fourth');"
+          <a href="/final-year-engineering" onclick="event.preventDefault(); onYearCardClick('fourth');"
             style="text-decoration: underline; color: var(--accent); font-weight: 500;">4th Year (BE)</a>
         </p>
       </div>
       <div class="year-grid">
-        <div class="year-card" onclick="selectYear('first')">
+        <div class="year-card" onclick="onYearCardClick('first')">
           <div class="year-icon">I</div>
           <div class="year-label">1st Year</div>
           <div class="year-sub">Common subjects for all branches</div>
@@ -642,7 +642,7 @@
               style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span>
           </div>
         </div>
-        <div class="year-card" onclick="selectYear('second')">
+        <div class="year-card" onclick="onYearCardClick('second')">
           <div class="year-icon">II</div>
           <div class="year-label">2nd Year</div>
           <div class="year-sub">Branch-specific courses begin</div>
@@ -650,7 +650,7 @@
               style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span>
           </div>
         </div>
-        <div class="year-card" onclick="selectYear('third')">
+        <div class="year-card" onclick="onYearCardClick('third')">
           <div class="year-icon">III</div>
           <div class="year-label">3rd Year</div>
           <div class="year-sub">Advanced engineering subjects</div>
@@ -658,7 +658,7 @@
               style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span>
           </div>
         </div>
-        <div class="year-card" onclick="selectYear('fourth')">
+        <div class="year-card" onclick="onYearCardClick('fourth')">
           <div class="year-icon">IV</div>
           <div class="year-label">4th Year</div>
           <div class="year-sub">Final year specializations</div>
@@ -676,6 +676,22 @@
       <div class="browser-header">
         <button class="back-btn" onclick="goBack()">← Back</button>
         <h2 id="panelTitle">Select Branch</h2>
+      </div>
+
+      <!-- Year Telegram Promo Banner -->
+      <div id="yearPromoBanner" style="display:none; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(42, 171, 238, 0.12) 0%, rgba(99, 102, 241, 0.15) 100%); border: 1px solid rgba(42, 171, 238, 0.35); border-radius: 14px; padding: 1rem 1.25rem; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: #2AABEE; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(42, 171, 238, 0.4);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.64 8.8C16.49 10.96 15.82 14.85 15.48 16.62C15.34 17.37 15.06 17.62 14.79 17.65C14.2 17.7 13.75 17.26 13.2 16.9C12.32 16.33 11.83 15.98 10.98 15.42C10.01 14.78 10.64 14.43 11.22 13.84C11.37 13.68 13.91 11.37 13.96 11.15C13.97 11.12 13.97 11.05 13.93 11.01C13.89 10.97 13.84 10.99 13.79 11.01C13.72 11.04 12.63 11.76 10.5 13.2C10.19 13.41 9.9 13.51 9.65 13.51C9.37 13.5 8.84 13.35 8.44 13.22C7.96 13.06 7.58 12.98 7.62 12.71C7.64 12.57 7.82 12.42 8.18 12.28C11.45 10.85 13.63 9.94 14.72 9.49C15.75 9.06 15.97 8.99 16.11 8.99C16.14 8.99 16.23 8.99 16.29 9.04C16.34 9.08 16.37 9.14 16.38 9.21C16.38 9.25 16.37 9.34 16.36 9.43L16.64 8.8Z" fill="white"/></svg>
+          </div>
+          <div>
+            <div id="yearPromoBannerTitle" style="font-weight: 700; font-size: 1rem; color: var(--text);">Join SPPU Discussion Group</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.15rem;">Get In-Sem/End-Sem IMP Questions, Notes & Circulars</div>
+          </div>
+        </div>
+        <a id="yearPromoBannerBtn" href="https://t.me/synapse_support_bot" target="_blank" rel="noopener noreferrer" style="background: #2AABEE; color: white; padding: 9px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(42, 171, 238, 0.35); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          Join Telegram ↗
+        </a>
       </div>
 
       <!-- Branch selection -->
@@ -966,6 +982,32 @@
     </div>
   </div>
 
+  <!-- ── YEAR TELEGRAM MODAL (CLICK ON YEAR CARD) ── -->
+  <div id="yearTelegramModal" class="modal-overlay" onclick="closeYearTelegramModal(event)" style="z-index: 2000;">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 440px; width: 90%; text-align: center; border-radius: 20px; padding: 2rem 1.75rem; background: var(--surface, #1e1e2d); border: 1px solid rgba(42, 171, 238, 0.35); box-shadow: 0 12px 40px rgba(0,0,0,0.5); position: relative;">
+      <button class="modal-close" onclick="closeYearTelegramModal()" aria-label="Close Modal" style="position: absolute; top: 1rem; right: 1.2rem; background: none; border: none; font-size: 1.6rem; color: var(--muted); cursor: pointer; line-height: 1;">&times;</button>
+      
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; box-shadow: 0 8px 20px rgba(42, 171, 238, 0.4);">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.64 8.8C16.49 10.96 15.82 14.85 15.48 16.62C15.34 17.37 15.06 17.62 14.79 17.65C14.2 17.7 13.75 17.26 13.2 16.9C12.32 16.33 11.83 15.98 10.98 15.42C10.01 14.78 10.64 14.43 11.22 13.84C11.37 13.68 13.91 11.37 13.96 11.15C13.97 11.12 13.97 11.05 13.93 11.01C13.89 10.97 13.84 10.99 13.79 11.01C13.72 11.04 12.63 11.76 10.5 13.2C10.19 13.41 9.9 13.51 9.65 13.51C9.37 13.5 8.84 13.35 8.44 13.22C7.96 13.06 7.58 12.98 7.62 12.71C7.64 12.57 7.82 12.42 8.18 12.28C11.45 10.85 13.63 9.94 14.72 9.49C15.75 9.06 15.97 8.99 16.11 8.99C16.14 8.99 16.23 8.99 16.29 9.04C16.34 9.08 16.37 9.14 16.38 9.21C16.38 9.25 16.37 9.34 16.36 9.43L16.64 8.8Z" fill="white"/>
+        </svg>
+      </div>
+
+      <h3 id="yearTelegramModalTitle" style="font-family:'Syne',sans-serif; font-size: 1.35rem; font-weight: 800; margin-bottom: 0.6rem; color: var(--text);">Join SPPU Telegram Community</h3>
+      <p id="yearTelegramModalText" style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">Get In-Sem & End-Sem IMP Questions, Handwritten Notes, Solved Papers and Exam Alerts directly on Telegram!</p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <a id="yearTelegramModalBtn" href="https://t.me/synapse_support_bot" target="_blank" rel="noopener noreferrer" onclick="handleYearTelegramJoinClick()" style="background: #2AABEE; color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 1rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(42, 171, 238, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.64 8.8C16.49 10.96 15.82 14.85 15.48 16.62C15.34 17.37 15.06 17.62 14.79 17.65C14.2 17.7 13.75 17.26 13.2 16.9C12.32 16.33 11.83 15.98 10.98 15.42C10.01 14.78 10.64 14.43 11.22 13.84C11.37 13.68 13.91 11.37 13.96 11.15C13.97 11.12 13.97 11.05 13.93 11.01C13.89 10.97 13.84 10.99 13.79 11.01C13.72 11.04 12.63 11.76 10.5 13.2C10.19 13.41 9.9 13.51 9.65 13.51C9.37 13.5 8.84 13.35 8.44 13.22C7.96 13.06 7.58 12.98 7.62 12.71C7.64 12.57 7.82 12.42 8.18 12.28C11.45 10.85 13.63 9.94 14.72 9.49C15.75 9.06 15.97 8.99 16.11 8.99C16.14 8.99 16.23 8.99 16.29 9.04C16.34 9.08 16.37 9.14 16.38 9.21C16.38 9.25 16.37 9.34 16.36 9.43L16.64 8.8Z" fill="white"/></svg>
+          <span id="yearTelegramModalBtnText">🚀 Join Telegram Group</span>
+        </a>
+        <button id="yearTelegramModalContinueBtn" onclick="proceedToYearPapers()" style="background: rgba(255, 255, 255, 0.06); color: var(--text); border: 1px solid var(--border); padding: 11px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">
+          Continue to Papers →
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Chatbot Widget ── -->
   <div id="chatWidget" class="chat-widget">
     <div class="chat-header" onclick="toggleChat()">
@@ -1064,7 +1106,7 @@
     </div>
   </div>
 
-  <script src="/js/main.js?v=5" defer></script>
+  <script src="/js/main.js?v=6" defer></script>
 </body>
 
 </html>

@@ -100,6 +100,7 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
       markFeedbackAsRead();
     }
     if (panelId === 'banner') loadBannerConfig();
+    if (panelId === 'telegram-promo') loadTelegramPromoConfig();
 
     // Close sidebar on mobile
     if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
@@ -1846,6 +1847,84 @@ async function saveBannerConfig() {
     }
   } catch (err) {
     alertBox.textContent = err.message;
+    alertBox.className = 'alert error';
+    alertBox.style.display = 'block';
+  }
+}
+
+// ── TELEGRAM PROMO CONFIG ───────────────────────────────────────────────────
+async function loadTelegramPromoConfig() {
+  try {
+    const res = await fetch('/admin/telegram-promo');
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('tgPopupEnabled').checked = data.popupEnabled !== false;
+      document.getElementById('tgPopupTitle').value = data.popupTitle || 'Join {year} SPPU Telegram Community';
+      document.getElementById('tgPopupText').value = data.popupText || 'Get In-Sem & End-Sem IMP Questions, Handwritten Notes, Solved Papers and Exam Alerts directly on Telegram!';
+      document.getElementById('tgPopupButtonText').value = data.popupButtonText || '🚀 Join Telegram Group';
+      document.getElementById('tgPopupContinueText').value = data.popupContinueText || 'Continue to Papers →';
+
+      document.getElementById('tgBannerEnabled').checked = data.bannerEnabled !== false;
+      document.getElementById('tgBannerText').value = data.bannerText || '📢 {year} SPPU Discussion & IMPs Group';
+      document.getElementById('tgBannerButtonText').value = data.bannerButtonText || 'Join Telegram ↗';
+
+      document.getElementById('tgDefaultUrl').value = data.defaultUrl || 'https://t.me/synapse_support_bot';
+      document.getElementById('tgFirstYearUrl').value = data.firstYearUrl || '';
+      document.getElementById('tgSecondYearUrl').value = data.secondYearUrl || '';
+      document.getElementById('tgThirdYearUrl').value = data.thirdYearUrl || '';
+      document.getElementById('tgFourthYearUrl').value = data.fourthYearUrl || '';
+    }
+  } catch (err) {
+    console.error('Failed to load telegram promo config', err);
+  }
+}
+
+async function saveTelegramPromoConfig() {
+  const alertBox = document.getElementById('tgPromoAlert');
+  alertBox.style.display = 'none';
+
+  const defaultUrl = document.getElementById('tgDefaultUrl').value.trim();
+  if (!defaultUrl) {
+    alertBox.textContent = 'Main / Default Telegram Link is required.';
+    alertBox.className = 'alert error';
+    alertBox.style.display = 'block';
+    return;
+  }
+
+  const payload = {
+    popupEnabled: document.getElementById('tgPopupEnabled').checked,
+    popupTitle: document.getElementById('tgPopupTitle').value.trim() || 'Join {year} SPPU Telegram Community',
+    popupText: document.getElementById('tgPopupText').value.trim() || '',
+    popupButtonText: document.getElementById('tgPopupButtonText').value.trim() || '🚀 Join Telegram Group',
+    popupContinueText: document.getElementById('tgPopupContinueText').value.trim() || 'Continue to Papers →',
+
+    bannerEnabled: document.getElementById('tgBannerEnabled').checked,
+    bannerText: document.getElementById('tgBannerText').value.trim() || '📢 {year} SPPU Discussion & IMPs Group',
+    bannerButtonText: document.getElementById('tgBannerButtonText').value.trim() || 'Join Telegram ↗',
+
+    defaultUrl,
+    firstYearUrl: document.getElementById('tgFirstYearUrl').value.trim(),
+    secondYearUrl: document.getElementById('tgSecondYearUrl').value.trim(),
+    thirdYearUrl: document.getElementById('tgThirdYearUrl').value.trim(),
+    fourthYearUrl: document.getElementById('tgFourthYearUrl').value.trim()
+  };
+
+  try {
+    const res = await fetch('/admin/telegram-promo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alertBox.textContent = 'Telegram Promo settings saved successfully!';
+      alertBox.className = 'alert success';
+      alertBox.style.display = 'block';
+    } else {
+      throw new Error(data.error || 'Failed to save');
+    }
+  } catch (err) {
+    alertBox.textContent = err.message || 'Error saving settings.';
     alertBox.className = 'alert error';
     alertBox.style.display = 'block';
   }

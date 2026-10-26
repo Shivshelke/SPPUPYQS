@@ -59,6 +59,9 @@
       <a href="#" class="nav-item" data-panel="banner">
         <span class="nav-icon">📢</span> Notice Banner
       </a>
+      <a href="#" class="nav-item" data-panel="telegram-promo">
+        <span class="nav-icon">✈️</span> Telegram Promos
+      </a>
       <div class="nav-divider"></div>
       <a href="/" class="nav-item" target="_blank">
         <span class="nav-icon">⬡</span> View Site
@@ -599,6 +602,109 @@
       </div>
     </section>
 
+    <!-- ══ PANEL: TELEGRAM PROMOS ══ -->
+    <section class="panel" id="panel-telegram-promo">
+      <div class="panel-header">
+        <h2>Year Cards Telegram Promos Configuration</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem;">Control Year Card click popup and browser panel banners to increase student group members.</p>
+      </div>
+      <div class="narrow-form">
+        <div class="alert" id="tgPromoAlert" style="display:none"></div>
+
+        <!-- 1. Year Card Click Popup (Modal) -->
+        <div style="background: var(--surface2); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+              <label style="margin-bottom: 0; font-size: 1.1rem; font-weight: 700;">1. Year Card Click Popup (Modal)</label>
+              <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem;">Shows a high-converting popup when a student clicks on 1st, 2nd, 3rd, or 4th Year cards.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="tgPopupEnabled">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Popup Title <span style="font-weight: normal; color: var(--muted); font-size: 0.8rem;">(use <code>{year}</code> for dynamic year name)</span></label>
+            <input type="text" id="tgPopupTitle" placeholder="e.g. Join {year} SPPU Telegram Community" />
+          </div>
+
+          <div class="form-group">
+            <label>Popup Description</label>
+            <textarea id="tgPopupText" rows="3" class="input-field" style="width: 100%; box-sizing: border-box; resize: vertical;" placeholder="e.g. Get In-Sem & End-Sem IMP Questions, Handwritten Notes, Solved Papers and Exam Alerts directly on Telegram!"></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Join Button Text</label>
+              <input type="text" id="tgPopupButtonText" placeholder="e.g. 🚀 Join Telegram Group" />
+            </div>
+            <div class="form-group">
+              <label>Continue Button Text</label>
+              <input type="text" id="tgPopupContinueText" placeholder="e.g. Continue to Papers →" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Browser Panel Banner -->
+        <div style="background: var(--surface2); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+              <label style="margin-bottom: 0; font-size: 1.1rem; font-weight: 700;">2. Browser Panel Banner</label>
+              <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem;">Shows a prominent banner card above Branch/Subject selection.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="tgBannerEnabled">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Banner Text <span style="font-weight: normal; color: var(--muted); font-size: 0.8rem;">(use <code>{year}</code> for dynamic year name)</span></label>
+            <input type="text" id="tgBannerText" placeholder="e.g. 📢 {year} SPPU Discussion & IMPs Group" />
+          </div>
+
+          <div class="form-group">
+            <label>Banner Button Text</label>
+            <input type="text" id="tgBannerButtonText" placeholder="e.g. Join Telegram ↗" />
+          </div>
+        </div>
+
+        <!-- 3. Telegram Group Links -->
+        <div style="background: var(--surface2); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem;">
+          <label style="margin-bottom: 0.5rem; font-size: 1.1rem; font-weight: 700; display: block;">3. Telegram Links</label>
+          <div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;">Specify the main group link, and optional year-specific group links if you have separate groups.</div>
+
+          <div class="form-group">
+            <label>Main / Default Telegram Link <span class="req">*</span></label>
+            <input type="url" id="tgDefaultUrl" placeholder="https://t.me/synapse_support_bot" />
+            <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem;">Used if year-specific link is not provided.</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>1st Year (FE) Link (Optional)</label>
+              <input type="url" id="tgFirstYearUrl" placeholder="https://t.me/sppu_fe_group" />
+            </div>
+            <div class="form-group">
+              <label>2nd Year (SE) Link (Optional)</label>
+              <input type="url" id="tgSecondYearUrl" placeholder="https://t.me/sppu_se_group" />
+            </div>
+            <div class="form-group">
+              <label>3rd Year (TE) Link (Optional)</label>
+              <input type="url" id="tgThirdYearUrl" placeholder="https://t.me/sppu_te_group" />
+            </div>
+            <div class="form-group">
+              <label>4th Year (BE) Link (Optional)</label>
+              <input type="url" id="tgFourthYearUrl" placeholder="https://t.me/sppu_be_group" />
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveTelegramPromoConfig()" style="width: 100%; padding: 0.9rem; font-size: 1rem;">Save Telegram Promo Settings</button>
+      </div>
+    </section>
+
   <!-- ── EDIT PREMIUM FILE MODAL ── -->
   <div class="modal-overlay" id="editPremiumModal" style="display:none">
     <div class="modal" style="max-width: 580px; text-align: left; max-height: 90vh; overflow-y: auto;">
@@ -767,7 +873,7 @@
     </div>
   </div>
 
-  <script src="/js/dashboard.js?v=2.0.7"></script>
+  <script src="/js/dashboard.js?v=2.0.8"></script>
 </body>
 
 </html>

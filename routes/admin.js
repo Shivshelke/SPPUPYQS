@@ -15,6 +15,7 @@ const Purchase = require('../models/Purchase');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
 const Banner = require('../models/Banner');
+const TelegramPromo = require('../models/TelegramPromo');
 
 // ── Cloudinary config ─────────────────────────────────────────────────────────
 cloudinary.config({
@@ -707,6 +708,67 @@ router.post('/banner', requireAdmin, async (req, res) => {
     banner.isActive = isActive;
     await banner.save();
     res.json({ success: true, banner });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET Telegram Promo Config ───────────────────────────────────────────────────
+router.get('/telegram-promo', requireAdmin, async (req, res) => {
+  try {
+    let promo = await TelegramPromo.findOne({ key: 'telegram_promo' });
+    if (!promo) {
+      promo = new TelegramPromo({ key: 'telegram_promo' });
+      await promo.save();
+    }
+    res.json(promo);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST Update Telegram Promo Config ─────────────────────────────────────────
+router.post('/telegram-promo', requireAdmin, async (req, res) => {
+  try {
+    const {
+      popupEnabled,
+      popupTitle,
+      popupText,
+      popupButtonText,
+      popupContinueText,
+      bannerEnabled,
+      bannerText,
+      bannerButtonText,
+      defaultUrl,
+      firstYearUrl,
+      secondYearUrl,
+      thirdYearUrl,
+      fourthYearUrl
+    } = req.body;
+
+    let promo = await TelegramPromo.findOne({ key: 'telegram_promo' });
+    if (!promo) {
+      promo = new TelegramPromo({ key: 'telegram_promo' });
+    }
+
+    if (popupEnabled !== undefined) promo.popupEnabled = Boolean(popupEnabled);
+    if (popupTitle !== undefined) promo.popupTitle = popupTitle;
+    if (popupText !== undefined) promo.popupText = popupText;
+    if (popupButtonText !== undefined) promo.popupButtonText = popupButtonText;
+    if (popupContinueText !== undefined) promo.popupContinueText = popupContinueText;
+
+    if (bannerEnabled !== undefined) promo.bannerEnabled = Boolean(bannerEnabled);
+    if (bannerText !== undefined) promo.bannerText = bannerText;
+    if (bannerButtonText !== undefined) promo.bannerButtonText = bannerButtonText;
+
+    if (defaultUrl !== undefined) promo.defaultUrl = defaultUrl;
+    if (firstYearUrl !== undefined) promo.firstYearUrl = firstYearUrl;
+    if (secondYearUrl !== undefined) promo.secondYearUrl = secondYearUrl;
+    if (thirdYearUrl !== undefined) promo.thirdYearUrl = thirdYearUrl;
+    if (fourthYearUrl !== undefined) promo.fourthYearUrl = fourthYearUrl;
+
+    await promo.save();
+    res.json({ success: true, promo });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -415,6 +415,28 @@ function selectYear(year) {
 
   document.getElementById('panelTitle').textContent = yearData.label;
 
+  // Update year promo banner if enabled
+  const banner = document.getElementById('yearPromoBanner');
+  if (banner) {
+    if (telegramPromoConfig && telegramPromoConfig.bannerEnabled) {
+      const yearLabel = getYearDisplayName(year);
+      const bTitle = (telegramPromoConfig.bannerText || '📢 {year} SPPU Discussion & IMPs Group').replace('{year}', yearLabel);
+      const bBtnText = telegramPromoConfig.bannerButtonText || 'Join Telegram ↗';
+      const bUrl = getTelegramUrlForYear(year);
+
+      const titleEl = document.getElementById('yearPromoBannerTitle');
+      const btnEl = document.getElementById('yearPromoBannerBtn');
+      if (titleEl) titleEl.textContent = bTitle;
+      if (btnEl) {
+        btnEl.textContent = bBtnText;
+        btnEl.href = bUrl;
+      }
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
   // Reset steps
   document.getElementById('branchStep').style.display = 'block';
   document.getElementById('subjectStep').style.display = 'none';
@@ -1273,7 +1295,11 @@ function closePremiumModal(e) {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closePremiumModal();
+  if (e.key === 'Escape') {
+    closePremiumModal();
+    closeGateModal();
+    closeYearTelegramModal();
+  }
 });
 
 // Drag & drop visual on the whole body (just nice to have)
@@ -1501,4 +1527,116 @@ async function loadNoticeBanner() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadNoticeBanner);
+// ── Year Telegram Promo Logic ────────────────────────────────────────────────
+let telegramPromoConfig = null;
+let pendingYearSelection = null;
+
+async function loadTelegramPromoConfig() {
+  try {
+    const res = await fetch('/api/telegram-promo');
+    if (res.ok) {
+      telegramPromoConfig = await res.json();
+    }
+  } catch (err) {
+    console.warn('Failed to load telegram promo config', err);
+  }
+}
+
+function getTelegramUrlForYear(year) {
+  if (!telegramPromoConfig) return 'https://t.me/synapse_support_bot';
+  if (year === 'first' && telegramPromoConfig.firstYearUrl) return telegramPromoConfig.firstYearUrl;
+  if (year === 'second' && telegramPromoConfig.secondYearUrl) return telegramPromoConfig.secondYearUrl;
+  if (year === 'third' && telegramPromoConfig.thirdYearUrl) return telegramPromoConfig.thirdYearUrl;
+  if (year === 'fourth' && telegramPromoConfig.fourthYearUrl) return telegramPromoConfig.fourthYearUrl;
+  return telegramPromoConfig.defaultUrl || 'https://t.me/synapse_support_bot';
+}
+
+function getYearDisplayName(year) {
+  const map = {
+    first: '1st Year (FE)',
+    second: '2nd Year (SE)',
+    third: '3rd Year (TE)',
+    fourth: '4th Year (BE)'
+  };
+  return map[year] || (CONFIG[year]?.label || 'SPPU');
+}
+
+function onYearCardClick(year) {
+  if (telegramPromoConfig && telegramPromoConfig.popupEnabled) {
+    showYearTelegramModal(year);
+  } else {
+    selectYear(year);
+  }
+}
+
+function showYearTelegramModal(year) {
+  try {
+    pendingYearSelection = year;
+    const modal = document.getElementById('yearTelegramModal');
+    if (!modal) {
+      selectYear(year);
+      return;
+    }
+
+    const yearLabel = getYearDisplayName(year);
+    const title = (telegramPromoConfig?.popupTitle || 'Join {year} SPPU Telegram Community').replace('{year}', yearLabel);
+    const text = (telegramPromoConfig?.popupText || 'Get In-Sem & End-Sem IMP Questions, Handwritten Notes, Solved Papers and Exam Alerts directly on Telegram!').replace('{year}', yearLabel);
+    const btnText = telegramPromoConfig?.popupButtonText || '🚀 Join Telegram Group';
+    const continueText = telegramPromoConfig?.popupContinueText || 'Continue to Papers →';
+    const url = getTelegramUrlForYear(year);
+
+    const titleEl = document.getElementById('yearTelegramModalTitle');
+    const textEl = document.getElementById('yearTelegramModalText');
+    const btnEl = document.getElementById('yearTelegramModalBtn');
+    const btnTextEl = document.getElementById('yearTelegramModalBtnText');
+    const continueBtnEl = document.getElementById('yearTelegramModalContinueBtn');
+
+    if (titleEl) titleEl.textContent = title;
+    if (textEl) textEl.textContent = text;
+    if (btnEl) btnEl.href = url;
+    if (btnTextEl) btnTextEl.textContent = btnText;
+    if (continueBtnEl) continueBtnEl.textContent = continueText;
+
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  } catch (err) {
+    console.error('Error showing telegram modal:', err);
+    selectYear(year);
+  }
+}
+
+function closeYearTelegramModal(event) {
+  if (event && event.target && event.target !== document.getElementById('yearTelegramModal') && !event.target.classList.contains('modal-close')) {
+    return;
+  }
+  const modal = document.getElementById('yearTelegramModal');
+  if (modal) modal.classList.remove('show');
+  document.body.style.overflow = '';
+  if (pendingYearSelection) {
+    const yr = pendingYearSelection;
+    pendingYearSelection = null;
+    selectYear(yr);
+  }
+}
+
+function proceedToYearPapers() {
+  const modal = document.getElementById('yearTelegramModal');
+  if (modal) modal.classList.remove('show');
+  document.body.style.overflow = '';
+  if (pendingYearSelection) {
+    const yr = pendingYearSelection;
+    pendingYearSelection = null;
+    selectYear(yr);
+  }
+}
+
+function handleYearTelegramJoinClick() {
+  setTimeout(() => {
+    proceedToYearPapers();
+  }, 350);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadNoticeBanner();
+  loadTelegramPromoConfig();
+});

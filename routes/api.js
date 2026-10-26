@@ -17,6 +17,7 @@ const File = require('../models/File');
 const Feedback = require('../models/Feedback');
 const Student = require('../models/Student');
 const Banner = require('../models/Banner');
+const TelegramPromo = require('../models/TelegramPromo');
 const crypto = require('crypto');
 
 const GATE_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-gates-2026';
@@ -445,6 +446,20 @@ router.get('/banner', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch banner' });
+  }
+});
+
+// ── GET Telegram Promo Config (Public) ──────────────────────────────────────────
+router.get('/telegram-promo', async (req, res) => {
+  try {
+    let promo = await TelegramPromo.findOne({ key: 'telegram_promo' });
+    if (!promo) {
+      promo = new TelegramPromo({ key: 'telegram_promo' });
+      await promo.save();
+    }
+    res.json(promo);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch telegram promo' });
   }
 });
 
