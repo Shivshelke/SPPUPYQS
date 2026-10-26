@@ -292,12 +292,12 @@ router.delete('/files/:id', async (req, res) => {
 
 // PUT /admin/files/:id/gate
 router.put('/files/:id/gate', async (req, res) => {
-  const { enabled, type, whatsappUrl } = req.body;
+  const { enabled, type, whatsappUrl, telegramUrl } = req.body;
   try {
     const file = await File.findById(req.params.id);
     if (!file) return res.status(404).json({ error: 'File not found.' });
 
-    file.downloadGate = { enabled, type, whatsappUrl };
+    file.downloadGate = { enabled, type, whatsappUrl, telegramUrl };
     await file.save();
     res.json({ success: true, file });
   } catch (e) {

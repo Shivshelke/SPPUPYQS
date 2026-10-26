@@ -15,8 +15,9 @@ const schema = new mongoose.Schema({
   pattern: { type: String, default: '2024' },
   downloadGate: {
     enabled: { type: Boolean, default: false },
-    type: { type: String, enum: ['none', 'whatsapp'], default: 'none' },
-    whatsappUrl: { type: String, default: '' }
+    type: { type: String, enum: ['none', 'whatsapp', 'telegram', 'both'], default: 'none' },
+    whatsappUrl: { type: String, default: '' },
+    telegramUrl: { type: String, default: '' }
   },
   solutionUrl: { type: String, default: '' },
   solutionType: { type: String, enum: ['file', 'link', 'none'], default: 'none' },

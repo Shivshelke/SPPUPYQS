@@ -837,7 +837,7 @@ async function loadAdminFiles() {
               <td>${formatDate(f.uploadDate)}</td>
               <td>
                 <button class="btn-ghost" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem; ${hasSol ? '' : 'color:var(--accent); border-color:var(--accent);'}" onclick="openSolutionModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${escHtml(f.solutionUrl || '')}', '${escHtml(f.solutionType || 'none')}', '${escHtml(f.solutionOriginalName || '')}')">${hasSol ? 'Edit Sol' : '+ Solution'}</button>
-                <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}')">Gate</button>
+                <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}', '${f.downloadGate ? escHtml(f.downloadGate.telegramUrl || '') : ''}')">Gate</button>
                 <button class="btn-del" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
               </td>
             </tr>
@@ -913,11 +913,12 @@ async function doPremiumDelete() {
 // ── Download Gate modal ───────────────────────────────────────────────────────
 let gateTargetId = null;
 
-function openGateModal(id, name, type, waUrl) {
+function openGateModal(id, name, type, waUrl, tgUrl) {
   gateTargetId = id;
   document.getElementById('gateModalText').textContent = `Settings for: ${name}`;
   document.getElementById('gateType').value = type || 'none';
   document.getElementById('gateWaUrl').value = waUrl || '';
+  document.getElementById('gateTgUrl').value = tgUrl || '';
   document.getElementById('gateAlert').style.display = 'none';
   
   toggleGateFields();
@@ -931,8 +932,8 @@ function closeGateModal() {
 
 function toggleGateFields() {
   const type = document.getElementById('gateType').value;
-  const waGroup = document.getElementById('gateWaGroup');
-  if (waGroup) waGroup.style.display = (type === 'whatsapp') ? 'block' : 'none';
+  document.getElementById('gateWaGroup').style.display = (type === 'whatsapp' || type === 'both') ? 'block' : 'none';
+  document.getElementById('gateTgGroup').style.display = (type === 'telegram' || type === 'both') ? 'block' : 'none';
 }
 
 async function saveGateSettings() {
@@ -942,10 +943,18 @@ async function saveGateSettings() {
   
   const type = document.getElementById('gateType').value;
   const whatsappUrl = document.getElementById('gateWaUrl').value.trim();
+  const telegramUrl = document.getElementById('gateTgUrl').value.trim();
   const enabled = type !== 'none';
 
-  if (type === 'whatsapp' && !whatsappUrl) {
+  if ((type === 'whatsapp' || type === 'both') && !whatsappUrl) {
     alertEl.textContent = 'WhatsApp Group Link is required.';
+    alertEl.className = 'alert error';
+    alertEl.style.display = 'block';
+    return;
+  }
+
+  if ((type === 'telegram' || type === 'both') && !telegramUrl) {
+    alertEl.textContent = 'Telegram Group Link is required.';
     alertEl.className = 'alert error';
     alertEl.style.display = 'block';
     return;
@@ -958,7 +967,7 @@ async function saveGateSettings() {
     const res = await fetch(`/admin/files/${gateTargetId}/gate`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled, type, whatsappUrl })
+      body: JSON.stringify({ enabled, type, whatsappUrl, telegramUrl })
     });
     const data = await res.json();
     if (data.success) {

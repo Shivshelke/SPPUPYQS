@@ -35,7 +35,8 @@ async function run() {
       downloadGate: {
         enabled: false,
         type: 'none',
-        whatsappUrl: ''
+        whatsappUrl: '',
+        telegramUrl: ''
       }
     });
     
