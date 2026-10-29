@@ -37,6 +37,10 @@
   <meta property="og:description"
     content="Download SPPU previous year question paper 2024 pattern PDFs for free. Insem and endsem papers for Computer, IT, Mechanical, Civil, and E&TC engineering.">
   <meta property="og:image" content="https://sppupyq.vercel.app/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="SYNAPSE — SPPU Engineering Question Papers & Solutions (2024 Pattern)">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
@@ -45,58 +49,98 @@
   <meta property="twitter:description"
     content="Download SPPU previous year question paper 2024 pattern PDFs for free. Insem and endsem papers for Computer, IT, Mechanical, Civil, and E&TC engineering.">
   <meta property="twitter:image" content="https://sppupyq.vercel.app/assets/og-image.png">
+  <meta property="twitter:image:alt" content="SYNAPSE — SPPU Engineering Question Papers & Solutions (2024 Pattern)">
 
-  <!-- Structured Data (JSON-LD) -->
+  <!-- Structured Data (JSON-LD Unified Graph) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "SYNAPSE — SPPU PYQ Portal",
-    "url": "https://sppupyq.vercel.app/",
-    "description": "Download SPPU previous year question paper 2024 pattern PDFs for free. Insem and endsem papers for Computer, IT, Mechanical, Civil, and E&TC engineering.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://sppupyq.vercel.app/?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "Where can I find SPPU Engineering Previous Year Question Papers (PYQs)?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can find them on SYNAPSE. We offer a comprehensive database of question papers for Savitribai Phule Pune University (SPPU) Engineering courses, organized by branch and academic year."
+        "@type": "EducationalOrganization",
+        "@id": "https://sppupyq.vercel.app/#organization",
+        "name": "SYNAPSE",
+        "alternateName": "SYNAPSE SPPU PYQ Portal",
+        "url": "https://sppupyq.vercel.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://sppupyq.vercel.app/img/icon-192.png",
+          "width": 192,
+          "height": 192
+        },
+        "description": "Comprehensive SPPU Engineering study portal providing 2024 Pattern and 2019 Pattern Previous Year Question (PYQ) papers, solved papers, and study resources.",
+        "founder": {
+          "@type": "Person",
+          "name": "Shivam Shelke"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Support",
+          "url": "https://sppupyq.vercel.app/contact.html"
         }
       },
       {
-        "@type": "Question",
-        "name": "Which engineering branches are supported?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We host PYQs for all major SPPU branches including Computer Engineering, Information Technology (IT), Mechanical Engineering, Civil Engineering, Electronics & Telecommunication (E&TC), and Artificial Intelligence & Data Science (AI-DS)."
+        "@type": "WebSite",
+        "@id": "https://sppupyq.vercel.app/#website",
+        "name": "SYNAPSE — SPPU PYQ Portal",
+        "url": "https://sppupyq.vercel.app/",
+        "description": "Download SPPU previous year question paper 2024 pattern PDFs for free. Insem and endsem papers for Computer, IT, Mechanical, Civil, and E&TC engineering.",
+        "publisher": {
+          "@id": "https://sppupyq.vercel.app/#organization"
+        },
+        "about": {
+          "@type": "CollegeOrUniversity",
+          "name": "Savitribai Phule Pune University",
+          "alternateName": ["SPPU", "Pune University", "University of Pune"],
+          "url": "http://www.unipune.ac.in/",
+          "sameAs": [
+            "https://en.wikipedia.org/wiki/Savitribai_Phule_Pune_University",
+            "https://www.wikidata.org/wiki/Q1144078"
+          ]
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://sppupyq.vercel.app/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
       },
       {
-        "@type": "Question",
-        "name": "Are these question papers updated for the 2024 Pattern?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, all First Year (FE) papers are for the latest SPPU 2024 Pattern, and higher years cover both 2024 Pattern and 2019 Pattern (legacy) question papers."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does SYNAPSE provide In-Sem and End-Sem question papers?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Absolutely. We organize both In-Semester (In-Sem) and End-Semester (End-Sem) exam papers for Pune University classes, making it simple to study for whichever exam session is coming up next."
-        }
+        "@type": "FAQPage",
+        "@id": "https://sppupyq.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Where can I find SPPU Engineering Previous Year Question Papers (PYQs)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can find them on SYNAPSE. We offer a comprehensive database of question papers for Savitribai Phule Pune University (SPPU) Engineering courses, organized by branch and academic year."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which engineering branches are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We host PYQs for all major SPPU branches including Computer Engineering, Information Technology (IT), Mechanical Engineering, Civil Engineering, Electronics & Telecommunication (E&TC), and Artificial Intelligence & Data Science (AI-DS)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are these question papers updated for the 2024 Pattern?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, all First Year (FE) papers are for the latest SPPU 2024 Pattern, and higher years cover both 2024 Pattern and 2019 Pattern (legacy) question papers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does SYNAPSE provide In-Sem and End-Sem question papers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Absolutely. We organize both In-Semester (In-Sem) and End-Semester (End-Sem) exam papers for Pune University classes, making it simple to study for whichever exam session is coming up next."
+            }
+          }
+        ]
       }
     ]
   }
@@ -577,6 +621,7 @@
 
       <div class="search-wrap" style="position:relative;">
         <input id="globalSearch" type="text" placeholder="Search papers, subjects, branches…" autocomplete="off"
+          aria-label="Search SPPU engineering papers, subjects, or branches"
           oninput="showSuggestions(this.value)" onfocus="showSuggestions(this.value)"
           onblur="setTimeout(()=>hideSuggestions(), 200)" />
         <button onclick="doGlobalSearch()">Search</button>
@@ -710,7 +755,7 @@
       <div id="fileStep" style="display:none">
         <div class="file-list-header">
           <p class="step-hint" id="fileStepLabel">Papers available</p>
-          <input type="text" id="localSearch" placeholder="Filter files…" oninput="filterLocal(this.value)" />
+          <input type="text" id="localSearch" placeholder="Filter files…" aria-label="Filter papers list" oninput="filterLocal(this.value)" />
         </div>
         <div id="dsaTableArea" style="margin-bottom: 1.5rem; overflow-x: auto;"></div>
         <div class="file-grid" id="fileGrid"></div>
@@ -779,12 +824,12 @@
       </div>
       <div class="feedback-form-card">
         <div class="feedback-form-group">
-          <label>Your Name (Optional)</label>
-          <input type="text" id="fbName" placeholder="e.g. Rahul" />
+          <label for="fbName">Your Name (Optional)</label>
+          <input type="text" id="fbName" placeholder="e.g. Rahul" aria-label="Your Name" />
         </div>
         <div class="feedback-form-group">
-          <label>Message <span class="req">*</span></label>
-          <textarea id="fbMessage" rows="5" placeholder="Type your message here…"></textarea>
+          <label for="fbMessage">Message <span class="req">*</span></label>
+          <textarea id="fbMessage" rows="5" placeholder="Type your message here…" aria-label="Feedback Message"></textarea>
         </div>
         <button class="btn-primary" id="fbBtn" onclick="submitFeedback()">Send Feedback</button>
 
@@ -1039,6 +1084,7 @@
       <div class="chat-input-area">
         <div class="chat-input-wrapper">
           <input type="text" id="chatInput" placeholder="Ask SYNAPSE Assistant..."
+            aria-label="Ask SYNAPSE AI Assistant"
             onkeypress="handleChatKeypress(event)" />
           <button class="chat-send-btn" onclick="sendChatMessage()" aria-label="Send message">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

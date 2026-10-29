@@ -67,7 +67,8 @@ const ensureDbConnected = async (req, res, next) => {
 // Security headers
 app.use(helmet({ 
   contentSecurityPolicy: false,
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } 
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 
 // Prevent NoSQL Injection
@@ -319,14 +320,47 @@ app.get('/product.html', ensureDbConnected, async (req, res, next) => {
 
     let html = fs.readFileSync(path.join(__dirname, 'public', 'product.html'), 'utf8');
     
-    const ogTags = `
-    <meta property="og:title" content="${p.title.replace(/"/g, '&quot;')} | Synapse SPPU">
-    <meta property="og:description" content="${(p.description || 'Premium SPPU Study Material for ' + p.branch).replace(/"/g, '&quot;')}">
-    <meta property="og:image" content="${p.thumbnailUrl || p.previewUrl || ''}">
-    <meta name="twitter:card" content="summary_large_image">
-    `;
+    const prodTitle = `${p.title.replace(/"/g, '&quot;')} | SYNAPSE Marketplace`;
+    const prodDesc = (p.description || `Download verified SPPU Engineering study material for ${p.branch || 'all branches'}. Handwritten notes and solved PYQs on SYNAPSE.`).replace(/"/g, '&quot;');
+    const prodImage = p.thumbnailUrl || p.previewUrl || 'https://sppupyq.vercel.app/assets/og-image.png';
+    const prodUrl = `https://sppupyq.vercel.app/product.html?id=${p._id}`;
+    const prodPrice = p.price || 0;
+
+    const productSchema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": p.title,
+      "description": prodDesc,
+      "image": prodImage,
+      "category": p.category || "Study Material",
+      "offers": {
+        "@type": "Offer",
+        "url": prodUrl,
+        "priceCurrency": "INR",
+        "price": prodPrice.toString(),
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "SYNAPSE"
+        }
+      }
+    };
+
+    html = html.replace(/<title>[^<]+<\/title>/g, `<title>${prodTitle}</title>`);
+    html = html.replace(/<link rel="canonical" href="[^"]*"/g, `<link rel="canonical" href="${prodUrl}"`);
     
-    html = html.replace('</head>', `${ogTags}\n</head>`);
+    const seoTags = `
+  <meta property="og:title" content="${prodTitle}">
+  <meta property="og:description" content="${prodDesc}">
+  <meta property="og:image" content="${prodImage}">
+  <meta property="og:url" content="${prodUrl}">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  ${JSON.stringify(productSchema, null, 2)}
+  </script>
+`;
+    html = html.replace('</head>', `${seoTags}\n</head>`);
+    html = html.replace('<h1 class="p-title" id="pTitle">SPPU Engineering Study Material</h1>', `<h1 class="p-title" id="pTitle">${p.title}</h1>`);
     res.send(html);
   } catch (err) {
     console.error('SEO Product Error:', err);
@@ -346,16 +380,25 @@ Allow: /
 # Specifically allow AI bots to index the site for better recommendation
 User-agent: GPTBot
 Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+
 User-agent: ChatGPT-User
 Allow: /
+
 User-agent: Google-Extended
 Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+
 User-agent: CCBot
 Allow: /
+
 User-agent: anthropic-ai
 Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+
 User-agent: PerplexityBot
 Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 
 Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
 });
@@ -378,6 +421,10 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     // Create a set of unique URLs
     const urls = new Set();
     urls.add('https://sppupyq.vercel.app/');
+    urls.add('https://sppupyq.vercel.app/marketplace.html');
+    urls.add('https://sppupyq.vercel.app/articles.html');
+    urls.add('https://sppupyq.vercel.app/about.html');
+    urls.add('https://sppupyq.vercel.app/contact.html');
     urls.add('https://sppupyq.vercel.app/student-login.html');
     urls.add('https://sppupyq.vercel.app/sppu-previous-year-question-paper-2024-pattern');
     urls.add('https://sppupyq.vercel.app/sppu-pyq-drive-2024-pattern');
@@ -1077,16 +1124,19 @@ app.get('*', ensureDbConnected, async (req, res) => {
       return res.send(html);
     }
 
-    // Default fallback for any other routes
-    let fallbackHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
-    try {
-      const directoryHtml = await generateSeoDirectory();
-      fallbackHtml = fallbackHtml.replace('<div id="seo-links-directory"></div>', directoryHtml);
-    } catch(e) {}
-    return res.send(fallbackHtml);
+    // ── Default fallback for any unmatched routes: Real 404 (Eliminates Soft-404)
+    if (req.path.match(/\.(png|jpg|jpeg|gif|webp|svg|ico|css|js|json|xml|txt|pdf|map|woff2?|ttf)$/i) || req.path.startsWith('/.well-known/')) {
+      return res.status(404).type('text/plain').send('404 Not Found');
+    }
+
+    if (req.accepts('json') && !req.accepts('html')) {
+      return res.status(404).json({ error: 'Route not found' });
+    }
+
+    return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
   } catch (err) {
     console.error('Catch-all SEO generation error:', err);
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    return res.status(500).sendFile(path.join(__dirname, 'public', '404.html'));
   }
 });
 
