@@ -155,7 +155,7 @@ router.get('/subject-papers', async (req, res) => {
     if (year) query.year = year;
     if (branch && branch !== 'any' && branch !== 'FE') query.branch = branch;
     if (subject && subject !== '__custom__') query.subject = subject;
-    const files = await File.find(query, '_id originalName subject pattern year branch semester solutionUrl solutionType solutionOriginalName').sort({ uploadDate: -1 }).lean();
+    const files = await File.find(query, '_id originalName subject pattern year branch semester isPinned solutionUrl solutionType solutionOriginalName').sort({ isPinned: -1, uploadDate: -1 }).lean();
     res.json(files);
   } catch (e) {
     console.error('Error fetching subject papers:', e);
@@ -307,13 +307,33 @@ router.put('/files/:id/gate', async (req, res) => {
   }
 });
 
+// PUT /admin/files/:id/pin
+router.put('/files/:id/pin', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: 'File not found.' });
+
+    file.isPinned = !file.isPinned;
+    await file.save();
+    res.json({ success: true, isPinned: file.isPinned });
+  } catch (e) {
+    console.error('Error toggling pin:', e);
+    res.status(500).json({ error: 'Failed to toggle pin status.' });
+  }
+});
+
 // GET /admin/files
 router.get('/files', async (req, res) => {
-  const { contentType } = req.query;
+  const { contentType, year, search } = req.query;
   const query = contentType
     ? { contentType }
     : { contentType: 'regular' };
-  const files = await File.find(query).sort({ uploadDate: -1 });
+  if (year) query.year = year;
+  if (search) {
+    const r = new RegExp(search, 'i');
+    query.$or = [{ originalName: r }, { subject: r }, { branch: r }];
+  }
+  const files = await File.find(query).sort({ isPinned: -1, uploadDate: -1 });
   res.json(files);
 });
 
@@ -332,10 +352,25 @@ router.delete('/feedback/:id', async (req, res) => {
 // GET /admin/premium-files
 router.get('/premium-files', async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find({}).sort({ isPinned: -1, createdAt: -1 });
     res.json(products);
   } catch (e) {
     res.status(500).json({ error: 'Failed to load products' });
+  }
+});
+
+// PUT /admin/product/:id/pin
+router.put('/product/:id/pin', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    product.isPinned = !product.isPinned;
+    await product.save();
+    res.json({ success: true, isPinned: product.isPinned });
+  } catch (e) {
+    console.error('Failed to toggle pin for product:', e);
+    res.status(500).json({ error: 'Failed to toggle pin: ' + e.message });
   }
 });
 

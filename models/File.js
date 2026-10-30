@@ -19,6 +19,7 @@ const schema = new mongoose.Schema({
     whatsappUrl: { type: String, default: '' },
     telegramUrl: { type: String, default: '' }
   },
+  isPinned: { type: Boolean, default: false },
   solutionUrl: { type: String, default: '' },
   solutionType: { type: String, enum: ['file', 'link', 'none'], default: 'none' },
   solutionOriginalName: { type: String, default: '' },

@@ -762,14 +762,19 @@ window.loadPremiumAdminFilesForTab = async function () {
       else if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
       else badge = `<span class="badge" style="background:#ec4899;color:#fff">${f.contentType || 'Other'}</span>`;
 
+      const isPinned = Boolean(f.isPinned);
       return `
-            <tr>
+            <tr ${isPinned ? 'style="background:rgba(245,158,11,0.05);"' : ''}>
               <td>${badge}</td>
-              <td><a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a></td>
+              <td>
+                ${isPinned ? '<span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-size:0.68rem; margin-right:5px; font-weight:600;">📌 PINNED</span>' : ''}
+                <a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a>
+              </td>
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
               <td>
                 <div style="display:flex; gap:6px; align-items:center;">
+                  <button class="btn-ghost small" style="font-size:0.75rem; padding:0.25rem 0.5rem; ${isPinned ? 'background:rgba(245,158,11,0.15); color:#f59e0b; border-color:#f59e0b;' : ''}" onclick="togglePinProduct('${escHtml(f._id)}')">${isPinned ? '📍 Unpin' : '📌 Pin'}</button>
                   <button class="btn-edit small" onclick="openEditPremiumModal('${escHtml(f._id)}')">Edit</button>
                   <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
                 </div>
@@ -828,8 +833,11 @@ async function loadAdminFiles() {
               : `<span style="color:var(--muted); font-size:0.75rem;">None</span>`;
             
             return `
-            <tr>
-              <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
+            <tr ${f.isPinned ? 'style="background:rgba(245,158,11,0.05);"' : ''}>
+              <td>
+                ${f.isPinned ? '<span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-size:0.68rem; margin-right:5px; font-weight:600;">📌 PINNED</span>' : ''}
+                <a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a>
+              </td>
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td><span class="badge" style="background:var(--card-bg); color:var(--text); border:1px solid var(--border); font-size:0.7rem">${escHtml(f.semester || '—')}</span></td>
               <td>${escHtml(f.subject)}</td>
@@ -837,6 +845,7 @@ async function loadAdminFiles() {
               <td>${formatSize(f.size)}</td>
               <td>${formatDate(f.uploadDate)}</td>
               <td>
+                <button class="btn-ghost" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem; ${f.isPinned ? 'background:rgba(245,158,11,0.15); color:#f59e0b; border-color:#f59e0b;' : ''}" onclick="togglePinFile('${escHtml(f._id)}')">${f.isPinned ? '📍 Unpin' : '📌 Pin'}</button>
                 <button class="btn-ghost" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem; ${hasSol ? '' : 'color:var(--accent); border-color:var(--accent);'}" onclick="openSolutionModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${escHtml(f.solutionUrl || '')}', '${escHtml(f.solutionType || 'none')}', '${escHtml(f.solutionOriginalName || '')}')">${hasSol ? 'Edit Sol' : '+ Solution'}</button>
                 <button class="btn-primary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin-right: 0.3rem;" onclick="openGateModal('${escHtml(f._id)}', '${escHtml(f.originalName)}', '${f.downloadGate ? escHtml(f.downloadGate.type) : 'none'}', '${f.downloadGate ? escHtml(f.downloadGate.whatsappUrl || '') : ''}', '${f.downloadGate ? escHtml(f.downloadGate.telegramUrl || '') : ''}')">Gate</button>
                 <button class="btn-del" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
@@ -886,6 +895,22 @@ async function doDelete() {
     btn.disabled = false; btn.textContent = 'Delete';
   }
 }
+
+async function togglePinFile(id) {
+  try {
+    const res = await fetch(`/admin/files/${id}/pin`, { method: 'PUT' });
+    const data = await res.json();
+    if (data.success) {
+      if (typeof loadAdminFiles === 'function') await loadAdminFiles();
+      if (typeof loadRecentFiles === 'function') await loadRecentFiles();
+    } else {
+      alert(data.error || 'Failed to toggle pin.');
+    }
+  } catch (e) {
+    alert('Network error while toggling pin.');
+  }
+}
+window.togglePinFile = togglePinFile;
 
 async function doPremiumDelete() {
   if (!deleteTargetId) return;
@@ -1469,14 +1494,19 @@ window.loadPremiumAdminFiles = async function () {
       else if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
       else badge = `<span class="badge" style="background:#ec4899;color:#fff">${f.contentType || 'Other'}</span>`;
 
+      const isPinned = Boolean(f.isPinned);
       return `
-            <tr>
+            <tr ${isPinned ? 'style="background:rgba(245,158,11,0.05);"' : ''}>
               <td>${badge}</td>
-              <td><a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a></td>
+              <td>
+                ${isPinned ? '<span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-size:0.68rem; margin-right:5px; font-weight:600;">📌 PINNED</span>' : ''}
+                <a href="${escHtml(f.pdfUrl)}" target="_blank" style="color:var(--accent); font-weight: 500;">${escHtml(f.title)}</a>
+              </td>
               <td><span class="badge badge-year" style="font-size:0.7rem">${escHtml(f.year)}</span> <span class="badge badge-branch" style="font-size:0.7rem">${escHtml(f.branch)}</span></td>
               <td style="color:#10b981; font-weight:600;">₹${f.price}</td>
               <td>
                 <div style="display:flex; gap:6px; align-items:center;">
+                  <button class="btn-ghost small" style="font-size:0.75rem; padding:0.25rem 0.5rem; ${isPinned ? 'background:rgba(245,158,11,0.15); color:#f59e0b; border-color:#f59e0b;' : ''}" onclick="togglePinProduct('${escHtml(f._id)}')">${isPinned ? '📍 Unpin' : '📌 Pin'}</button>
                   <button class="btn-edit small" onclick="openEditPremiumModal('${escHtml(f._id)}')">Edit</button>
                   <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.title).replace(/'/g, "\\'")}', 'premium')">Delete</button>
                 </div>
@@ -1661,6 +1691,21 @@ window.deleteProduct = async function (id) {
     }
   } catch (e) {
     alert('Network error during deletion');
+  }
+};
+
+window.togglePinProduct = async function (id) {
+  try {
+    const res = await fetch('/admin/product/' + id + '/pin', { method: 'PUT' });
+    const data = await res.json();
+    if (data.success) {
+      if (typeof window.loadPremiumAdminFiles === 'function') await window.loadPremiumAdminFiles();
+      if (typeof window.loadPremiumAdminFilesForTab === 'function') await window.loadPremiumAdminFilesForTab();
+    } else {
+      alert(data.error || 'Failed to toggle pin for product');
+    }
+  } catch (e) {
+    alert('Network error while toggling pin for product');
   }
 };
 

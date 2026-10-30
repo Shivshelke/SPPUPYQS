@@ -800,10 +800,16 @@ function renderFileGrid(files, gridId) {
       ? `<button type="button" class="btn-solution has-solution" onclick="handleViewSolutionClick('${escHtml(f.solutionUrl)}', '${escHtml(f.originalName)}')" title="View Solution for ${escHtml(f.originalName)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:3px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>View Solution</button>`
       : '';
 
+    const isPinned = Boolean(f.isPinned);
+    const pinBadge = isPinned
+      ? `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-bottom: 4px; display: inline-flex; align-items: center; gap: 3px; width: fit-content;">📌 Pinned</span>`
+      : '';
+
     return `
-      <div class="file-card fade-in-card" style="animation-delay: ${i * 0.05}s">
-        <div class="file-icon">📄</div>
+      <div class="file-card fade-in-card ${isPinned ? 'pinned-file-card' : ''}" style="animation-delay: ${i * 0.05}s; ${isPinned ? 'border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.07);' : ''}">
+        <div class="file-icon" ${isPinned ? 'style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);"' : ''}>📄</div>
         <div class="file-info">
+          ${pinBadge}
           <div class="file-name" title="${escHtml(f.originalName)}">${escHtml(f.originalName)}</div>
           <div class="file-meta">${escHtml(f.subject)} · ${formatSize(f.size)}</div>
           <div class="file-meta">${formatDate(f.uploadDate)}</div>
@@ -1233,13 +1239,15 @@ async function openPremiumModal(type) {
           ? downloadAction
           : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
 
+        const isPinned = Boolean(f.isPinned);
         return `
-          <li>
+          <li ${isPinned ? 'style="background:rgba(245,158,11,0.06); border-radius:8px; padding:6px 10px;"' : ''}>
             <div>
+              ${isPinned ? '<span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:999px; margin-bottom:3px; display:inline-block;">📌 PINNED</span>' : ''}
               <span style="display:block">${escHtml(f.subject)}</span>
               <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
               ${actionBtn}
             </div>
           </li>

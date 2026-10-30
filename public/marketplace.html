@@ -812,10 +812,15 @@
         return;
       }
 
+      // Ensure pinned products always appear on top
+      filtered.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+
       grid.innerHTML = filtered.map(p => {
         // Format specific elements
         let badgeHTML = '';
-        if (p.isBestSeller) {
+        if (p.isPinned) {
+          badgeHTML = '<div class="card-badge" style="background: linear-gradient(90deg, #f59e0b, #d97706); box-shadow: 0 2px 10px rgba(245,158,11,0.3);">📌 PINNED</div>';
+        } else if (p.isBestSeller) {
           badgeHTML = '<div class="card-badge">BEST SELLER</div>';
         } else if (p.isFeatured) {
           badgeHTML = '<div class="card-badge" style="background: linear-gradient(90deg, #8b5cf6, #a855f7);">FEATURED</div>';
@@ -847,7 +852,7 @@
         }
 
         return `
-          <article class="product-card" style="position: relative;">
+          <article class="product-card" style="position: relative; ${p.isPinned ? 'border: 1px solid rgba(245, 158, 11, 0.4); box-shadow: 0 8px 30px rgba(245, 158, 11, 0.08);' : ''}">
             <button class="btn-share" title="Copy Link" onclick="shareProduct('${p.slug || p._id}', '${p.title.replace(/'/g, "\\'")}')" style="position:absolute; top: 12px; right: 12px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
             </button>

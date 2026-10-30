@@ -775,7 +775,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
     if (branchSlug && branchSlug !== 'FE') query.branch = formattedBranch;
     if (subjectSlug) query.subject = formattedSubject;
 
-    files = await File.find(query).sort({ uploadDate: -1 }).lean();
+    files = await File.find(query).sort({ isPinned: -1, uploadDate: -1 }).lean();
   } catch (dbErr) {
     console.error('Failed to fetch files for SEO container:', dbErr);
   }

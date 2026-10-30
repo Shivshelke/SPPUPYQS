@@ -16,6 +16,7 @@ const productSchema = new mongoose.Schema({
   previewUrl: { type: String },
   thumbnailUrl: { type: String },
   isPublished: { type: Boolean, default: false },
+  isPinned: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
   isBestSeller: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }

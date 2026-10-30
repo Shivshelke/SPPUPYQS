@@ -29,7 +29,7 @@ router.get('/products', async (req, res) => {
       query.$or = [{ title: regex }, { subject: regex }, { branch: regex }];
     }
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    const products = await Product.find(query).sort({ isPinned: -1, createdAt: -1 });
     res.json(products);
   } catch (err) {
     console.error('Marketplace Products API Error:', err);

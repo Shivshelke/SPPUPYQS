@@ -221,7 +221,7 @@ router.get('/files', async (req, res) => {
       }
     }
 
-    const files = await File.find(query).sort({ uploadDate: -1 });
+    const files = await File.find(query).sort({ isPinned: -1, uploadDate: -1 });
     res.json(files);
   } catch (error) {
     console.error("[Files API Error]:", error);
@@ -272,7 +272,7 @@ router.get('/premium-files', async (req, res) => {
     if (branch) query.branch = branch;
     if (semester) query.semester = semester;
 
-    const files = await File.find(query).sort({ uploadDate: -1 });
+    const files = await File.find(query).sort({ isPinned: -1, uploadDate: -1 });
 
     // If user is premium or admin, return everything.
     // Otherwise, remove the 'url' field to prevent direct downloads.
