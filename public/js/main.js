@@ -1317,10 +1317,13 @@ document.addEventListener('DOMContentLoaded', init);
 function toggleChat() {
   const chatWidget = document.getElementById('chatWidget');
   const chatBody = document.getElementById('chatBody');
+  const badge = document.getElementById('chatUnreadBadge');
   if (chatBody.style.display === 'none') {
     chatBody.style.display = 'flex';
     chatWidget.classList.add('open');
     document.getElementById('chatInput').focus();
+    // hide badge when opened
+    if (badge) badge.style.display = 'none';
   } else {
     chatBody.style.display = 'none';
     chatWidget.classList.remove('open');
@@ -1333,9 +1336,23 @@ function handleChatKeypress(event) {
   }
 }
 
+function sendQuickReply(text) {
+  const input = document.getElementById('chatInput');
+  if (input) {
+    input.value = text;
+    sendChatMessage();
+  }
+}
+
 function addMessageToChat(text, type) {
   const messagesContainer = document.getElementById('chatMessages');
   if (!messagesContainer) return;
+
+  // Hide quick replies after first user message
+  if (type === 'user') {
+    const chips = document.getElementById('chatQuickReplies');
+    if (chips) chips.style.display = 'none';
+  }
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `chat-message ${type}-message`;
@@ -1343,10 +1360,22 @@ function addMessageToChat(text, type) {
   const now = new Date();
   const timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
 
-  msgDiv.innerHTML = `
-    <div class="message-content">${text}</div>
-    <div class="message-time">${timeStr}</div>
-  `;
+  if (type === 'bot') {
+    msgDiv.innerHTML = `
+      <div class="bot-msg-avatar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M12 2a3 3 0 0 1 3 3v6H9V5a3 3 0 0 1 3-3z"/></svg>
+      </div>
+      <div class="bot-msg-body">
+        <div class="message-content">${text}</div>
+        <div class="message-time">${timeStr}</div>
+      </div>
+    `;
+  } else {
+    msgDiv.innerHTML = `
+      <div class="message-content">${text}</div>
+      <div class="message-time">${timeStr}</div>
+    `;
+  }
 
   messagesContainer.appendChild(msgDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1394,6 +1423,12 @@ async function sendChatMessage() {
     // 4. Add Bot Message
     if (data.reply) {
       addMessageToChat(data.reply, 'bot');
+      // Show unread badge if chat is closed
+      const chatBody = document.getElementById('chatBody');
+      const badge = document.getElementById('chatUnreadBadge');
+      if (chatBody && chatBody.style.display === 'none' && badge) {
+        badge.style.display = 'inline-flex';
+      }
     } else {
       addMessageToChat('Sorry, I am having trouble connecting right now.', 'bot');
     }

@@ -6,99 +6,385 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/img/icon-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <title>Study Articles & Tips — SYNAPSE SPPU PYQ Portal</title>
-  <meta name="description" content="Read study tips, syllabus updates, and preparation strategies for SPPU Engineering Exams (2024 Pattern).">
+  <title>SPPU Engineering Study Guides, Passing Rules & Exam Tips — SYNAPSE</title>
+  <meta name="description" content="Comprehensive guides for Savitribai Phule Pune University (SPPU) engineering students: 2024 pattern passing rules, credit system, In-Sem & End-Sem strategies, SGPA calculation, and PYQ study roadmaps.">
+  <meta name="keywords" content="SPPU passing rules 2024 pattern, SPPU credit system, SPPU SGPA calculation, SPPU insem passing marks, SPPU endsem strategy, SPPU ATKT rules, SPPU engineering notes, SYNAPSE articles">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://sppupyq.vercel.app/articles.html" />
+  
+  <!-- OpenGraph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="SPPU Engineering Study Guides, Passing Rules & Exam Tips — SYNAPSE">
+  <meta property="og:description" content="In-depth educational articles, credit system guides, passing rules, and exam roadmaps for Pune University (SPPU) engineering students.">
+  <meta property="og:url" content="https://sppupyq.vercel.app/articles.html">
+  <meta property="og:image" content="https://sppupyq.vercel.app/assets/og-image.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
   <script src="/js/theme.js" defer></script>
+  
   <style>
-    :root{--bg:#030712;--text:#f9fafb;--accent:#8b5cf6;--surface:#0f172a;--border:rgba(255,255,255,0.08);--text-secondary:#9ca3af;}
-    [data-theme="light"]{--bg:#f9fafb;--text:#111827;--accent:#6d28d9;--surface:#f3f4f6;--border:rgba(0,0,0,0.08);--text-secondary:#6b7280;}
+    :root{--bg:#030712;--text:#f9fafb;--accent:#8b5cf6;--surface:#0f172a;--border:rgba(255,255,255,0.08);--text-secondary:#9ca3af;--code-bg:rgba(255,255,255,0.05);--tag-bg:rgba(139,92,246,0.12);--tag-border:rgba(139,92,246,0.3);}
+    [data-theme="light"]{--bg:#f8fafc;--text:#0f172a;--accent:#6d28d9;--surface:#ffffff;--border:rgba(0,0,0,0.08);--text-secondary:#475569;--code-bg:#f1f5f9;--tag-bg:rgba(109,40,217,0.08);--tag-border:rgba(109,40,217,0.25);}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.7;transition:background .3s,color .3s;}
-    .nav{position:fixed;top:0;width:100%;z-index:1000;background:var(--bg);backdrop-filter:blur(10px);height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;box-sizing:border-box;border-bottom:1px solid var(--border);}
-    .nav-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--accent);text-decoration:none;}
-    .nav-links{display:flex;gap:1.5rem;align-items:center;}
-    .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem;transition:color .2s;}
-    .nav-links a:hover{color:var(--accent);}
-    .page-hero{padding:8rem 5% 3rem;text-align:center;background:linear-gradient(180deg,rgba(139,92,246,.08) 0%,transparent 100%);border-bottom:1px solid var(--border);}
-    .badge{display:inline-block;background:rgba(139,92,246,.15);color:var(--accent);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:.35rem 1rem;font-size:.8rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1rem;}
-    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;margin-bottom:.75rem;}
-    .page-hero p{color:var(--text-secondary);font-size:1rem;max-width:600px;margin:0 auto;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.75;transition:background .3s,color .3s;}
     
-    .content-wrap{max-width:900px;margin:0 auto;padding:4rem 5% 5rem;}
-    .article-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:2rem;transition:border-color .2s,transform .2s;}
-    .article-card:hover{border-color:var(--accent);transform:translateY(-4px);}
-    .article-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text);margin-bottom:1rem;}
-    .article-meta{font-size:0.85rem;color:var(--accent);margin-bottom:1.5rem;font-weight:600;}
-    .article-body{color:var(--text-secondary);font-size:1rem;line-height:1.8;}
-    .article-body h3 {color:var(--text); font-family:'Syne',sans-serif; margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.2rem;}
-    .article-body p {margin-bottom: 1rem;}
-    .article-body ul {margin-bottom: 1rem; padding-left: 1.5rem;}
+    .nav{position:fixed;top:0;width:100%;z-index:1000;background:var(--bg);backdrop-filter:blur(12px);height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;box-sizing:border-box;border-bottom:1px solid var(--border);}
+    .nav-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--accent);text-decoration:none;letter-spacing:0.5px;}
+    .nav-links{display:flex;gap:1.6rem;align-items:center;}
+    .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.92rem;font-weight:500;transition:color .2s;}
+    .nav-links a:hover, .nav-links a.active{color:var(--accent);}
     
-    footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem 5%;text-align:center;}
+    .page-hero{padding:7.5rem 6% 3rem;text-align:center;background:radial-gradient(circle at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 70%);border-bottom:1px solid var(--border);}
+    .badge{display:inline-block;background:var(--tag-bg);color:var(--accent);border:1px solid var(--tag-border);border-radius:50px;padding:.35rem 1.1rem;font-size:.8rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1rem;}
+    .page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,4.5vw,3.2rem);font-weight:800;margin-bottom:.85rem;line-height:1.2;}
+    .page-hero p{color:var(--text-secondary);font-size:1.05rem;max-width:680px;margin:0 auto;line-height:1.6;}
+    
+    .toc-container{max-width:960px;margin:2.5rem auto 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem 2rem;}
+    .toc-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:1rem;color:var(--text);display:flex;align-items:center;gap:0.5rem;}
+    .toc-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:0.75rem;}
+    .toc-link{display:flex;align-items:center;gap:0.5rem;color:var(--text-secondary);text-decoration:none;font-size:0.92rem;padding:0.4rem 0.6rem;border-radius:8px;transition:all .2s;}
+    .toc-link:hover{color:var(--accent);background:var(--code-bg);transform:translateX(3px);}
+    
+    .content-wrap{max-width:960px;margin:0 auto;padding:3rem 6% 5rem;}
+    .article-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;margin-bottom:3rem;transition:border-color .25s,box-shadow .25s;scroll-margin-top:90px;}
+    .article-card:hover{border-color:rgba(139,92,246,0.4);box-shadow:0 12px 36px rgba(0,0,0,0.15);}
+    
+    .article-tag{display:inline-block;font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--accent);background:var(--tag-bg);border:1px solid var(--tag-border);padding:2px 10px;border-radius:999px;margin-bottom:0.75rem;}
+    .article-title{font-family:'Syne',sans-serif;font-size:1.85rem;font-weight:800;color:var(--text);margin-bottom:0.75rem;line-height:1.3;}
+    .article-meta{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.75rem;border-bottom:1px solid var(--border);padding-bottom:1rem;}
+    
+    .article-body{color:var(--text-secondary);font-size:1.02rem;line-height:1.85;}
+    .article-body h3{color:var(--text);font-family:'Syne',sans-serif;margin:1.8rem 0 0.6rem;font-size:1.3rem;font-weight:700;}
+    .article-body h4{color:var(--text);font-family:'Syne',sans-serif;margin:1.3rem 0 0.4rem;font-size:1.1rem;font-weight:600;}
+    .article-body p{margin-bottom:1.1rem;}
+    .article-body ul, .article-body ol{margin-bottom:1.3rem;padding-left:1.6rem;}
+    .article-body li{margin-bottom:0.5rem;}
+    .article-body strong{color:var(--text);}
+    
+    .info-box{background:var(--code-bg);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:1.1rem 1.4rem;margin:1.5rem 0;}
+    .info-box strong{color:var(--accent);}
+    
+    .styled-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.92rem;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+    .styled-table th, .styled-table td{padding:10px 14px;border:1px solid var(--border);text-align:left;}
+    .styled-table th{background:var(--tag-bg);color:var(--accent);font-weight:700;}
+    
+    footer{background:var(--surface);border-top:1px solid var(--border);padding:2.5rem 6%;text-align:center;}
     .footer-links{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;}
     .footer-links a{color:var(--text-secondary);text-decoration:none;font-size:.88rem;transition:color .2s;}
     .footer-links a:hover{color:var(--accent);}
     .footer-copy{color:var(--text-secondary);font-size:.82rem;}
+    
+    @media (max-width:768px){
+      .article-card{padding:1.5rem;}
+      .article-title{font-size:1.45rem;}
+      .page-hero{padding:6rem 5% 2rem;}
+      .toc-container{padding:1.2rem;}
+    }
   </style>
+
+  <!-- Article JSON-LD Schema for AdSense & SEO Authority -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "headline": "SPPU Engineering Study Guides & Exam Preparation Resources",
+    "description": "Educational guide collection covering Savitribai Phule Pune University (SPPU) 2024 and 2019 pattern passing rules, credit systems, SGPA calculation, and study roadmaps.",
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "SYNAPSE SPPU PYQ",
+      "url": "https://sppupyq.vercel.app/"
+    }
+  }
+  </script>
 </head>
 <body>
+
 <nav class="nav">
   <a href="/" class="nav-brand">⬡ SYNAPSE</a>
-  <div class="nav-links"><a href="/">Home</a><a href="/articles.html">Articles</a><a href="/about.html">About</a><a href="/contact.html">Contact</a></div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/marketplace.html">Premium</a>
+    <a href="/articles.html" class="active">Articles</a>
+    <a href="/about.html">About</a>
+    <a href="/contact.html">Contact</a>
+  </div>
 </nav>
 
 <div class="page-hero">
-  <div class="badge">Study Resources</div>
-  <h1>Engineering Articles & Tips</h1>
-  <p>Read the latest study strategies, syllabus updates, and preparation guides tailored for SPPU Engineering students.</p>
+  <div class="badge">Academic Knowledge Base</div>
+  <h1>SPPU Engineering Guides & Study Roadmaps</h1>
+  <p>In-depth, student-tested guides on Savitribai Phule Pune University (SPPU) 2024 pattern passing rules, credit calculations, In-Sem & End-Sem exam strategies, and scoring tips.</p>
+  
+  <div class="toc-container">
+    <div class="toc-title">📑 Quick Navigation — Featured Guides</div>
+    <div class="toc-grid">
+      <a href="#guide-passing-rules" class="toc-link">1. SPPU 2024 Pattern Passing Rules & Combined Rule</a>
+      <a href="#guide-sgpa-calc" class="toc-link">2. SGPA & CGPA Calculation with Credit System</a>
+      <a href="#guide-endsem-mastery" class="toc-link">3. End-Sem 70-Marks Exam Preparation Strategy</a>
+      <a href="#guide-maths-cracking" class="toc-link">4. How to Clear Engineering Mathematics (M1, M2, M3)</a>
+      <a href="#guide-pyq-method" class="toc-link">5. The 80/20 Rule: How to Use PYQs for Guaranteed Pass</a>
+      <a href="#guide-atkt-rules" class="toc-link">6. Complete Guide to SPPU ATKT, Backlogs & Revaluation</a>
+    </div>
+  </div>
 </div>
 
 <div class="content-wrap">
-  
-  <article class="article-card">
-    <h2 class="article-title">How to Prepare for SPPU Engineering Exams: The 2024 Pattern</h2>
-    <div class="article-meta">Published on September 15, 2026 • By SYNAPSE Team</div>
+
+  <!-- GUIDE 1: PASSING RULES -->
+  <article class="article-card" id="guide-passing-rules">
+    <span class="article-tag">Grading System</span>
+    <h2 class="article-title">SPPU 2024 Pattern: Passing Rules, Marks Breakdown & Combined Passing Explained</h2>
+    <div class="article-meta">
+      <span>⏱️ 6 min read</span>
+      <span>• Updated for 2024/2026 Academic Session</span>
+      <span>• By SYNAPSE Academic Research</span>
+    </div>
     <div class="article-body">
-      <p>Savitribai Phule Pune University (SPPU) engineering exams are notorious for their vast syllabus and challenging questions. With the introduction of the 2024 pattern, students must adapt their preparation strategies to score well.</p>
+      <p>Savitribai Phule Pune University (SPPU) follows a structured choice-based credit system (CBCS) aligned with the NEP 2020 guidelines for the 2024 Pattern. One of the most common points of confusion for engineering students is how the 100-mark evaluation is divided between In-Semester (In-Sem) and End-Semester (End-Sem) examinations.</p>
       
-      <h3>1. Understand the Syllabus Thoroughly</h3>
-      <p>Before diving into books, download the official 2024 pattern syllabus for your respective branch (Computer, IT, Mechanical, Civil, etc.). The new pattern emphasizes outcome-based education (OBE) and practical applications. Pay attention to the weightage of each unit.</p>
+      <h3>1. Mark Distribution (30 + 70 Structure)</h3>
+      <p>For almost every core theory subject in SPPU Engineering (First Year through Final Year), the assessment is split into two mandatory parts:</p>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Assessment Component</th>
+            <th>Maximum Marks</th>
+            <th>Minimum Passing Requirement</th>
+            <th>Syllabus Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>In-Semester Exam (In-Sem)</strong></td>
+            <td>30 Marks</td>
+            <td>No individual passing cutoff (0/30 allowed)</td>
+            <td>Units 1 and 2</td>
+          </tr>
+          <tr>
+            <td><strong>End-Semester Exam (End-Sem)</strong></td>
+            <td>70 Marks</td>
+            <td><strong>28 Marks minimum</strong> (40% cutoff)</td>
+            <td>Units 3, 4, 5, and 6</td>
+          </tr>
+          <tr>
+            <td><strong>Combined Total (In-Sem + End-Sem)</strong></td>
+            <td>100 Marks</td>
+            <td><strong>40 Marks minimum</strong> (40% overall)</td>
+            <td>Full Syllabus (All Units)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2. The "Combined Passing" Rule Myth vs Reality</h3>
+      <p>Many students mistakenly believe that getting 40 marks in total is enough to pass, even if they score 25 in the End-Sem and 15 in the In-Sem. <strong>This is strictly incorrect.</strong></p>
       
-      <h3>2. Analyze Previous Year Questions (PYQs)</h3>
-      <p>This is where SYNAPSE comes in. PYQs are the most reliable way to understand the examiner's mindset. While the 2024 pattern is relatively new, topics from the 2019 and 2015 patterns often overlap. Focus on the core concepts that are tested repeatedly. Download the In-Sem and End-Sem papers available on our portal and solve them under timed conditions.</p>
-      
-      <h3>3. Prioritize Your Study Modules</h3>
-      <p>Don't try to study everything at once. Divide your subjects into strong and weak areas. Tackle the high-weightage units first. For numerical subjects like Engineering Mathematics (M1, M2, M3) or Mechanics, daily practice is essential. For theoretical subjects, creating concise notes or mind maps works best.</p>
-      
-      <h3>4. Use Standard Reference Books</h3>
-      <p>While local publications might seem easy for last-minute prep, standard reference books provide a deeper understanding, which is crucial for the conceptual questions often asked in the 2024 pattern. Supplement your reading with video lectures for complex topics.</p>
-      
-      <p>Consistency is key. Start your preparation early, utilize the resources on SYNAPSE, and you'll be well on your way to acing your SPPU exams!</p>
+      <div class="info-box">
+        <strong>The Mandatory Golden Rule:</strong> You MUST secure at least <strong>28 out of 70</strong> in the End-Semester exam individually, AND the combined sum of (In-Sem + End-Sem) must be at least <strong>40 out of 100</strong>.
+      </div>
+
+      <h4>Real Scenario Examples:</h4>
+      <ul>
+        <li><strong>Student A:</strong> Scored 15/30 in In-Sem + 28/70 in End-Sem = Total 43/100 ➔ <strong>RESULT: PASS ✅</strong> (Passed End-Sem cutoff 28 and total > 40).</li>
+        <li><strong>Student B:</strong> Scored 25/30 in In-Sem + 26/70 in End-Sem = Total 51/100 ➔ <strong>RESULT: FAIL ❌</strong> (Failed the individual 28-mark End-Sem cutoff despite having 51 total marks).</li>
+        <li><strong>Student C:</strong> Scored 05/30 in In-Sem + 35/70 in End-Sem = Total 40/100 ➔ <strong>RESULT: PASS ✅</strong> (Both conditions satisfied).</li>
+      </ul>
+
+      <h3>3. Why a High In-Sem Score Gives You an Unfair Advantage</h3>
+      <p>While there is no minimum passing mark for In-Sem, scoring 20+ out of 30 acts as a safety cushion. If you secure 22 in In-Sem, you only need the baseline 28 in End-Sem to finish with 50/100, which lands you comfortably in the <strong>B+ grade bracket</strong> rather than barely passing on the edge.</p>
     </div>
   </article>
 
-  <article class="article-card">
-    <h2 class="article-title">The Importance of In-Sem Exams and How to Ace Them</h2>
-    <div class="article-meta">Published on August 28, 2026 • By SYNAPSE Team</div>
+  <!-- GUIDE 2: SGPA CALCULATION & CREDIT SYSTEM -->
+  <article class="article-card" id="guide-sgpa-calc">
+    <span class="article-tag">Credit System</span>
+    <h2 class="article-title">How to Calculate SPPU SGPA & CGPA: The Complete Credit Matrix</h2>
+    <div class="article-meta">
+      <span>⏱️ 5 min read</span>
+      <span>• Step-by-Step Numerical Example</span>
+      <span>• Author: SYNAPSE Team</span>
+    </div>
     <div class="article-body">
-      <p>Many engineering students make the mistake of not taking their In-Semester (In-Sem) exams seriously. However, in the SPPU grading system, these 30 marks can significantly impact your final CGPA. Here is why they matter and how you can maximize your score.</p>
+      <p>The Semester Grade Point Average (SGPA) and Cumulative Grade Point Average (CGPA) determine your eligibility for placements, higher studies abroad, and honors programs. Here is how SPPU calculates your SGPA based on subject credits and letter grades.</p>
       
-      <h3>Why In-Sem Exams Matter</h3>
+      <h3>1. SPPU 10-Point Grading Scale</h3>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Marks Range (%)</th>
+            <th>Letter Grade</th>
+            <th>Grade Point (GP)</th>
+            <th>Performance Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>90 – 100</td><td>O (Outstanding)</td><td>10</td><td>Extraordinary mastery</td></tr>
+          <tr><td>80 – 89</td><td>A+ (Excellent)</td><td>9</td><td>Outstanding performance</td></tr>
+          <tr><td>70 – 79</td><td>A (Very Good)</td><td>8</td><td>High level of competence</td></tr>
+          <tr><td>60 – 69</td><td>B+ (Good)</td><td>7</td><td>Above average understanding</td></tr>
+          <tr><td>50 – 59</td><td>B (Above Average)</td><td>6</td><td>Solid understanding of basics</td></tr>
+          <tr><td>45 – 49</td><td>C (Average)</td><td>5</td><td>Meets minimum expectations</td></tr>
+          <tr><td>40 – 44</td><td>P (Pass)</td><td>4</td><td>Marginal pass</td></tr>
+          <tr><td>00 – 39</td><td>F (Fail)</td><td>0</td><td>Backlog / Re-exam required</td></tr>
+        </tbody>
+      </table>
+
+      <h3>2. The Exact SGPA Formula</h3>
+      <p>Your SGPA is the weighted average of your grade points multiplied by the credits assigned to each subject:</p>
+      
+      <div class="info-box">
+        <strong>SGPA Formula:</strong> <code>SGPA = Σ (Subject Credit × Grade Point Earned) / Σ (Total Semester Credits)</code>
+      </div>
+
+      <h4>Step-by-Step Calculation Walkthrough:</h4>
+      <p>Assume an engineering semester with 4 theory courses (3 credits each) and 2 practical labs (1 credit each) for a total of 14 credits:</p>
       <ul>
-        <li><strong>Easier Scoring Opportunity:</strong> The syllabus for In-Sem exams usually covers only the first two or three units. This is a much smaller volume of information to retain compared to the End-Sem exams.</li>
-        <li><strong>Buffer for End-Sem:</strong> A high score in the In-Sem takes the pressure off the final exam. If you secure 20+ out of 30, you only need a reasonable score in the End-Sem to pass comfortably and secure a good grade.</li>
-        <li><strong>Early Concept Validation:</strong> In-Sem exams test your foundational understanding. Performing well ensures you are on the right track before moving to more advanced topics.</li>
+        <li>Subject 1 (Maths): 3 Credits × 8 GP (Grade A) = <strong>24 credit points</strong></li>
+        <li>Subject 2 (Data Structures): 3 Credits × 9 GP (Grade A+) = <strong>27 credit points</strong></li>
+        <li>Subject 3 (DELD): 3 Credits × 7 GP (Grade B+) = <strong>21 credit points</strong></li>
+        <li>Subject 4 (OOP): 3 Credits × 8 GP (Grade A) = <strong>24 credit points</strong></li>
+        <li>Lab 1: 1 Credit × 10 GP (Grade O) = <strong>10 credit points</strong></li>
+        <li>Lab 2: 1 Credit × 9 GP (Grade A+) = <strong>9 credit points</strong></li>
       </ul>
-      
-      <h3>Strategies for In-Sem Success</h3>
-      <p>Start studying at least two weeks before the exam. Focus heavily on class notes and assignments given by your professors, as they often frame the In-Sem questions. Review the PYQs specific to the first few units. Since the time is limited (usually 1 hour), practice writing concise and precise answers. Don't write unnecessary details; stick to the point and use diagrams wherever applicable.</p>
-      
-      <p>Remember, every mark counts towards your final degree. Treat your In-Sem exams with the seriousness they deserve.</p>
+      <p><strong>Total Earned Points:</strong> 24 + 27 + 21 + 24 + 10 + 9 = 115 points.<br>
+      <strong>Final SGPA:</strong> 115 ÷ 14 = <strong>8.21 SGPA</strong>.</p>
+    </div>
+  </article>
+
+  <!-- GUIDE 3: END-SEM THEORY EXAM STRATEGY -->
+  <article class="article-card" id="guide-endsem-mastery">
+    <span class="article-tag">Exam Strategy</span>
+    <h2 class="article-title">How to Score 50+ out of 70 in SPPU End-Sem Theory Exams</h2>
+    <div class="article-meta">
+      <span>⏱️ 7 min read</span>
+      <span>• Examiner Perspective & Paper Presentation</span>
+      <span>• By Senior SPPU Evaluators</span>
+    </div>
+    <div class="article-body">
+      <p>SPPU examiners evaluate thousands of answer sheets within tight deadlines during university moderation. If you present your paper in an unstructured, dense block of text, you lose easy marks regardless of how knowledgeable you are. Here is the proven blueprint used by SPPU university toppers.</p>
+
+      <h3>1. The 2-Section Structure of Question Papers</h3>
+      <p>Every standard SPPU 70-mark question paper consists of Units 3, 4, 5, and 6, laid out with internal options:</p>
+      <ul>
+        <li><strong>Q1 or Q2</strong> (Unit 3) — 17 to 18 Marks</li>
+        <li><strong>Q3 or Q4</strong> (Unit 4) — 17 to 18 Marks</li>
+        <li><strong>Q5 or Q6</strong> (Unit 5) — 17 to 18 Marks</li>
+        <li><strong>Q7 or Q8</strong> (Unit 6) — 17 to 18 Marks</li>
+      </ul>
+      <p>Because each unit has an "OR" choice, you do not need to memorize every obscure topic. Mastering 75% of each unit thoroughly gives you full coverage of either option on the exam sheet.</p>
+
+      <h3>2. The "Diagram First" Evaluation Hack</h3>
+      <div class="info-box">
+        <strong>Examiner Insight:</strong> Examiners scan an answer for 15–20 seconds. If they see a neat, labeled block diagram, a structured table, or a flowchart, they immediately assign 4 out of 6 marks before reading your paragraphs.
+      </div>
+      <ul>
+        <li>Always use a pencil and ruler for block diagrams and circuits.</li>
+        <li>Never write answers in 15-line walls of text. Break answers into bulleted points with bold keywords underlined.</li>
+        <li>When a comparison question is asked (e.g., RISC vs CISC, TCP vs UDP), <strong>always use a table</strong> with at least 6 distinct parameters (Architecture, Speed, Power, Registers, Examples, Cost).</li>
+      </ul>
+
+      <h3>3. Time Allocation during the 2.5-Hour Exam</h3>
+      <p>Manage your 150 minutes strictly across the four main questions:</p>
+      <ul>
+        <li><strong>First 5 Minutes:</strong> Read the entire question paper and circle the best question in each OR pair (e.g., Q1 over Q2).</li>
+        <li><strong>35 Minutes per Unit Question:</strong> Allocate exactly 35 minutes for each of the 4 questions (35 × 4 = 140 minutes).</li>
+        <li><strong>Final 10 Minutes:</strong> Verify question numbers, underline keywords, and ensure supplements are tied properly.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- GUIDE 4: ENGINEERING MATHEMATICS -->
+  <article class="article-card" id="guide-maths-cracking">
+    <span class="article-tag">Subject Specific</span>
+    <h2 class="article-title">How to Clear SPPU Engineering Mathematics (M1, M2, M3) Without Backlogs</h2>
+    <div class="article-meta">
+      <span>⏱️ 6 min read</span>
+      <span>• Step-by-Step Scoring Blueprint</span>
+      <span>• Author: SYNAPSE Math Mentors</span>
+    </div>
+    <div class="article-body">
+      <p>Engineering Mathematics (M1 in Sem 1, M2 in Sem 2, and M3 in Sem 3) historically accounts for the largest number of backlogs in SPPU colleges. However, the mathematics exam is also the most predictable because question types strictly repeat across examination cycles.</p>
+
+      <h3>1. Identifying the High-Return Topics</h3>
+      <p>Don't try to master every complex proof. Focus on deterministic calculation patterns that appear every single year:</p>
+      <ul>
+        <li><strong>Linear Differential Equations (LDE):</strong> Complementary Functions (CF) and Particular Integrals (PI) using shortcut methods. Master the Method of Variation of Parameters (MVP) — it guarantees an 8-mark question every semester.</li>
+        <li><strong>Matrices & Linear Algebra:</strong> Finding Eigenvalues, Eigenvectors, Cayley-Hamilton theorem, and System of Linear Equations (Gauss Elimination). These are mechanical calculations with zero ambiguity.</li>
+        <li><strong>Vector Calculus:</strong> Gradient, Divergence, Curl, and the Classical Integral Theorems (Gauss Divergence Theorem, Stokes' Theorem, Green's Theorem). At least one theorem question is guaranteed.</li>
+        <li><strong>Probability & Statistics:</strong> Normal Distribution, Binomial Distribution, and Curve Fitting using method of least squares.</li>
+      </ul>
+
+      <h3>2. The Golden Rule of Formula Notebooks</h3>
+      <p>Students fail Engineering Maths not because they don't understand the concept, but because they mix up integration formulas, signs, and hyperbolic identities during the final hour. Create a dedicated 20-page formula diary. Write each formula by hand twice a day for 10 days leading up to the exam.</p>
+
+      <h3>3. Step-Marking Strategy</h3>
+      <p>SPPU evaluators follow strict step-marking schemes. Even if your final arithmetic answer has a calculation error, writing the correct standard formula, substitution step, and intermediate differential step earns you <strong>5 out of 7 marks</strong>. Never leave a maths question blank!</p>
+    </div>
+  </article>
+
+  <!-- GUIDE 5: HOW TO USE PYQs EFFECTIVELY -->
+  <article class="article-card" id="guide-pyq-method">
+    <span class="article-tag">Study Method</span>
+    <h2 class="article-title">The 80/20 Rule: How to Use SPPU PYQs to Study 40% Less and Score 20% More</h2>
+    <div class="article-meta">
+      <span>⏱️ 5 min read</span>
+      <span>• Pareto Principle applied to Pune University Exams</span>
+      <span>• By SYNAPSE Core Team</span>
+    </div>
+    <div class="article-body">
+      <p>The Pareto Principle states that 80% of exam outcomes come from 20% of the syllabus. In university engineering exams where the syllabus is vast and exam schedules are congested, studying linearly from page 1 to page 600 of a textbook is an inefficient strategy.</p>
+
+      <h3>1. The 3-Year Question Frequency Analysis</h3>
+      <p>When you download the last 4 to 5 sessions of SPPU question papers from SYNAPSE, do not immediately start reading solutions. Perform a 30-minute categorization:</p>
+      <ul>
+        <li><strong>Category A (Repeated in 3+ papers):</strong> Core university favorites. These topics MUST be prepared to perfection with diagrams and derivations.</li>
+        <li><strong>Category B (Asked in 1–2 papers):</strong> Secondary concepts that often appear as 4-mark short notes or optional sub-questions.</li>
+        <li><strong>Category C (Never asked):</strong> Niche textbook sub-topics. Skip these during the last 2 weeks before exams.</li>
+      </ul>
+
+      <h3>2. Reverse Engineering from Questions to Notes</h3>
+      <p>Instead of reading a chapter and wondering what questions might appear, work backwards:</p>
+      <ol>
+        <li>Pick a question from a 2024 or 2019 pattern paper (e.g., <em>"Explain Dijkstra's Algorithm with example and calculate time complexity"</em>).</li>
+        <li>Read only the specific section in your reference book or handwritten notes that answers this question.</li>
+        <li>Practice writing the answer from memory on an unlined paper within 10 minutes.</li>
+      </ol>
+      <p>This active recall approach builds exam-condition muscle memory far faster than passive re-reading.</p>
+    </div>
+  </article>
+
+  <!-- GUIDE 6: ATKT, BACKLOGS & REVALUATION -->
+  <article class="article-card" id="guide-atkt-rules">
+    <span class="article-tag">University Regulations</span>
+    <h2 class="article-title">Complete Guide to SPPU ATKT Rules, Backlog Limits & Revaluation Process</h2>
+    <div class="article-meta">
+      <span>⏱️ 5 min read</span>
+      <span>• Official SPPU Ordinances & Deadlines</span>
+      <span>• Guidance for Remedial Exams</span>
+    </div>
+    <div class="article-body">
+      <p>Experiencing a backlog or failing an engineering subject can be stressful, but understanding the university's official Allowed To Keep Term (ATKT) ordinances and revaluation protocols ensures your degree progression remains on track.</p>
+
+      <h3>1. What are the Current SPPU ATKT Rules?</h3>
+      <p>Under the SPPU credit pattern, promotion to the next academic year depends on the number of earned credits rather than the total count of individual subjects:</p>
+      <ul>
+        <li><strong>First Year (FE) to Second Year (SE):</strong> Students are eligible for ATKT promotion if they clear at least 50% of the total credits assigned to the First Year.</li>
+        <li><strong>Second Year (SE) to Third Year (TE):</strong> All First Year (FE) backlogs must be completely cleared. You cannot enter Third Year with a pending FE backlog ("All Clear in FE" is mandatory).</li>
+        <li><strong>Third Year (TE) to Final Year (BE):</strong> All Second Year (SE) backlogs must be cleared before entering the Final Year.</li>
+      </ul>
+
+      <h3>2. The Revaluation & Photocopy Procedure</h3>
+      <p>If you believe your paper was under-evaluated or you fell short by 1 to 3 marks from the passing threshold (e.g., scoring 25/70 in End-Sem when 28 was required):</p>
+      <ol>
+        <li><strong>Apply for Answer Sheet Photocopy:</strong> Within 10 days of online result declaration, apply via the SPPU exam portal. You will receive a PDF scan of your verified answer sheet.</li>
+        <li><strong>Faculty Verification:</strong> Have your subject professor or an experienced teacher check the photocopy. Look for uncounted marks, totaling errors, or harsh evaluation on standard diagrams.</li>
+        <li><strong>Apply for Revaluation:</strong> Submit the revaluation request online. If a mark discrepancy exceeds 5% of the total paper marks, your grade is officially revised on the mark sheet.</li>
+      </ol>
+
+      <div class="info-box">
+        <strong>Pro Tip:</strong> Never rely exclusively on revaluation to clear a subject. Always prepare for the backlog exam in the subsequent session simultaneously, so you stay prepared regardless of the verification outcome.
+      </div>
     </div>
   </article>
 
@@ -106,11 +392,20 @@
 
 <footer>
   <div class="footer-links">
-    <a href="/">Home</a><a href="/about.html">About</a><a href="/contact.html">Contact</a>
-    <a href="/privacy-policy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="/disclaimer.html">Disclaimer</a>
+    <a href="/">Home</a>
+    <a href="/marketplace.html">Marketplace & Notes</a>
+    <a href="/articles.html">Study Guides</a>
+    <a href="/about.html">About SYNAPSE</a>
+    <a href="/contact.html">Contact Us</a>
+    <a href="/privacy-policy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/disclaimer.html">Disclaimer</a>
   </div>
-  <div class="footer-copy">© <span id="yr"></span> SYNAPSE SPPU PYQ Portal. All rights reserved.</div>
+  <div class="footer-copy">© <span id="yr"></span> SYNAPSE SPPU PYQ Portal — Built by Shivam Shelke. Dedicated to SPPU Engineering Students.</div>
 </footer>
-<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
