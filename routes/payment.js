@@ -179,15 +179,14 @@ router.get('/stream/:productId', requireAuth, async (req, res) => {
       return res.redirect(pdfUrl);
     }
 
-    // Pipe the PDF from Cloudinary to the client securely
-    https.get(pdfUrl, (pdfRes) => {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${purchase.product.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf"`);
-      pdfRes.pipe(res);
-    }).on('error', (err) => {
-      console.error('Stream error:', err);
-      res.status(500).end();
-    });
+    // Secure direct redirect for authenticated buyer (Zero Vercel serverless egress/CPU load)
+    let downloadUrl = pdfUrl;
+    if (pdfUrl.includes('/upload/') && !pdfUrl.includes('/fl_attachment')) {
+      const safeTitle = (purchase.product.title || 'premium_material').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+      downloadUrl = pdfUrl.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(safeTitle)}/`);
+    }
+
+    return res.redirect(302, downloadUrl);
       
   } catch (error) {
     console.error('Error streaming PDF:', error);

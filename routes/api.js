@@ -117,12 +117,13 @@ router.post('/verify-gate/:id', async (req, res) => {
   }
 });
 
-// GET /api/download/:id — proxy PDF with correct content-type
+// GET /api/download/:id — direct high-speed CDN download (Zero Vercel Bandwidth & Zero CPU)
 router.get('/download/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
 
+    // 1. Strict Download Gate Security Check (WhatsApp / Telegram unlock)
     if (file.downloadGate && file.downloadGate.enabled && file.downloadGate.type !== 'none') {
       const token = req.query.token;
       if (!verifyGateToken(file._id.toString(), token)) {
@@ -130,27 +131,38 @@ router.get('/download/:id', async (req, res) => {
       }
     }
 
+    // 2. Google Drive direct redirect
     if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
-      return res.redirect(file.url);
+      return res.redirect(302, file.url);
     }
 
+    // 3. Clean filename for download
     let baseName = (file.originalName || file.subject || 'file').trim();
     if (baseName.toLowerCase().endsWith('.pdf')) {
       baseName = baseName.slice(0, -4);
     }
-    const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
-    proxySecure(file.url, res, filename, 'attachment');
+    const safeFilename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
+    // 4. Cloudinary attachment redirect (Zero Vercel serverless egress/CPU load)
+    let downloadUrl = file.url;
+    if (file.url.includes('/upload/') && !file.url.includes('/fl_attachment')) {
+      downloadUrl = file.url.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(safeFilename)}/`);
+    }
+
+    return res.redirect(302, downloadUrl);
   } catch (e) {
+    console.error('Download error:', e);
     res.status(500).json({ error: 'Server error.' });
   }
 });
 
-// GET /api/view/:id — view PDF inline in browser
+// GET /api/view/:id — view PDF inline directly from CDN
 router.get('/view/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
 
+    // Strict Download Gate Security Check
     if (file.downloadGate && file.downloadGate.enabled && file.downloadGate.type !== 'none') {
       const token = req.query.token;
       if (!verifyGateToken(file._id.toString(), token)) {
@@ -158,17 +170,10 @@ router.get('/view/:id', async (req, res) => {
       }
     }
 
-    if (file.url.includes('drive.google.com') || (file.publicId && file.publicId.startsWith('google-drive'))) {
-      return res.redirect(file.url);
-    }
-
-    let baseName = (file.originalName || file.subject || 'file').trim();
-    if (baseName.toLowerCase().endsWith('.pdf')) {
-      baseName = baseName.slice(0, -4);
-    }
-    const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
-    proxySecure(file.url, res, filename, 'inline');
+    // Direct redirect to view inline
+    return res.redirect(302, file.url);
   } catch (e) {
+    console.error('View error:', e);
     res.status(500).json({ error: 'Server error.' });
   }
 });
