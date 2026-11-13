@@ -664,7 +664,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDXwOD4wR6p6iF4UWbVNrh8YV3Yv6jnNkg",
@@ -681,6 +681,31 @@
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({
       prompt: 'select_account'
+    });
+
+    // Check if returning from a redirect login (Safari/Mobile fallback)
+    getRedirectResult(auth).then(async (result) => {
+      if (result && result.user) {
+        showMsg('loginSuccess', 'Google login verified! Redirecting...', 'success');
+        const idToken = await result.user.getIdToken();
+        const res = await fetch('/student/google-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect') || '/';
+          setTimeout(() => window.location.href = redirect, 500);
+        } else {
+          showMsg('loginError', data.error || 'Google login failed.');
+        }
+      }
+    }).catch((err) => {
+      if (err.code && err.code !== 'auth/popup-closed-by-user') {
+        showMsg('loginError', `Google login failed: ${err.message}`);
+      }
     });
 
     window.doGoogleLogin = async function() {
@@ -715,7 +740,18 @@
         }
       } catch (error) {
         console.error(error);
-        showMsg('loginError', `Google login failed: ${error.message} (${error.code})`);
+        // If Safari / iOS blocks the popup, fallback automatically to redirect flow
+        if (error.code === 'auth/popup-blocked') {
+          showMsg('loginSuccess', 'Redirecting to Google Sign-in...', 'success');
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+
+        let userFriendlyMsg = error.message;
+        if (error.code === 'auth/unauthorized-domain') {
+          userFriendlyMsg = 'This domain is not authorized in Firebase Console yet. Please add sppupyq2024.vercel.app to Firebase Authentication > Settings > Authorized domains.';
+        }
+        showMsg('loginError', `Google login failed: ${userFriendlyMsg}`);
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
