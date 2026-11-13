@@ -105,6 +105,17 @@ app.use(session({
 // ── SEO Directory & Dynamic Injections Helper ─────────────────────────────────
 const fs = require('fs');
 
+function getSiteBaseUrl(req) {
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.get('host');
+    if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+      return `${proto}://${host}`;
+    }
+  }
+  return process.env.APP_URL || 'https://sppupyq2024.vercel.app';
+}
+
 function slugify(text) {
   if (!text) return '';
   return text
@@ -322,8 +333,9 @@ app.get('/product.html', ensureDbConnected, async (req, res, next) => {
     
     const prodTitle = `${p.title.replace(/"/g, '&quot;')} | SYNAPSE Marketplace`;
     const prodDesc = (p.description || `Download verified SPPU Engineering study material for ${p.branch || 'all branches'}. Handwritten notes and solved PYQs on SYNAPSE.`).replace(/"/g, '&quot;');
-    const prodImage = p.thumbnailUrl || p.previewUrl || 'https://sppupyq.vercel.app/assets/og-image.png';
-    const prodUrl = `https://sppupyq.vercel.app/product.html?id=${p._id}`;
+    const base = getSiteBaseUrl(req);
+    const prodImage = p.thumbnailUrl || p.previewUrl || `${base}/assets/og-image.png`;
+    const prodUrl = `${base}/product.html?id=${p._id}`;
     const prodPrice = p.price || 0;
 
     const productSchema = {
@@ -373,6 +385,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── SEO Files ─────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
+  const base = getSiteBaseUrl(req);
   res.type('text/plain');
   res.send(`User-agent: *
 Allow: /
@@ -400,7 +413,7 @@ User-agent: PerplexityBot
 Allow: /
 Content-Signal: search=yes, ai-input=yes, ai-train=no
 
-Sitemap: https://sppupyq.vercel.app/sitemap.xml`);
+Sitemap: ${base}/sitemap.xml`);
 });
 
 // ── Google AdSense ads.txt ────────────────────────────────────────────────────
@@ -411,6 +424,7 @@ app.get('/ads.txt', (req, res) => {
 
 app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
   try {
+    const base = getSiteBaseUrl(req);
     const File = require('./models/File');
     const CategoryConfig = require('./models/CategoryConfig');
 
@@ -420,24 +434,24 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
 
     // Create a set of unique URLs
     const urls = new Set();
-    urls.add('https://sppupyq.vercel.app/');
-    urls.add('https://sppupyq.vercel.app/marketplace.html');
-    urls.add('https://sppupyq.vercel.app/articles.html');
-    urls.add('https://sppupyq.vercel.app/about.html');
-    urls.add('https://sppupyq.vercel.app/contact.html');
-    urls.add('https://sppupyq.vercel.app/student-login.html');
-    urls.add('https://sppupyq.vercel.app/sppu-previous-year-question-paper-2024-pattern');
-    urls.add('https://sppupyq.vercel.app/sppu-pyq-drive-2024-pattern');
-    urls.add('https://sppupyq.vercel.app/sppu-dsa-question-paper-2024-pattern');
-    urls.add('https://sppupyq.vercel.app/deld-subject-in-engineering');
-    urls.add('https://sppupyq.vercel.app/deld-subject');
-    urls.add('https://sppupyq.vercel.app/sppu-m2-pyq');
-    urls.add('https://sppupyq.vercel.app/sppu-question-paper-2019-pattern');
+    urls.add(`${base}/`);
+    urls.add(`${base}/marketplace.html`);
+    urls.add(`${base}/articles.html`);
+    urls.add(`${base}/about.html`);
+    urls.add(`${base}/contact.html`);
+    urls.add(`${base}/student-login.html`);
+    urls.add(`${base}/sppu-previous-year-question-paper-2024-pattern`);
+    urls.add(`${base}/sppu-pyq-drive-2024-pattern`);
+    urls.add(`${base}/sppu-dsa-question-paper-2024-pattern`);
+    urls.add(`${base}/deld-subject-in-engineering`);
+    urls.add(`${base}/deld-subject`);
+    urls.add(`${base}/sppu-m2-pyq`);
+    urls.add(`${base}/sppu-question-paper-2019-pattern`);
 
     // Add Year page catalogs
     const yearOrder = ['first', 'second', 'third', 'fourth'];
     yearOrder.forEach(y => {
-      urls.add(`https://sppupyq.vercel.app${getSeoUrl(y, null, null)}`);
+      urls.add(`${base}${getSeoUrl(y, null, null)}`);
     });
 
     // Populate URLs from CategoryConfig
@@ -447,12 +461,12 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       if (yearKey === 'first') {
         const subjects = yearVal.subjects || [];
         subjects.forEach(sub => {
-          urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, 'FE', sub)}`);
+          urls.add(`${base}${getSeoUrl(yearKey, 'FE', sub)}`);
         });
       } else {
         const branches = yearVal.branches || [];
         branches.forEach(br => {
-          urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, br, null)}`);
+          urls.add(`${base}${getSeoUrl(yearKey, br, null)}`);
 
           let branchSubjects = [];
           if (yearVal.subjects) {
@@ -464,7 +478,7 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
             }
           }
           branchSubjects.forEach(sub => {
-            urls.add(`https://sppupyq.vercel.app${getSeoUrl(yearKey, br, sub)}`);
+            urls.add(`${base}${getSeoUrl(yearKey, br, sub)}`);
           });
         });
       }
@@ -476,12 +490,12 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
       if (f.year) {
         if (f.year === 'first') {
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app${getSeoUrl('first', 'FE', f.subject)}`);
+            urls.add(`${base}${getSeoUrl('first', 'FE', f.subject)}`);
           }
         } else if (f.branch) {
-          urls.add(`https://sppupyq.vercel.app${getSeoUrl(f.year, f.branch, null)}`);
+          urls.add(`${base}${getSeoUrl(f.year, f.branch, null)}`);
           if (f.subject) {
-            urls.add(`https://sppupyq.vercel.app${getSeoUrl(f.year, f.branch, f.subject)}`);
+            urls.add(`${base}${getSeoUrl(f.year, f.branch, f.subject)}`);
           }
         }
       }
@@ -524,7 +538,7 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
      'sppu question paper solution', 'sppu pyq with solution', 'sppu syllabus 2024 pattern pdf',
      'sppu syllabus 2019 pattern pdf', 'sppu exam time table', 'sppu passing marks',
      'sppu sgpa to percentage calculator', 'sppu decote', 'sppu question paper format'].forEach(kw => {
-       urls.add(`https://sppupyq.vercel.app/${kw.replace(/\s+/g, '-')}`);
+       urls.add(`${base}/${kw.replace(/\s+/g, '-')}`);
     });
 
     // Add branch specific terms
@@ -535,8 +549,8 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     ];
     seoBranches.forEach(branch => {
       seoPatterns.forEach(pattern => {
-        urls.add(`https://sppupyq.vercel.app/${('sppu ' + branch + ' pyq ' + pattern).replace(/\s+/g, '-')}`);
-        urls.add(`https://sppupyq.vercel.app/${('sppu ' + pattern + ' ' + branch + ' question papers').replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${('sppu ' + branch + ' pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${('sppu ' + pattern + ' ' + branch + ' question papers').replace(/\s+/g, '-')}`);
       });
     });
 
@@ -544,13 +558,13 @@ app.get('/sitemap.xml', ensureDbConnected, async (req, res) => {
     seoPatterns.forEach(pattern => {
       seoSubjects.forEach(sub => {
         // Basic subject + pattern
-        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu pyq ' + pattern).replace(/\s+/g, '-')}`);
-        urls.add(`https://sppupyq.vercel.app/${('sppu ' + pattern + ' ' + sub + ' pyq').replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${(sub + ' sppu pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${('sppu ' + pattern + ' ' + sub + ' pyq').replace(/\s+/g, '-')}`);
         // Insem & Endsem specific
-        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu insem pyq ' + pattern).replace(/\s+/g, '-')}`);
-        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu endsem pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${(sub + ' sppu insem pyq ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${(sub + ' sppu endsem pyq ' + pattern).replace(/\s+/g, '-')}`);
         // PDF & Download specific
-        urls.add(`https://sppupyq.vercel.app/${(sub + ' sppu question paper pdf download ' + pattern).replace(/\s+/g, '-')}`);
+        urls.add(`${base}/${(sub + ' sppu question paper pdf download ' + pattern).replace(/\s+/g, '-')}`);
       });
     });
     // ----------------------------------------------------------------------------------
@@ -577,7 +591,7 @@ ${cleanedUrls.map(url => `  <url>
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sppupyq.vercel.app/</loc>
+    <loc>${base}/</loc>
     <lastmod>2026-06-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -636,6 +650,7 @@ app.get('/sppu-pyq-drive-2024-pattern', ensureDbConnected, async (req, res) => {
 
 // ── Catalog SEO Dynamic Meta Injection ────────────────────────────────────────
 app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) => {
+  const base = getSiteBaseUrl(req);
   const { yearSlug, subjectSlug } = req.params;
   
   if (yearSlug && yearSlug.includes('2025-pattern')) {
@@ -703,7 +718,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://sppupyq.vercel.app/"
+      "item": `${base}/`
     }
   ];
 
@@ -712,7 +727,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
       "@type": "ListItem",
       "position": 2,
       "name": `${formattedYear} Year`,
-      "item": `https://sppupyq.vercel.app${getSeoUrl(year, null, null)}`
+      "item": `${base}${getSeoUrl(year, null, null)}`
     });
   }
 
@@ -721,13 +736,13 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
       "@type": "ListItem",
       "position": 3,
       "name": formattedBranch,
-      "item": `https://sppupyq.vercel.app${getSeoUrl(year, branchSlug, null)}`
+      "item": `${base}${getSeoUrl(year, branchSlug, null)}`
     });
   }
 
   if (subjectSlug) {
     const pos = branchSlug ? 4 : 3;
-    const urlPath = `https://sppupyq.vercel.app${getSeoUrl(year, branchSlug || 'FE', subjectSlug)}`;
+    const urlPath = `${base}${getSeoUrl(year, branchSlug || 'FE', subjectSlug)}`;
     breadcrumbList.push({
       "@type": "ListItem",
       "position": pos,
@@ -791,7 +806,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
     html = html.replace(/<meta property="og:description" content="[^"]+"/g, `<meta property="og:description" content="${description}"`);
     html = html.replace(/<meta property="twitter:title" content="[^"]+"/g, `<meta property="twitter:title" content="${title}"`);
     html = html.replace(/<meta property="twitter:description" content="[^"]+"/g, `<meta property="twitter:description" content="${description}"`);
-    html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="https://sppupyq.vercel.app${req.originalUrl}"`);
+    html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="${base}${req.originalUrl}"`);
 
     // Inject Breadcrumb Schema & FAQ Schema
     const schemaScript = `
@@ -905,6 +920,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
 // ── Catch-all Programmatic SEO Route ──────────────────────────────────────────
 app.get('*', ensureDbConnected, async (req, res) => {
   try {
+    const base = getSiteBaseUrl(req);
     const urlPath = req.path.substring(1).toLowerCase();
     const File = require('./models/File');
     
@@ -1094,7 +1110,7 @@ app.get('*', ensureDbConnected, async (req, res) => {
       html = html.replace(/<meta property="og:description" content="[^"]+"/g, `<meta property="og:description" content="${description}"`);
       html = html.replace(/<meta property="twitter:title" content="[^"]+"/g, `<meta property="twitter:title" content="${title}"`);
       html = html.replace(/<meta property="twitter:description" content="[^"]+"/g, `<meta property="twitter:description" content="${description}"`);
-      html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="https://sppupyq.vercel.app${req.originalUrl}"`);
+      html = html.replace(/<link rel="canonical" href="[^"]+"/g, `<link rel="canonical" href="${base}${req.originalUrl}"`);
 
       // Dynamic Hero Header replacement
       const headingToUse = customHeading || searchKeyword;
