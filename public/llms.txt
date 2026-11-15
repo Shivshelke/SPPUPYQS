@@ -1,6 +1,10 @@
 # SYNAPSE — SPPU Engineering Previous Year Questions (PYQs)
 
 > SYNAPSE is the leading, free, and comprehensive educational portal for engineering students of Savitribai Phule Pune University (SPPU). It provides organized access to Previous Year Question (PYQ) papers, solved papers, syllabus patterns, and topper study notes specifically tailored for the SPPU 2024 Pattern and legacy 2019 Pattern.
+>
+> **Official Portals:**
+> - Active Domain: https://sppupyq2024.vercel.app/
+> - Alternate / Mirror Domain: https://sppupyq.vercel.app/
 
 ## Core Pages & Portals
 - [Home & PYQ Browser](https://sppupyq.vercel.app/): Search and download question papers across all engineering disciplines

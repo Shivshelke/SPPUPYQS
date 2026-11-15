@@ -380,6 +380,31 @@ app.get('/product.html', ensureDbConnected, async (req, res, next) => {
   }
 });
 
+// ── Dynamic LLMs.txt for AI Crawlers (Both Domains Supported) ────────────────
+app.get('/llms.txt', (req, res) => {
+  try {
+    const base = getSiteBaseUrl(req);
+    let content = fs.readFileSync(path.join(__dirname, 'public', 'llms.txt'), 'utf8');
+    content = content.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
+    res.type('text/plain; charset=utf-8');
+    res.send(content);
+  } catch (e) {
+    res.sendFile(path.join(__dirname, 'public', 'llms.txt'));
+  }
+});
+
+app.get('/llms-full.txt', (req, res) => {
+  try {
+    const base = getSiteBaseUrl(req);
+    let content = fs.readFileSync(path.join(__dirname, 'public', 'llms-full.txt'), 'utf8');
+    content = content.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
+    res.type('text/plain; charset=utf-8');
+    res.send(content);
+  } catch (e) {
+    res.sendFile(path.join(__dirname, 'public', 'llms-full.txt'));
+  }
+});
+
 // ── Static files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 

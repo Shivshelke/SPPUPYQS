@@ -1,6 +1,6 @@
 # SYNAPSE — SPPU Engineering Knowledge Base & Study Directory (Full Specification)
 
-> SYNAPSE (https://sppupyq.vercel.app/) is an authoritative, open educational repository and student resource portal tailored specifically for engineering students of Savitribai Phule Pune University (SPPU), Maharashtra, India.
+> SYNAPSE (https://sppupyq2024.vercel.app/ | https://sppupyq.vercel.app/) is an authoritative, open educational repository and student resource portal tailored specifically for engineering students of Savitribai Phule Pune University (SPPU), Maharashtra, India.
 
 ---
 
