@@ -304,9 +304,11 @@ async function generateSeoDirectory() {
 // ── Root SEO Route ────────────────────────────────────────────────────────────
 app.get('/', ensureDbConnected, async (req, res) => {
   try {
+    const base = getSiteBaseUrl(req);
     let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
     const directoryHtml = await generateSeoDirectory();
     html = html.replace('<div id="seo-links-directory"></div>', directoryHtml);
+    html = html.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
     res.send(html);
   } catch (err) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -403,6 +405,26 @@ app.get('/llms-full.txt', (req, res) => {
   } catch (e) {
     res.sendFile(path.join(__dirname, 'public', 'llms-full.txt'));
   }
+});
+
+// ── Dynamic Domain Middleware for Static HTML Files ───────────────────────────
+app.use((req, res, next) => {
+  if (req.method === 'GET' && (req.path.endsWith('.html') || req.path === '/index.html')) {
+    const filePath = req.path.replace(/^\//, '');
+    const fullPath = path.join(__dirname, 'public', filePath);
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      try {
+        const base = getSiteBaseUrl(req);
+        let content = fs.readFileSync(fullPath, 'utf8');
+        content = content.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
+        res.type('text/html; charset=utf-8');
+        return res.send(content);
+      } catch (e) {
+        return next();
+      }
+    }
+  }
+  next();
 });
 
 // ── Static files ──────────────────────────────────────────────────────────────
@@ -664,9 +686,11 @@ app.get('/dsa', (req, res) => {
 // ── Complete SPPU PYQ Drive 2024 Pattern Route ────────────────────────────────
 app.get('/sppu-pyq-drive-2024-pattern', ensureDbConnected, async (req, res) => {
   try {
+    const base = getSiteBaseUrl(req);
     let html = fs.readFileSync(path.join(__dirname, 'public', 'sppu-pyq-drive-2024-pattern.html'), 'utf8');
     const directoryHtml = await generateSeoDirectory();
     html = html.replace('<div id="seo-links-directory"></div>', directoryHtml);
+    html = html.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
     res.send(html);
   } catch (err) {
     res.sendFile(path.join(__dirname, 'public', 'sppu-pyq-drive-2024-pattern.html'));
