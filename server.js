@@ -846,6 +846,7 @@ app.get('/:yearSlug/:subjectSlug?', ensureDbConnected, async (req, res, next) =>
 
   try {
     let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    html = html.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
 
     // Replace Meta Tags dynamically
     html = html.replace(/<title>[^<]+<\/title>/g, `<title>${title}</title>`);
@@ -981,6 +982,7 @@ app.get('*', ensureDbConnected, async (req, res) => {
     )) {
       
       let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+      html = html.replace(/https:\/\/sppupyq\.vercel\.app/g, base);
       
       let title = '';
       let description = '';
