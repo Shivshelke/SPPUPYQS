@@ -18,6 +18,8 @@
   <meta name="keywords" content="sppu pyq drive 2024 pattern, sppu google drive pyq, sppu pyq drive link, sppu question paper drive 2024, sppu 2024 pattern drive, sppu all subjects pyq drive">
   <link rel="canonical" href="https://sppupyq.vercel.app/sppu-pyq-drive-2024-pattern" />
   <link rel="icon" type="image/png" href="/img/icon-192.png" />
+  <link rel="apple-touch-icon" href="/img/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Syne:wght@400..800&display=swap" rel="stylesheet">
@@ -48,53 +50,424 @@
   </script>
 
   <style>
-    .drive-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 5rem;
+    /* ── Drive Page Upgraded Styles ── */
+    :root {
+      --drive-accent: #6366f1;
+      --drive-accent-light: #818cf8;
+      --drive-accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+      --drive-card-bg: rgba(255, 255, 255, 0.025);
+      --drive-card-border: rgba(255, 255, 255, 0.08);
+      --drive-glass-hover: rgba(255, 255, 255, 0.05);
     }
+
+    [data-theme="light"] {
+      --drive-card-bg: rgba(0, 0, 0, 0.02);
+      --drive-card-border: rgba(0, 0, 0, 0.08);
+      --drive-glass-hover: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Top Announcement Ribbon */
+    .top-announcement-bar {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.18), rgba(99, 102, 241, 0.15));
+      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 0.65rem 1rem;
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .top-announcement-bar .badge-fire {
+      background: #f59e0b;
+      color: #000;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .top-announcement-bar a {
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    .top-announcement-bar a:hover {
+      color: var(--accent-hover);
+    }
+
+    /* Enhanced Navbar */
+    .drive-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .drive-nav-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drive-brand-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .drive-brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .drive-brand-logo .logo-icon {
+      color: var(--accent);
+      font-size: 1.4rem;
+    }
+    .drive-edition-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+    .drive-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .drive-nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+    }
+    .drive-nav-link:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .drive-nav-link.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .pro-nav-pill {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2));
+      color: #f59e0b !important;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      font-weight: 700 !important;
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+    }
+    .pro-nav-pill:hover {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(234, 88, 12, 0.3));
+    }
+    .drive-mobile-toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .drive-mobile-drawer {
+      display: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .drive-mobile-drawer.open {
+      display: flex;
+    }
+
+    /* Main Container */
+    .drive-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    /* Hero Section */
     .drive-hero {
       text-align: center;
-      padding: 3rem 1rem 2rem;
+      padding: 2.5rem 1rem 1.5rem;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      padding: 0.35rem 1rem;
+      border-radius: 99px;
+      margin-bottom: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
     .drive-hero h1 {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-size: clamp(2.1rem, 4.8vw, 3.4rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 1rem;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin-bottom: 1.1rem;
+      color: var(--text);
+    }
+    .drive-hero h1 .accent {
+      background: var(--drive-accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .drive-hero p {
       color: var(--text-secondary);
-      font-size: clamp(1rem, 2.5vw, 1.15rem);
-      max-width: 780px;
+      font-size: clamp(1rem, 2.3vw, 1.15rem);
+      max-width: 820px;
       margin: 0 auto 2rem;
-      line-height: 1.6;
+      line-height: 1.65;
     }
+
+    /* Stats Strip */
     .drive-stats-strip {
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
+      gap: 1.2rem;
       flex-wrap: wrap;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2.8rem;
     }
     .stat-pill {
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--drive-card-bg);
       border: 1px solid var(--border);
       border-radius: 99px;
-      padding: 0.6rem 1.4rem;
-      font-size: 0.9rem;
+      padding: 0.55rem 1.3rem;
+      font-size: 0.88rem;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     .stat-pill span {
       color: var(--accent);
+      font-weight: 700;
     }
+
+    /* ── 4 Gateway Navigation Cards ("Explore Entire Portal") ── */
+    .portal-nav-section {
+      margin-bottom: 3.5rem;
+    }
+    .section-lead-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .section-lead-title h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.4rem, 3vw, 1.85rem);
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+    .section-lead-title p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .portal-nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .portal-nav-card {
+      background: var(--drive-card-bg);
+      border: 1px solid var(--drive-card-border);
+      border-radius: 16px;
+      padding: 1.6rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    .portal-nav-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      background: var(--drive-glass-hover);
+      box-shadow: 0 14px 32px rgba(99, 102, 241, 0.15);
+    }
+    .portal-nav-card.featured {
+      border-color: rgba(99, 102, 241, 0.35);
+      background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.02));
+    }
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .card-icon-badge {
+      font-size: 1.6rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .card-tag.gold {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .card-tag.blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .card-tag.green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .portal-nav-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+    .portal-nav-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.55;
+      margin-bottom: 1.4rem;
+      flex-grow: 1;
+    }
+    .portal-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.75rem 1.1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+    }
+    .portal-nav-card:hover .portal-nav-btn {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── Sticky Branch Pills Filter ── */
+    .branch-filter-sticky {
+      position: sticky;
+      top: 65px;
+      z-index: 900;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 0;
+      margin: 2.5rem 0 2rem;
+    }
+    .branch-pills-container {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 0 0.5rem;
+    }
+    .branch-pills-container::-webkit-scrollbar {
+      display: none;
+    }
+    .branch-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .branch-pill:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.07);
+    }
+    .branch-pill.active {
+      background: var(--accent);
+      color: #fff !important;
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+    .branch-pill.legacy-pill {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .branch-pill.legacy-pill:hover {
+      background: rgba(245, 158, 11, 0.2);
+    }
+
+    /* Search Box */
     .search-filter-box {
-      max-width: 650px;
+      max-width: 680px;
       margin: 0 auto 3rem;
       position: relative;
     }
@@ -104,8 +477,8 @@
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 1rem;
-      padding: 1rem 1.25rem 1rem 3rem;
-      border-radius: 14px;
+      padding: 1.05rem 3rem 1.05rem 3.1rem;
+      border-radius: 16px;
       outline: none;
       transition: all 0.25s ease;
       box-sizing: border-box;
@@ -113,27 +486,56 @@
     .search-filter-box input:focus {
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
     }
     .search-filter-box .search-icon {
       position: absolute;
-      left: 1rem;
+      left: 1.1rem;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 1.2rem;
-      opacity: 0.6;
+      font-size: 1.25rem;
+      opacity: 0.65;
       pointer-events: none;
     }
+    .clear-search-btn {
+      position: absolute;
+      right: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+    .search-match-count {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.65rem;
+    }
+
+    /* Category Cards */
     .drive-category-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 18px;
+      background: var(--drive-card-bg);
+      border: 1px solid var(--drive-card-border);
+      border-radius: 20px;
       margin-bottom: 2.5rem;
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transition: border-color 0.25s;
+    }
+    .drive-category-card:hover {
+      border-color: rgba(99, 102, 241, 0.25);
     }
     .category-header {
-      padding: 1.5rem 1.8rem;
+      padding: 1.4rem 1.8rem;
       background: rgba(255, 255, 255, 0.02);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -165,6 +567,28 @@
       font-size: 0.82rem;
       font-weight: 700;
     }
+    .branch-catalog-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .branch-catalog-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Papers Table */
     .papers-table-responsive {
       overflow-x: auto;
     }
@@ -175,7 +599,7 @@
       font-size: 0.92rem;
     }
     .drive-table th {
-      padding: 0.9rem 1.5rem;
+      padding: 0.95rem 1.5rem;
       background: rgba(255, 255, 255, 0.015);
       border-bottom: 1px solid var(--border);
       color: var(--text-secondary);
@@ -217,8 +641,8 @@
     .btn-dl {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1.1rem;
+      gap: 0.45rem;
+      padding: 0.5rem 1.15rem;
       background: var(--accent);
       color: #fff !important;
       text-decoration: none;
@@ -233,72 +657,460 @@
       box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
       background: #4f46e5;
     }
-    .drive-cta-box {
-      margin-top: 4rem;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+
+    /* ── Inline Promo Cards ── */
+    .inline-promo-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(245, 158, 11, 0.08));
       border: 1px solid rgba(99, 102, 241, 0.25);
       border-radius: 20px;
-      padding: 2.5rem;
-      text-align: center;
+      padding: 2.2rem;
+      margin: 3.5rem 0;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
-    .drive-cta-box h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
+    @media (max-width: 860px) {
+      .inline-promo-card {
+        grid-template-columns: 1fr;
+        padding: 1.6rem;
+      }
+    }
+    .promo-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
       margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .drive-cta-box p {
+    .promo-left h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    .promo-left p {
       color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto 1.5rem;
+      font-size: 0.95rem;
       line-height: 1.6;
+      margin-bottom: 1.4rem;
+    }
+    .promo-actions {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .btn-promo-primary {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.7rem 1.4rem;
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #000 !important;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-promo-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+    }
+    .btn-promo-secondary {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.7rem 1.2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-promo-secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--text);
+    }
+    .promo-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.3rem;
+    }
+    .pf-item {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .pf-icon {
+      color: #10b981;
+      font-weight: bold;
+    }
+
+    /* ── Inline Community Card ── */
+    .inline-community-card {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.1));
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      border-radius: 18px;
+      padding: 1.6rem 2rem;
+      margin: 3.5rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .comm-icon {
+      font-size: 2.2rem;
+      background: rgba(14, 165, 233, 0.15);
+      border-radius: 14px;
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .comm-body {
+      flex: 1 1 340px;
+    }
+    .comm-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #0ea5e9;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+    .comm-body h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+      color: var(--text);
+    }
+    .comm-body p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .btn-telegram {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      background: #0088cc;
+      color: #fff !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border-radius: 10px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(0, 136, 204, 0.35);
+      white-space: nowrap;
+    }
+    .btn-telegram:hover {
+      background: #0077b5;
+      transform: translateY(-1px);
+    }
+
+    /* ── Comprehensive SPPU Directory Hub ── */
+    .sppu-directory-hub {
+      margin-top: 5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 4rem;
+    }
+    .hub-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+    }
+    .hub-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+    }
+    .hub-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800;
+      margin: 0.8rem 0 0.4rem;
+      color: var(--text);
+    }
+    .hub-header p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+    }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 3rem;
+    }
+    .hub-col {
+      background: var(--drive-card-bg);
+      border: 1px solid var(--drive-card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .hub-col h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .hub-col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+    .hub-col li a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.18s, padding-left 0.18s;
+      display: block;
+    }
+    .hub-col li a:hover {
+      color: var(--accent);
+      padding-left: 4px;
+    }
+
+    /* ── Sticky Mobile Dock ── */
+    .mobile-sticky-dock {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .drive-nav-links {
+        display: none;
+      }
+      .drive-mobile-toggle {
+        display: block;
+      }
+      .mobile-sticky-dock {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--mobile-nav-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 0.5rem 0.25rem;
+        z-index: 10000;
+      }
+      .dock-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.25rem 0;
+      }
+      .dock-item:hover, .dock-item.active {
+        color: var(--accent);
+      }
+      .dock-item.highlight {
+        color: #0ea5e9;
+      }
+      .dock-icon {
+        font-size: 1.15rem;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="nav-container">
-      <div class="logo-area">
-        <a href="/" class="brand-logo">
-          <span class="brand-symbol">⬡</span>
-          <span class="brand-name">SYNAPSE</span>
+
+  <!-- ── Top Announcement Banner ── -->
+  <aside class="top-announcement-bar">
+    <span class="badge-fire">Live</span>
+    <span>Looking for interactive search, preview & In-Sem/End-Sem filters?</span>
+    <a href="/">Explore Full Interactive Catalog (730+ Papers) →</a>
+  </aside>
+
+  <!-- ── Navigation Header ── -->
+  <header class="drive-header">
+    <div class="drive-nav-container">
+      <div class="drive-brand-area">
+        <a href="/" class="drive-brand-logo">
+          <span class="logo-icon">⬡</span>
+          <span>SYNAPSE</span>
         </a>
+        <span class="drive-edition-tag">2024 DRIVE</span>
       </div>
-      <nav class="nav-links-desktop">
-        <a href="/" class="nav-link">Catalog</a>
-        <a href="/sppu-pyq-drive-2024-pattern" class="nav-link active" style="color:var(--accent);font-weight:700;">2024 Drive</a>
-        <a href="/marketplace.html" class="nav-link">Pro Marketplace</a>
-        <a href="/student-login.html" class="nav-link">Student Portal</a>
+
+      <nav class="drive-nav-links">
+        <a href="/" class="drive-nav-link">Catalog Directory</a>
+        <a href="/sppu-pyq-drive-2024-pattern" class="drive-nav-link active">2024 Drive</a>
+        <a href="/marketplace.html" class="drive-nav-link pro-nav-pill">💎 Pro Marketplace</a>
+        <a href="/articles.html" class="drive-nav-link">Study Guides</a>
+        <a href="/student-login.html" class="drive-nav-link">Student Portal</a>
+        <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;padding:0.3rem;">
+          <span class="theme-icon">☀️</span>
+        </button>
       </nav>
+
+      <button class="drive-mobile-toggle" onclick="toggleDriveMobileMenu()" aria-label="Toggle Menu">
+        ☰
+      </button>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="drive-mobile-drawer" id="driveMobileDrawer">
+      <a href="/" class="drive-nav-link">🔍 Full Catalog (730+ Papers)</a>
+      <a href="/sppu-pyq-drive-2024-pattern" class="drive-nav-link active">⚡ 2024 Pattern PYQ Drive</a>
+      <a href="/marketplace.html" class="drive-nav-link pro-nav-pill">💎 Pro Notes & Solved Papers</a>
+      <a href="/articles.html" class="drive-nav-link">📖 Passing Rules & SGPA Guides</a>
+      <a href="/student-login.html" class="drive-nav-link">🎓 Student Login</a>
+      <a href="https://t.me/sppupyqs" target="_blank" rel="noopener" class="drive-nav-link" style="color:#0ea5e9;">💬 Telegram Group (10k+)</a>
     </div>
   </header>
 
   <main class="drive-container">
-    <div class="drive-hero">
+    
+    <!-- ── Hero Section ── -->
+    <section class="drive-hero">
+      <div class="hero-eyebrow">
+        <span>⚡ SPPU 2024 Pattern • Direct Cloud Repository</span>
+      </div>
       <h1>Complete SPPU PYQ Drive — All Subjects, One Link <span class="accent">(2024 Pattern)</span></h1>
       <p>Looking for a complete SPPU PYQ Drive for the latest 2024 Pattern? Here is the entire verified collection of Pune University Insem and Endsem papers across all engineering branches in one central archive. Every paper is 100% authentic and ready for direct download.</p>
       
       <div class="drive-stats-strip">
-        <div class="stat-pill">📚 Total Papers: <span>78</span></div>
+        <div class="stat-pill">📚 Total Verified Papers: <span>78</span></div>
         <div class="stat-pill">🎓 Syllabus: <span>2024 Pattern</span></div>
         <div class="stat-pill">⚡ Format: <span>Official High-Res PDFs</span></div>
         <div class="stat-pill">🔒 Verified: <span>Direct Cloud Downloads</span></div>
       </div>
+    </section>
 
-      <div class="search-filter-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="driveSearchInput" placeholder="Search by subject, branch, or exam paper name..." onkeyup="filterDrivePapers()" />
+    <!-- ── 4 Gateway Navigation Cards ("Explore Entire Website") ── -->
+    <section class="portal-nav-section">
+      <div class="section-lead-title">
+        <h2>Explore Everything on the SYNAPSE Portal</h2>
+        <p>Beyond this drive page, access hundreds of interactive features designed for SPPU students.</p>
+      </div>
+
+      <div class="portal-nav-grid">
+        <div class="portal-nav-card featured">
+          <div class="card-top-row">
+            <div class="card-icon-badge">🔍</div>
+            <span class="card-tag">Interactive</span>
+          </div>
+          <h3>All SPPU PYQs (730+)</h3>
+          <p>Filter papers by Academic Year (FE, SE, TE, BE), Branch, Semester, Pattern & Insem/Endsem in real-time with instant search.</p>
+          <a href="/" class="portal-nav-btn">
+            <span>Explore Full Catalog</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="portal-nav-card">
+          <div class="card-top-row">
+            <div class="card-icon-badge">💎</div>
+            <span class="card-tag gold">Topper Notes</span>
+          </div>
+          <h3>Pro Solved Notes</h3>
+          <p>Handwritten notes, solved question papers, formula sheets & scoring question banks created by top SPPU rankers.</p>
+          <a href="/marketplace.html" class="portal-nav-btn">
+            <span>Visit Marketplace</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="portal-nav-card">
+          <div class="card-top-row">
+            <div class="card-icon-badge">📖</div>
+            <span class="card-tag blue">Passing Rules</span>
+          </div>
+          <h3>Rules & SGPA Guides</h3>
+          <p>Complete breakdown of 2024 Pattern 40/60 marks rule, In-Sem eligibility criteria, SGPA calculator & ATKT rules.</p>
+          <a href="/articles.html" class="portal-nav-btn">
+            <span>Read Study Guides</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="portal-nav-card">
+          <div class="card-top-row">
+            <div class="card-icon-badge">💬</div>
+            <span class="card-tag green">10k+ Community</span>
+          </div>
+          <h3>Official Telegram & Bot</h3>
+          <p>Join 10,000+ Pune University students. Get real-time paper alerts, exam discussions, and instant paper requests via bot.</p>
+          <a href="https://t.me/sppupyqs" target="_blank" rel="noopener" class="portal-nav-btn">
+            <span>Join Telegram Group</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sticky Branch & Pattern Quick Filter Bar ── -->
+    <div class="branch-filter-sticky" id="branchFilterSticky">
+      <div class="branch-pills-container">
+        <button class="branch-pill active" onclick="filterByBranch('all', this)">✨ All Branches (78)</button>
+        <button class="branch-pill" onclick="filterByBranch('fe', this)">📁 First Year (FE) (52)</button>
+        <button class="branch-pill" onclick="filterByBranch('comp', this)">💻 Computer Engg (8)</button>
+        <button class="branch-pill" onclick="filterByBranch('aids', this)">⚡ AI & Data Science (9)</button>
+        <button class="branch-pill" onclick="filterByBranch('civil', this)">🏗️ Civil Engg (5)</button>
+        <button class="branch-pill" onclick="filterByBranch('it', this)">🌐 IT Engg (1)</button>
+        <button class="branch-pill" onclick="filterByBranch('te-be', this)">🎓 TE & BE (3)</button>
+        <a href="/sppu-question-paper-2019-pattern" class="branch-pill legacy-pill" title="Browse 2019 Pattern Papers">📦 2019 Pattern (Legacy) Archive &rarr;</a>
       </div>
     </div>
 
+    <!-- ── Search Input ── -->
+    <div class="search-filter-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="driveSearchInput" placeholder="Search by subject (e.g. M1, BXE, DSA, Physics), branch, or exam date..." onkeyup="filterDrivePapers()" />
+      <button id="clearSearchBtn" class="clear-search-btn" onclick="clearDriveSearch()" style="display:none;" title="Clear Search">✕</button>
+      <div id="searchMatchCount" class="search-match-count">Showing 78 official papers</div>
+    </div>
+
+    <!-- ── Drive Paper Categories ── -->
     <div id="driveSectionsWrapper">
-      
-    <div class="drive-category-card">
+      <!-- Category 1: FE -->
+      <div class="drive-category-card" id="cat-fe" data-branch="fe">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>First Year (FE) — All Branches</h2>
         </div>
         <span class="badge count-badge">52 Official Papers</span>
+        <a href="/first-year-fe-engineering" class="branch-catalog-btn">Explore 10+ FE Subjects & Notes →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -942,13 +1754,38 @@
       </div>
     </div>
     
-    <div class="drive-category-card">
+    
+
+      <!-- Inline Pro Study Material Banner -->
+      
+<div class="inline-promo-card">
+  <div class="promo-left">
+    <div class="promo-pill">💎 EXAM READY STUDY MATERIAL</div>
+    <h3>Need Handwritten Topper Notes & Solved Papers?</h3>
+    <p>Don't waste hours searching through group chats before exams. Get verified unit-wise notes, solved In-Sem/End-Sem questions, and formula cheatsheets created by SPPU top rankers.</p>
+    <div class="promo-actions">
+      <a href="/marketplace.html" class="btn-promo-primary">Explore Study Materials (PRO) →</a>
+      <a href="/articles.html" class="btn-promo-secondary">SPPU Passing Rules & Exam Guides</a>
+    </div>
+  </div>
+  <div class="promo-features-list">
+    <div class="pf-item"><span class="pf-icon">✓</span> 100% SPPU 2024 Syllabus Aligned</div>
+    <div class="pf-item"><span class="pf-icon">✓</span> In-Sem & End-Sem Solved Solutions</div>
+    <div class="pf-item"><span class="pf-icon">✓</span> Handwritten High-Scoring Formulae</div>
+    <div class="pf-item"><span class="pf-icon">✓</span> Instant PDF Access on Phone & Laptop</div>
+  </div>
+</div>
+
+
+      <!-- Category 2: SE Comp -->
+      <div class="drive-category-card" id="cat-comp" data-branch="comp">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>Second Year (SE) — Computer Engineering</h2>
         </div>
         <span class="badge count-badge">8 Official Papers</span>
+        <a href="/second-year-computer-engineering" class="branch-catalog-btn">Explore Full Computer Catalog →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -1064,13 +1901,17 @@
       </div>
     </div>
     
-    <div class="drive-category-card">
+    
+
+      <!-- Category 3: SE AIDS -->
+      <div class="drive-category-card" id="cat-aids" data-branch="aids">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>Second Year (SE) — Artificial Intelligence & Data Science / AIML</h2>
         </div>
         <span class="badge count-badge">9 Official Papers</span>
+        <a href="/second-year-aiml-engineering" class="branch-catalog-btn">Explore Full AI & Data Science Catalog →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -1198,13 +2039,34 @@
       </div>
     </div>
     
-    <div class="drive-category-card">
+    
+
+      <!-- Inline Telegram Community Banner -->
+      
+<div class="inline-community-card">
+  <div class="comm-icon">💬</div>
+  <div class="comm-body">
+    <div class="comm-pill">OFFICIAL SPPU TELEGRAM HUB</div>
+    <h3>Join 10,000+ Pune University Engineering Students</h3>
+    <p>Get real-time paper alerts, syllabus updates, exam discussion, and request any missing paper directly from our team.</p>
+  </div>
+  <div class="comm-action">
+    <a href="https://t.me/sppupyqs" target="_blank" rel="noopener" class="btn-telegram">
+      <span class="tg-send-icon">✈</span> Join SPPU Community
+    </a>
+  </div>
+</div>
+
+
+      <!-- Category 4: SE Civil -->
+      <div class="drive-category-card" id="cat-civil" data-branch="civil">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>Second Year (SE) — Civil Engineering</h2>
         </div>
         <span class="badge count-badge">5 Official Papers</span>
+        <a href="/second-year-civil-engineering" class="branch-catalog-btn">Explore Full Civil Catalog →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -1284,13 +2146,17 @@
       </div>
     </div>
     
-    <div class="drive-category-card">
+    
+
+      <!-- Category 5: SE IT -->
+      <div class="drive-category-card" id="cat-it" data-branch="it">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>Second Year (SE) — Information Technology</h2>
         </div>
         <span class="badge count-badge">1 Official Papers</span>
+        <a href="/second-year-information-technology" class="branch-catalog-btn">Explore Full IT Catalog →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -1322,13 +2188,17 @@
       </div>
     </div>
     
-    <div class="drive-category-card">
+    
+
+      <!-- Category 6: TE/BE -->
+      <div class="drive-category-card" id="cat-te-be" data-branch="te-be">
       <div class="category-header">
         <div class="cat-title-wrap">
           <span class="cat-icon">📁</span>
           <h2>Third & Final Year (TE / BE)</h2>
         </div>
         <span class="badge count-badge">3 Official Papers</span>
+        <a href="/third-year-engineering" class="branch-catalog-btn">Explore TE & BE Portal →</a>
       </div>
       <div class="papers-table-responsive">
         <table class="drive-table">
@@ -1386,17 +2256,91 @@
     
     </div>
 
-    <div class="drive-cta-box">
-      <h3>Need 2019 Pattern (legacy) or Subject Catalogs?</h3>
-      <p>Visit the interactive SYNAPSE catalog to filter by individual academic year, branch, and pattern with real-time subject tagging.</p>
+    
+    </div>
+
+    <!-- ── Call To Action Box ── -->
+    <div class="drive-cta-box" style="margin-top:4rem; background:linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08)); border:1px solid rgba(99, 102, 241, 0.25); border-radius:20px; padding:2.5rem; text-align:center;">
+      <h3 style="font-family:'Syne', sans-serif; font-size:1.6rem; margin-bottom:0.75rem;">Need 2019 Pattern (legacy) or Subject Catalogs?</h3>
+      <p style="color:var(--text-secondary); max-width:600px; margin:0 auto 1.5rem; line-height:1.6;">Visit the interactive SYNAPSE catalog to filter by individual academic year, branch, and pattern with real-time subject tagging.</p>
       <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
         <a href="/" class="btn-dl" style="padding:0.75rem 1.8rem; font-size:0.95rem;">Go to SPPU Catalog Directory</a>
         <a href="/sppu-question-paper-2019-pattern" class="btn-dl" style="padding:0.75rem 1.8rem; font-size:0.95rem; background:rgba(255,255,255,0.06); border:1px solid var(--border);">Browse 2019 Pattern (legacy) Archive</a>
       </div>
     </div>
+
+    <!-- ── Comprehensive SPPU Engineering Directory Site Map ── -->
+    <section class="sppu-directory-hub">
+      <div class="hub-header">
+        <span class="hub-badge">COMPLETE PORTAL DIRECTORY</span>
+        <h2>Explore All SPPU Engineering Branches & Portals</h2>
+        <p>Direct links to every branch, year, study material hub, and exam resource on SYNAPSE.</p>
+      </div>
+
+      <div class="hub-grid">
+        <div class="hub-col">
+          <h4>First Year (FE)</h4>
+          <ul>
+            <li><a href="/first-year-fe-engineering">All FE Subjects & Syllabus</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-mathematics-i">Engineering Mathematics – I (M1)</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-mathematics-ii">Engineering Mathematics – II (M2)</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-physics">Engineering Physics</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-chemistry">Engineering Chemistry</a></li>
+            <li><a href="/first-year-fe-engineering/basic-electrical-engineering">Basic Electrical Engineering (BEE)</a></li>
+            <li><a href="/first-year-fe-engineering/basic-electronics-engineering">Basic Electronics Engineering (BXE)</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-mechanics">Engineering Mechanics</a></li>
+            <li><a href="/first-year-fe-engineering/engineering-graphics">Engineering Graphics</a></li>
+            <li><a href="/first-year-fe-engineering/fundamentals-of-programming-languages">FPL (Programming)</a></li>
+            <li><a href="/first-year-fe-engineering/programming-and-problem-solving">PPS (Problem Solving)</a></li>
+          </ul>
+        </div>
+
+        <div class="hub-col">
+          <h4>Second Year (SE)</h4>
+          <ul>
+            <li><a href="/second-year-computer-engineering">Computer Engineering</a></li>
+            <li><a href="/second-year-information-technology">Information Technology (IT)</a></li>
+            <li><a href="/second-year-aiml-engineering">AI & Data Science (AIML)</a></li>
+            <li><a href="/second-year-civil-engineering">Civil Engineering</a></li>
+            <li><a href="/second-year-mechanical-engineering">Mechanical Engineering</a></li>
+            <li><a href="/second-year-electronics-telecommunication-engineering">Electronics & Telecom (EnTC)</a></li>
+            <li><a href="/second-year-electrical-engineering">Electrical Engineering</a></li>
+            <li><a href="/second-year-chemical-engineering">Chemical Engineering</a></li>
+          </ul>
+        </div>
+
+        <div class="hub-col">
+          <h4>Higher Years & Archive</h4>
+          <ul>
+            <li><a href="/third-year-engineering">Third Year (TE) All Branches</a></li>
+            <li><a href="/third-year-computer-engineering">TE Computer Engineering</a></li>
+            <li><a href="/third-year-information-technology">TE Information Technology</a></li>
+            <li><a href="/final-year-engineering">Final Year (BE) All Branches</a></li>
+            <li><a href="/final-year-computer-engineering">BE Computer Engineering</a></li>
+            <li><a href="/sppu-question-paper-2019-pattern">2019 Pattern Legacy Archive</a></li>
+          </ul>
+        </div>
+
+        <div class="hub-col">
+          <h4>Exam Tools & Marketplace</h4>
+          <ul>
+            <li><a href="/marketplace.html">💎 Pro Study Marketplace</a></li>
+            <li><a href="/articles.html">📖 SPPU Passing Rules & SGPA</a></li>
+            <li><a href="/student-login.html">🎓 Student Portal / Login</a></li>
+            <li><a href="https://t.me/sppupyqs" target="_blank" rel="noopener">💬 Telegram Community (10k+)</a></li>
+            <li><a href="/about.html">About SYNAPSE</a></li>
+            <li><a href="/contact.html">Report Missing Paper</a></li>
+            <li><a href="/privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="/terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="main-footer" style="margin-top:4rem;">
+  <!-- ── Dynamic Server SEO Directory Container ── -->
+  <footer class="main-footer" style="margin-top:2rem;">
     <div class="footer-container">
       <div id="seo-links-directory"></div>
       <div class="footer-top">
@@ -1416,18 +2360,131 @@
     </div>
   </footer>
 
+  <!-- ── Mobile Sticky Bottom Dock ── -->
+  <aside class="mobile-sticky-dock">
+    <a href="/" class="dock-item">
+      <span class="dock-icon">🔍</span>
+      <span class="dock-label">Catalog</span>
+    </a>
+    <a href="/marketplace.html" class="dock-item">
+      <span class="dock-icon">💎</span>
+      <span class="dock-label">Pro Notes</span>
+    </a>
+    <a href="/articles.html" class="dock-item">
+      <span class="dock-icon">📖</span>
+      <span class="dock-label">Rules</span>
+    </a>
+    <a href="https://t.me/sppupyqs" target="_blank" rel="noopener" class="dock-item highlight">
+      <span class="dock-icon">💬</span>
+      <span class="dock-label">Telegram</span>
+    </a>
+  </aside>
+
   <script>
-    function filterDrivePapers() {
-      const q = document.getElementById('driveSearchInput').value.toLowerCase().trim();
-      const rows = document.querySelectorAll('.paper-row');
-      rows.forEach(r => {
-        const text = r.getAttribute('data-search') || '';
-        if (!q || text.includes(q)) {
-          r.style.display = '';
+    let activeBranchFilter = "all";
+
+    function filterByBranch(branch, el) {
+      activeBranchFilter = branch;
+      
+      // Update active pill
+      document.querySelectorAll(".branch-pill").forEach(p => p.classList.remove("active"));
+      if (el) el.classList.add("active");
+
+      // Filter category cards
+      const cards = document.querySelectorAll(".drive-category-card");
+      cards.forEach(card => {
+        const cardBranch = card.getAttribute("data-branch");
+        if (branch === "all" || cardBranch === branch) {
+          card.style.display = "";
         } else {
-          r.style.display = 'none';
+          card.style.display = "none";
         }
       });
+
+      // If specific branch selected, smoothly scroll to it
+      if (branch !== "all") {
+        const targetCard = document.getElementById("cat-" + branch);
+        if (targetCard) {
+          const headerOffset = 130;
+          const elementPosition = targetCard.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }
+      }
+
+      // Re-run text filter if query exists
+      filterDrivePapers();
+    }
+
+    function filterDrivePapers() {
+      const q = document.getElementById("driveSearchInput").value.toLowerCase().trim();
+      const clearBtn = document.getElementById("clearSearchBtn");
+      const matchCountEl = document.getElementById("searchMatchCount");
+      
+      if (clearBtn) {
+        clearBtn.style.display = q ? "flex" : "none";
+      }
+
+      let visibleCount = 0;
+      const cards = document.querySelectorAll(".drive-category-card");
+
+      cards.forEach(card => {
+        const cardBranch = card.getAttribute("data-branch");
+        const branchMatches = (activeBranchFilter === "all" || cardBranch === activeBranchFilter);
+
+        if (!branchMatches) {
+          card.style.display = "none";
+          return;
+        }
+
+        const rows = card.querySelectorAll(".paper-row");
+        let cardVisibleRows = 0;
+
+        rows.forEach(r => {
+          const text = r.getAttribute("data-search") || "";
+          if (!q || text.includes(q)) {
+            r.style.display = "";
+            cardVisibleRows++;
+            visibleCount++;
+          } else {
+            r.style.display = "none";
+          }
+        });
+
+        // Hide card if searching and no rows match
+        if (q && cardVisibleRows === 0) {
+          card.style.display = "none";
+        } else {
+          card.style.display = "";
+        }
+      });
+
+      if (matchCountEl) {
+        if (!q && activeBranchFilter === "all") {
+          matchCountEl.textContent = "Showing all 78 official papers";
+        } else {
+          matchCountEl.textContent = "Showing " + visibleCount + " matching paper" + (visibleCount === 1 ? "" : "s");
+        }
+      }
+    }
+
+    function clearDriveSearch() {
+      const input = document.getElementById("driveSearchInput");
+      if (input) {
+        input.value = "";
+        filterDrivePapers();
+        input.focus();
+      }
+    }
+
+    function toggleDriveMobileMenu() {
+      const drawer = document.getElementById("driveMobileDrawer");
+      if (drawer) {
+        drawer.classList.toggle("open");
+      }
     }
   </script>
 </body>
